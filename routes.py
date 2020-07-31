@@ -13,6 +13,51 @@ def index():
     return render_template("index.html", polls=polls)
 
 
+@app.route('/poll/<poll_id>')
+def poll(poll_id):
+    return "poll"
+
+
+@app.route('/new_poll', methods=['GET', 'POST'])
+def new_poll():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'GET':
+        return render_template("new_poll.html")
+    
+    if request.method == 'POST':
+        poll = Poll(session['user_id'],
+                    request.form.get('poll_name'), 
+                    request.form.get('poll_description'),
+                    request.form.get('first_appointment_date'),
+                    request.form.get('last_appointment_date'),
+                    request.form.get('poll_end_date'),
+                    request.form.get('poll_end_time'),
+                    False)
+
+        print(request.form)
+        print(poll.name,
+              poll.description, poll.first_date, poll.last_date, poll.end_date,
+              poll.end_time)
+
+
+        if not check_poll_validity(poll):
+            #TODO some note about what was wrong
+            print("not valid")
+            return render_template("new_poll.html")
+
+        print(poll)
+
+        process_new_poll(poll)
+        return redirect("/")
+
+
+
+
+
+
+#TODO
 #storing the 'login_redirect' in the session was a very bad idea
 #what if the user visits the link, then does something else, 
 #comes back to the site and logs in
