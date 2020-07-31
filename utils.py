@@ -50,3 +50,49 @@ def process_logout():
     del session['username']
 
 
+class Poll():
+    def __init__(self, owner, name, description, first_date, last_date,
+            end_date, end_time, has_final_results):
+        self.owner = owner
+        self.name = name
+        self.description = description
+        self.first_date = first_date
+        self.last_date = last_date
+        self.end_date = end_date
+        self.end_time = end_time
+        self.has_final_results = has_final_results
+
+def check_poll_validity(poll):
+    if None in [poll.name, poll.description, poll.first_date, poll.last_date,
+                poll.end_date, poll.end_time]:
+        return False
+    return True
+
+
+def process_new_poll(poll):
+    sql = "INSERT INTO Polls \
+           (owner_user_id, poll_end_time, first_appointment_date, \
+           last_appointment_date, poll_name, poll_description, \
+           has_final_results) VALUES \
+           (:owner_user_id, :poll_end_time, :first_appointment_date, \
+           :last_appointment_date, :poll_name, :poll_description, \
+           :has_final_results)"
+
+    poll_end_timestamp = poll.end_date + " " + poll.end_time;
+
+    parameter_dict = {'owner_user_id': poll.owner, 
+                      'poll_end_time': poll_end_timestamp,
+                      'first_appointment_date': poll.first_date,
+                      'last_appointment_date': poll.last_date,
+                      'poll_name': poll.name,
+                      'poll_description': poll.description,
+                      'has_final_results': poll.has_final_results}
+
+    db.session.execute(sql, parameter_dict)
+    db.session.commit()
+
+#returns ids of all polls that user somehow part of
+#(either owner, participant or owner of a resource)
+def get_user_polls():
+    pass
+    #sql = "SELECT * FROM Polls WHERE 
