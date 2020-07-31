@@ -9,8 +9,8 @@ CREATE TABLE Polls
     poll_id SERIAL PRIMARY KEY,
     owner_user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE, --Also there was ON UPDATE CASCADE, check these!
     poll_end_time timestamp,
-    first_appointment_date timestamp,
-    last_appointment_date timestamp,
+    first_appointment_date date,
+    last_appointment_date date,
     poll_name TEXT,
     poll_description TEXT,
     has_final_results boolean
@@ -23,15 +23,12 @@ CREATE TABLE UsersPolls  --does this need a primary key?
     poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
     reservation_length interval --name?
 );
-
-
 CREATE TABLE Resources
 (
     resource_id SERIAL PRIMARY KEY,
     resource_description TEXT,
     owner_poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE
 );
-
 CREATE TABLE UsersResources
 (
     user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
