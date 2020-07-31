@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ajanvarausjärjestelmä</title>
+        <link href="/static/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <a href="/">Etusivu</a>
+        {% if session['user_id'] %}
+        <a href="/new_poll">Luo uusi kysely</a>
+        Käyttäjä: {{ session['username'] }}
+        <a href="/logout">Kirjaudu ulos</a>
+        {% else %}
+        <a href="/login">Kirjaudu sisään</a> 
+        <a href="/register">Uusi käyttäjä</a>
+        {% endif %}
+        <hr>
+
+        {% for poll in polls %}
+            <a href="/poll/{{ poll[0] }}">{{ poll[1] }}</a>
+            <br>
+        {% endfor %}
+
+        {% block content %}{% endblock %}
+
+    </body>
+
+</html>

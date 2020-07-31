@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form action="/new_poll" method="post">
+<ul>
+    <li>
+        <label for="poll_name">Kyselyn nimi</label>
+        <input type="text" name="poll_name" id="poll_name">
+    </li>
+    <li>
+        <label for="poll_description">Kyselyn vapaamuotoinen kuvaus</label>
+        <textarea name="poll_description" id="poll_description" rows=1 cols=20></textarea>
+    </li>
+    <li>
+        <label for="first_appointment_date">Ensimmäinen mahdollinen päivä varauksille</label>
+        <input type="date" name="first_appointment_date" id="first_appointment_date">
+    </li>
+    <li>
+        <label for="last_appointment_date">Viimeinen mahdollinen päivä varauksille</label>
+        <input type="date" name="last_appointment_date" id="last_appointment_date">
+    </li>
+    <li>
+        <label for="poll_end_date">Kyselyn päättymispäivämäärä</label>
+        <input type="date" name="poll_end_date" id="poll_end_date">
+    </li>
+    <li>
+        <label for="poll_end_time">Kyselyn päättymisaika</label>
+        <input type="time" name="poll_end_time" id="poll_end_time">
+    </li>
+    <li>
+        <input type="submit" value="Lisää kysely">
+    </li>
+</ul>
+
+</form>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Kirjaudu sisään</h3>
+{% if message  %}
+<p>{{ message }}</p>
+{% endif %}
+<form action="/login" method="post">
+<ul>
+    <li>
+        <label for="username">Käyttäjätunnus:</label>
+        <input type="text" name="username" id="username">
+    </li>
+    <li>
+    <label for="password">Salasana:</label>
+    <input type="password" name="password" id="password">
+    </li>
+    <li>
+    <input type="submit" value="Kirjaudu">
+    </li>
+</ul>
+</form>
+
+{% endblock %}

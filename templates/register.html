@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Uusi käyttäjä</h3>
+{% if message  %}
+<p>{{ message }}</p>
+{% endif %}
+<form action="/register" method="post">
+<ul>
+    <li>
+        <label for="username">Käyttäjätunnus ([a-zA-Z0-9]+):</label>
+        <input type="text" name="username" id="username">
+    </li>
+    <li>
+        <label for="password">Salasana:</label>
+        <input type="password" name="password" id="password">
+    </li>
+    <li>
+        <input type="submit" value="Luo tunnus">
+    </li>
+</ul>
+</form>
+
+{% endblock %}
