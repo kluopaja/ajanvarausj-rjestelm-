@@ -8,11 +8,11 @@ CREATE TABLE Polls
 (
     poll_id SERIAL PRIMARY KEY,
     owner_user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE, --Also there was ON UPDATE CASCADE, check these!
-    poll_end_time timestamp,
-    first_appointment_date date,
-    last_appointment_date date,
     poll_name TEXT,
     poll_description TEXT,
+    first_appointment_date date,
+    last_appointment_date date,
+    poll_end_time timestamp, --change name?
     has_final_results boolean
 );
 --think about upper and lower case

@@ -71,11 +71,11 @@ def check_poll_validity(poll):
 
 def process_new_poll(poll):
     sql = "INSERT INTO Polls \
-           (owner_user_id, poll_end_time, first_appointment_date, \
-           last_appointment_date, poll_name, poll_description, \
-           has_final_results) VALUES \
-           (:owner_user_id, :poll_end_time, :first_appointment_date, \
-           :last_appointment_date, :poll_name, :poll_description, \
+           (owner_user_id, poll_name, poll_description,  \
+           first_appointment_date, last_appointment_date, \
+           poll_end_time, has_final_results) VALUES \
+           (:owner_user_id, :poll_name, :poll_description, \
+           :first_appointment_date, :last_appointment_date, :poll_end_time, \
            :has_final_results)"
 
     poll_end_timestamp = poll.end_date + " " + poll.end_time;
