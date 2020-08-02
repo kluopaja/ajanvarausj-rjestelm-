@@ -94,10 +94,71 @@ def process_new_poll(poll):
 #returns ids of all polls that user somehow part of
 #(either owner, participant or owner of a resource)
 def get_user_polls():
-    pass
-    #sql = "SELECT * FROM Polls WHERE 
+    tmp = get_user_poll_ids()
+    return get_polls_by_ids(tmp)
+def get_user_poll_ids():
+    if 'user_id' not in session:
+        return []
+
+    polls = poll_ids_owned_by(session['user_id'])
+    polls += poll_ids_where_user_owns_resource(session['user_id'])
+    polls += poll_ids_where_user_participant(session['user_id'])
+
+    #return unique
+    return sorted(list(set(polls)))
+
+def poll_ids_owned_by(user_id):
+    sql = 'SELECT poll_id FROM Polls WHERE owner_user_id=:user_id'
+    result = db.session.execute(sql, {'user_id':user_id})
+    polls = result.fetchall()
+    if polls is None:
+        return []
+
+    poll_ids = [x[0] for x in polls]
+    return poll_ids
+
+def poll_ids_where_user_owns_resource(user_id):
+    sql = 'SELECT owner_poll_id FROM Resources R, UsersResources U\
+           WHERE R.resource_id=U.resource_id AND U.user_id=:user_id'
+
+    result = db.session.execute(sql, {'user_id':user_id})
+    polls = result.fetchall()
+    if polls is None:
+        return []
+
+    poll_ids = [x[0] for x in polls]
+    return poll_ids
 
 
+def poll_ids_where_user_participant(user_id):
+    sql = 'SELECT poll_id FROM UsersPolls WHERE user_id=:user_id'
+
+    result = db.session.execute(sql, {'user_id':user_id})
+    polls = result.fetchall()
+    if polls is None:
+        return []
+
+    poll_ids = [x[0] for x in polls]
+    return poll_ids
+
+def get_polls_by_ids(poll_ids):
+    if len(poll_ids) == 0:
+        return []
+
+    sql = 'SELECT * FROM Polls WHERE poll_id in :poll_ids'
+    result = db.session.execute(sql, {'poll_ids':tuple(poll_ids)})
+    polls = result.fetchall()
+    if polls is None:
+        return []
+    #TODO fix
+    print(polls[0])
+    print(db_tuple_to_poll(polls[0]).poll_id)
+    return [db_tuple_to_poll(x) for x in polls]
+
+def db_tuple_to_poll(t):
+    return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
+
+#TODO fix, fails with large reservation_lengths
 def process_new_invitation(invitation_type, target_id,
                                 reservation_length):
 

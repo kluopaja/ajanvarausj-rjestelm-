@@ -5,4 +5,23 @@
 <p>Täällä voit perustaa ajanvarauskyselyitä ja jakaa niitä
 muille käyttäjille.
 </p>
+<table>
+    <tr>
+        <th>Nimi</th><th>id</th><th>Kuvaus</th>
+    </tr>
+{% for poll in polls %}
+<tr>
+    <td>
+        <a href="/poll/{{ poll.poll_id }}">{{ poll.name }}</a>
+    </td>
+    <td>
+        {{ poll.poll_id }}
+    </td>
+    <td>
+        {{ poll.description }}
+    </td>
+            
+</tr>
+{% endfor %}
+</table>
 {% endblock %}

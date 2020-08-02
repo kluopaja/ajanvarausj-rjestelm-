@@ -9,14 +9,29 @@ from utils import Poll
 
 @app.route('/')
 def index():
-    polls = [(str(i), f'kysely {i}') for i in range(4)]
+    polls = get_user_polls()
+    print("index: ", polls)
     return render_template("index.html", polls=polls)
 
 
 @app.route('/poll/<poll_id>')
 def poll(poll_id):
-    return "poll"
 
+    #list of (url_id, reservation_length)
+    participant_invitations = None
+    #list of (url_id, resource_description)
+    resource_invitations = None
+    is_owner = user_owns_poll(poll_id)
+    print("is owner: ", is_owner)
+    if is_owner:
+        participant_invitations = get_participant_invitations(poll_id)
+        resource_invitations = get_resource_invitations(poll_id)
+
+
+    return render_template("poll.html", is_owner=is_owner,
+                           poll_id=poll_id,
+                           participant_invitations=participant_invitations,
+                           resource_invitations=resource_invitations)
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
