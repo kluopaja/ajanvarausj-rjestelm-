@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sinut on kutsuttu osallistumaan kyselyyn:</h2>
+<p>Kyselyn nimi: {{ details[0] }}</p>
+<p>Kyselyn kuvaus: {{ details[1] }}</p>
+<p>Varattavan ajan pituus: {{ details[2] }}</p>
+<form action="/invite/{{url_id}}" method="POST">
+    <p>Haluatko hyväksyä kutsun?</p>
+    <label for="yes">Kyllä</label>
+    <input type="radio" name="user_response" id="yes" value="yes" checked>
+    <label for="no">En</label>
+    <input type="radio" name="user_response" id="no" value="no">
+    <br>
+    <input type="submit" value="Lähetä vastaus">
+</form>
+{% endblock %}

@@ -96,3 +96,136 @@ def process_new_poll(poll):
 def get_user_polls():
     pass
     #sql = "SELECT * FROM Polls WHERE 
+
+
+def process_new_invitation(invitation_type, target_id,
+                                reservation_length):
+
+    if 'user_id' not in session:
+        return False
+    print(invitation_type)
+    if invitation_type == 'poll_participant':
+        #check if user has rights to do the operation
+        #and that the target poll exists
+        if not user_owns_poll(target_id):
+            print("does not own")
+            return False
+
+        #TODO
+        #check reservation_length
+        url_id = urandom(16).hex()
+
+        sql = "INSERT INTO PollMembershipLinks \
+               (poll_id, url_id, reservation_length)\
+               VALUES (:target_id, :url_id, :reservation_length)"
+
+        #TODO find out a good way to put the reservation length to the
+        #database
+        #why is it string?
+        reservation_length = str(int(reservation_length)*60)
+        db.session.execute(sql, {'target_id': target_id, 'url_id': url_id,
+                                 'reservation_length': reservation_length})
+        db.session.commit()
+        return True
+
+    print("incorrect invitation type")
+    return False
+
+
+def user_owns_poll(poll_id):
+    sql = "SELECT owner_user_id FROM Polls WHERE poll_id=:poll_id"
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    user = result.fetchone()
+
+    if user is None:
+        return False
+    if user[0] == session['user_id']:
+        return True
+
+    return False
+
+def get_participant_invitations(poll_id):
+    sql = "SELECT url_id, reservation_length FROM PollMembershipLinks\
+           WHERE poll_id=:poll_id"
+
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    invitations = result.fetchall()
+    return invitations
+
+def get_resource_invitations(poll_id):
+    sql = "SELECT L.url_id, R.resource_description \
+           FROM ResourceMembershipLinks L, Resources R\
+           WHERE L.resource_id=R.resource_id AND R.owner_poll_id=:poll_id"
+
+    result = db.session.execute(sql, {"poll_id": poll_id})
+    resource_invitations = result.fetchall()
+    return resource_invitations
+
+
+
+#TODO return named tuple after we know what field are necessary for it
+#we need poll name, poll description, reservation length, poll_id
+def participant_invitation_by_url_id(url_id):
+    sql = "SELECT poll_name, poll_description, reservation_length, \
+           P.poll_id \
+           FROM Polls P, PollMembershipLinks L \
+           WHERE P.poll_id=L.poll_id AND L.url_id=:url_id"
+
+    result = db.session.execute(sql, {"url_id": url_id}).fetchall()
+    if result is None:
+        return None
+
+    return result[0]
+
+
+#we need poll name, poll description, resource description, resource_id
+def resource_invitation_by_url_id(url_id):
+    sql = "SELECT poll_name, poll_description, resource_description, \
+           resource_id \
+           FROM Polls P, Resources R, ResourceMembershipLinks L \
+           WHERE P.poll_id=R.owner_poll_id AND R.resource_id=L.resource_id \
+           AND L.url_id=:url_id"
+
+    result = db.session.execute(sql, {"url_id": url_id}).fetchall()
+    if result is None:
+        return None
+
+    return result[0]
+
+
+def get_invitation_type(url_id):
+    sql = "SELECT COUNT(*) FROM PollMembershipLinks WHERE url_id=:url_id"
+    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
+    if result[0] == 1:
+        return 'poll_participant'
+
+    sql = "SELECT COUNT(*) FROM ResourceMembershipLinks WHERE url_id=:url_id"
+    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
+    if result[0] == 1:
+        return 'resource_owner'
+
+    return None
+
+#TODO take invitation as a parameter and not as url_id
+def apply_poll_invitation(url_id):
+    details = participant_invitation_by_url_id(url_id)
+    sql = "INSERT INTO UsersPolls (user_id, poll_id, reservation_length) \
+           VALUES (:user_id, :poll_id, :reservation_length)"
+
+    #TODO think about doing this differently
+    user_id = session['user_id']
+    db.session.execute(sql, {'user_id': user_id, 'poll_id': details[3],
+                             'reservation_length': details[2]})
+    db.session.commit()
+
+#TODO do not insert multiple times the same element!
+def apply_resource_invitation(url_id):
+    details = resource_invitation_by_url_id(url_id)
+    sql = "INSERT INTO UsersResources (user_id, resource_id) \
+           VALUES (:user_id, :resouce_id)"
+
+    user_id = session['user_id']
+    db.session.execute(sql, {'user_id': user_id, 'poll_id': details[3]})
+    db.session.commit()
+
+#so in invite function it would seem that we need an invitation class
