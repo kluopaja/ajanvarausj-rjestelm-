@@ -34,7 +34,7 @@ CREATE TABLE UsersResources
     user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
     resource_id INTEGER REFERENCES Resources (resource_id) ON DELETE CASCADE
 );
-CREATE TABLE UserTimesSelections
+CREATE TABLE UserTimeSelections
 (
     user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
     poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
