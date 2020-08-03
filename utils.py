@@ -308,6 +308,18 @@ def apply_resource_invitation(url_id):
     details = resource_invitation_by_url_id(url_id)
     user_id = session['user_id']
     add_user_to_resource(user_id, details[3])
-    db.session.commit()
 
-#so in invite function it would seem that we need an invitation class
+
+#TODO check that identical resource has not already been added
+def process_new_resource(poll_id, resource_description):
+    if not user_owns_poll(poll_id):
+        return False
+
+    sql = "INSERT INTO Resources (resource_description, owner_poll_id) \
+           VALUES (:resource_description, :poll_id)"
+
+    db.session.execute(sql, {'resource_description': resource_description,
+                             'poll_id': poll_id})
+    db.session.commit()
+    return True
+

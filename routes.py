@@ -3,9 +3,7 @@ from flask import render_template
 from werkzeug.urls import url_parse
 from flask import session, request, redirect
 
-from utils import process_login, process_registration, process_logout
-from utils import check_poll_validity, process_new_poll
-from utils import Poll
+from utils import *
 
 @app.route('/')
 def index():
@@ -189,4 +187,19 @@ def new_invitation():
         pass
         #TODO
         #redirect to the poll with a message
+
+@app.route('/new_resource', methods=['POST'])
+def new_resource():
+    if 'user_id' not in session:
+        return redirect('/')
+    print("new resource, post: ", request.form)
+    ok = process_new_resource(request.form.get('poll_id'),
+                              request.form.get('resource_description'))
+    if ok:
+        return redirect('/poll/'+request.form.get('poll_id'))
+    else:
+        print("creation of new resource failed")
+        return render_template("new_resource_failed.html",
+                               error_message="Tuntematon virhe",
+                               poll_id=request.form.get('poll_id'))
 
