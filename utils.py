@@ -281,7 +281,7 @@ def participant_invitation_by_url_id(url_id):
 #we need poll name, poll description, resource description, resource_id
 def resource_invitation_by_url_id(url_id):
     sql = "SELECT poll_name, poll_description, resource_description, \
-           resource_id \
+           R.resource_id \
            FROM Polls P, Resources R, ResourceMembershipLinks L \
            WHERE P.poll_id=R.owner_poll_id AND R.resource_id=L.resource_id \
            AND L.url_id=:url_id"

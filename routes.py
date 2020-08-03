@@ -169,7 +169,7 @@ def invite(url_id):
             if invitation_type == 'poll_participant':
                 apply_poll_invitation(url_id)
             if invitation_type == 'resource_owner':
-                process_resource_invitation(url_id)
+                apply_resource_invitation(url_id)
             #TODO add message
             return redirect('/')
         else:
