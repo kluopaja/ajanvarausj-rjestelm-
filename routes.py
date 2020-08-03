@@ -183,10 +183,9 @@ def new_invitation():
     if ok:
         return redirect('/poll/'+request.form.get('poll_id'))
     else:
-        return redirect('/poll/'+request.form.get('poll_id'))
-        pass
-        #TODO
-        #redirect to the poll with a message
+        return render_template("new_invitation_failed.html",
+                               error_message="Tuntematon virhe",
+                               poll_id=request.form.get('poll_id'))
 
 @app.route('/new_resource', methods=['POST'])
 def new_resource():
