@@ -1,6 +1,8 @@
 from db import db
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
+from os import urandom
+from datetime import datetime, date, time
 
 
 def process_login(username, password):
@@ -45,26 +47,41 @@ def check_username(username):
     if not username.isalnum():
         return False
     return True
+
 def process_logout():
-    del session['user_id'] 
+    del session['user_id']
     del session['username']
 
 
 class Poll():
+    #times are stored as python datetime.date or datetime.datetime
     def __init__(self, owner, name, description, first_date, last_date,
-            end_date, end_time, has_final_results):
+            end, has_final_results, poll_id=None):
         self.owner = owner
         self.name = name
         self.description = description
         self.first_date = first_date
         self.last_date = last_date
-        self.end_date = end_date
-        self.end_time = end_time
+        self.end = end
         self.has_final_results = has_final_results
+        self.poll_id=poll_id
+
+    @classmethod
+    def from_form(self, owner, name, description, first_date, last_date,
+            end_date, end_time, has_final_results):
+        first_date = date.fromisoformat(first_date)
+        last_date = date.fromisoformat(last_date)
+        end_date = date.fromisoformat(end_date)
+        end_time = time.fromisoformat(end_time)
+        end = datetime.combine(end_date, end_time)
+        tmp = Poll(owner, name, description, first_date, last_date, end,
+                   has_final_results)
+
+        return tmp
 
 def check_poll_validity(poll):
     if None in [poll.name, poll.description, poll.first_date, poll.last_date,
-                poll.end_date, poll.end_time]:
+                poll.end]:
         return False
     return True
 
@@ -78,9 +95,9 @@ def process_new_poll(poll):
            :first_appointment_date, :last_appointment_date, :poll_end_time, \
            :has_final_results)"
 
-    poll_end_timestamp = poll.end_date + " " + poll.end_time;
+    poll_end_timestamp = poll.end
 
-    parameter_dict = {'owner_user_id': poll.owner, 
+    parameter_dict = {'owner_user_id': poll.owner,
                       'poll_end_time': poll_end_timestamp,
                       'first_appointment_date': poll.first_date,
                       'last_appointment_date': poll.last_date,

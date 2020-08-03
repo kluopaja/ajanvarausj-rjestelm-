@@ -40,22 +40,20 @@ def new_poll():
 
     if request.method == 'GET':
         return render_template("new_poll.html")
-    
     if request.method == 'POST':
-        poll = Poll(session['user_id'],
-                    request.form.get('poll_name'), 
-                    request.form.get('poll_description'),
-                    request.form.get('first_appointment_date'),
-                    request.form.get('last_appointment_date'),
-                    request.form.get('poll_end_date'),
-                    request.form.get('poll_end_time'),
-                    False)
+
+        poll = Poll.from_form(session['user_id'],
+                              request.form.get('poll_name'),
+                              request.form.get('poll_description'),
+                              request.form.get('first_appointment_date'),
+                              request.form.get('last_appointment_date'),
+                              request.form.get('poll_end_date'),
+                              request.form.get('poll_end_time'),
+                              False)
 
         print(request.form)
         print(poll.name,
-              poll.description, poll.first_date, poll.last_date, poll.end_date,
-              poll.end_time)
-
+              poll.description, poll.first_date, poll.last_date, poll.end)
 
         if not check_poll_validity(poll):
             #TODO some note about what was wrong
