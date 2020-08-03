@@ -56,14 +56,11 @@ CREATE TABLE PollMembershipLinks
     reservation_length interval
 
 );
-
 CREATE TABLE ResourceMembershipLinks
 (
     resource_id INTEGER REFERENCES Resources (resource_id) ON DELETE CASCADE,
-    resource_descrpition TEXT,
     url_id TEXT
 );
-
 CREATE TABLE OptimizationResults
 (
     poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
