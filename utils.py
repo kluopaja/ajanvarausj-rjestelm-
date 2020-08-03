@@ -297,13 +297,17 @@ def apply_poll_invitation(url_id):
     db.session.commit()
 
 #TODO do not insert multiple times the same element!
-def apply_resource_invitation(url_id):
-    details = resource_invitation_by_url_id(url_id)
+def add_user_to_resource(user_id, resource_id):
     sql = "INSERT INTO UsersResources (user_id, resource_id) \
            VALUES (:user_id, :resouce_id)"
+    db.session.execute(sql, {'user_id': user_id, 'resouce_id': resource_id})
+    db.session.commit()
 
+
+def apply_resource_invitation(url_id):
+    details = resource_invitation_by_url_id(url_id)
     user_id = session['user_id']
-    db.session.execute(sql, {'user_id': user_id, 'poll_id': details[3]})
+    add_user_to_resource(user_id, details[3])
     db.session.commit()
 
 #so in invite function it would seem that we need an invitation class
