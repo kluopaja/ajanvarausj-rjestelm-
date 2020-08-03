@@ -14,22 +14,29 @@ def index():
 
 @app.route('/poll/<poll_id>')
 def poll(poll_id):
+    #TODO
+    #some check that user has any rights to see this poll
 
     #list of (url_id, reservation_length)
     participant_invitations = None
     #list of (url_id, resource_description)
     resource_invitations = None
+    #list of (resource_description, resource_id)
+    resources = None
+
+
     is_owner = user_owns_poll(poll_id)
     print("is owner: ", is_owner)
     if is_owner:
         participant_invitations = get_participant_invitations(poll_id)
         resource_invitations = get_resource_invitations(poll_id)
-
+        resources = get_poll_resources(poll_id)
 
     return render_template("poll.html", is_owner=is_owner,
                            poll_id=poll_id,
                            participant_invitations=participant_invitations,
-                           resource_invitations=resource_invitations)
+                           resource_invitations=resource_invitations,
+                           resources=resources)
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
@@ -176,6 +183,7 @@ def new_invitation():
 
     ok = process_new_invitation(request.form.get('invitation_type'),
                                 request.form.get('poll_id'),
+                                request.form.get('resource_id'),
                                 request.form.get('reservation_length'))
 
     print("new invitation request", request.form)

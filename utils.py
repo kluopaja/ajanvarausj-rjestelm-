@@ -176,7 +176,7 @@ def db_tuple_to_poll(t):
     return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
 
 #TODO fix, fails with large reservation_lengths
-def process_new_invitation(invitation_type, target_id,
+def process_new_invitation(invitation_type, poll_id, resource_id,
                                 reservation_length):
 
     if 'user_id' not in session:
@@ -185,7 +185,7 @@ def process_new_invitation(invitation_type, target_id,
     if invitation_type == 'poll_participant':
         #check if user has rights to do the operation
         #and that the target poll exists
-        if not user_owns_poll(target_id):
+        if not user_owns_poll(poll_id):
             print("does not own")
             return False
 
@@ -195,18 +195,40 @@ def process_new_invitation(invitation_type, target_id,
 
         sql = "INSERT INTO PollMembershipLinks \
                (poll_id, url_id, reservation_length)\
-               VALUES (:target_id, :url_id, :reservation_length)"
+               VALUES (:poll_id, :url_id, :reservation_length)"
 
         #TODO find out a good way to put the reservation length to the
         #database
         #why is it string?
         reservation_length = str(int(reservation_length)*60)
-        db.session.execute(sql, {'target_id': target_id, 'url_id': url_id,
+        db.session.execute(sql, {'poll_id': poll_id, 'url_id': url_id,
                                  'reservation_length': reservation_length})
+        db.session.commit()
+        return True
+    if invitation_type == 'resource_owner':
+        #check user is the owner of the resource parent poll
+        if not user_owns_resource(resource_id):
+            print("user does not own the resource")
+            return False
+
+        url_id = urandom(16).hex()
+
+        sql = "INSERT INTO ResourceMembershipLinks \
+               (resource_id, url_id) VALUES (:resource_id, :url_id)"
+        db.session.execute(sql, {'resource_id': resource_id, 'url_id': url_id})
         db.session.commit()
         return True
 
     print("incorrect invitation type")
+    return False
+
+def user_owns_resource(resource_id):
+    sql = "SELECT owner_user_id FROM Polls P, Resources R \
+            WHERE P.poll_id=R.owner_poll_id AND R.resource_id=:resource_id"
+    owner_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
+    print("user_owns_resource: ", resource_id, owner_id)
+    if owner_id is not None and owner_id[0] == session.get('user_id'):
+        return True
     return False
 
 

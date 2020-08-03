@@ -30,5 +30,20 @@
     <input type="hidden" name="poll_id" value={{ poll_id }}>
 </form>
 
+</table>
+<h2>Luo uusi resurssikutsu</h2>
+<form action="/new_invitation" method="post">
+    {% for resource in resources %}
+    <label for={{ resource[1] }}>{{ resource[0] }}</label>
+    <input type="radio" name="resource_id" id={{ resource[1] }}
+           value={{ resource[1] }}>
+    {% endfor %}
+    <br>
+    <input type="submit" value="Luo linkki">
+    <input type="hidden" name="invitation_type" value="resource_owner">
+    <input type="hidden" name="poll_id" value={{ poll_id }}>
+
+</form>
+
 {% endif %}
 {% endblock %}
