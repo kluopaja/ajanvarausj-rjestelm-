@@ -345,3 +345,12 @@ def process_new_resource(poll_id, resource_description):
     db.session.commit()
     return True
 
+def get_poll_resources(poll_id):
+    sql = "SELECT resource_description, resource_id FROM Resources\
+           WHERE owner_poll_id=:poll_id"
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    resources = result.fetchall()
+    if resources is None:
+        return []
+
+    return resources
