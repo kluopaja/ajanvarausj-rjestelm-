@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+{% if is_owner %}
+<h2>Aktiiviset vastaajakutsumislinkit:</h2>
+<ul>
+<table>
+<tr><th>Url</th><th>Varauksen pituus</th></tr>
+{% for invitation in participant_invitations %}
+<tr><td>/invite/{{ invitation[0] }}</td><td>{{ invitation[1] }}</td></tr>
+{% endfor %}
+</table>
+
+<form action="/new_invitation" method="post">
+<h2>Luo uusi vastaajienkutsumislinkki</h2>
+<ul>
+    <label for="reservation_length">Varauksen pituus minuutteina</label>
+    <input type="number" min=1 value=60 name="reservation_length" 
+           id="reservation_length">
+    <input type="submit" value="Luo linkki">
+    <input type="hidden" name="poll_id" value={{ poll_id }}>
+    <input type="hidden" name="invitation_type" value="poll_participant">
+</ul>
+</form>
+
+
+{% endif %}
+{% endblock %}
