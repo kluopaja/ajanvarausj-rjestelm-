@@ -150,12 +150,12 @@ def invite(url_id):
     if request.method == 'GET':
         if invitation_type == 'poll_participant':
             #TODO think if the url_id should be in 'details'
-            return render_template("confirm_poll.html",
+            return render_template("confirm_poll_invitation.html",
                                    details=participant_invitation_by_url_id(url_id),
                                    url_id=url_id)
 
         if invitation_type == 'resource_owner':
-            return render_template("confirm_resource.html",
+            return render_template("confirm_resource_invitation.html",
                                    details=resource_invitation_by_url_id(url_id),
                                    url_id=url_id)
     if request.method == 'POST':
