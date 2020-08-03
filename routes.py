@@ -107,14 +107,14 @@ def login():
         if process_login(request.form['username'], request.form['password']):
             return redirect_to_next(default='/')
 
-    return render_template('login.html', 
+    return render_template('login.html',
                            message='Kirjautuminen epäonnistui,yritä uudelleen')
 
 
 @app.route('/logout')
 def logout():
     process_logout()
-    
+
     return render_template("logout.html")
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -130,7 +130,7 @@ def register():
         if is_ok:
             process_login(request.form['username'],
                           request.form['password'])
-            return redirect('/login') 
+            return redirect('/login')
 
     return render_template("register.html",
                            message='Käyttäjätunnuksen luonti epäonnistui,yritä uudelleen')
@@ -174,7 +174,7 @@ def invite(url_id):
 @app.route('/new_invitation', methods=['POST', 'GET'])
 def new_invitation():
     if 'user_id' not in session:
-        return redirect('/') 
+        return redirect('/')
 
     ok = process_new_invitation(request.form.get('invitation_type'),
                                 request.form.get('poll_id'),

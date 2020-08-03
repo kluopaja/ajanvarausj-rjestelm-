@@ -35,7 +35,7 @@ def process_registration(username, password):
 
     sql = "INSERT INTO Users (username, password_hash) \
             VALUES (:username, :password_hash)"
-    db.session.execute(sql, {'username': username, 
+    db.session.execute(sql, {'username': username,
                             'password_hash':password_hash})
     db.session.commit()
 
