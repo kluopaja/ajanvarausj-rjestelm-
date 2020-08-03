@@ -43,6 +43,16 @@
 </tr>
 {% endfor %}
 </table>
+<h2>Aktiiviset resurssikutsulinkit</h2>
+<table>
+<tr><th>Url</th><th>Resurssin kuvaus</th></tr>
+{% for invitation in resource_invitations %}
+<tr><td>/invite/{{ invitation[0] }}</td><td>{{ invitation[1] }}</td></tr>
+{% endfor %}
+</table>
+
+
+
 <h2>Luo uusi resurssikutsu</h2>
 <form action="/new_invitation" method="post">
     {% for resource in resources %}
