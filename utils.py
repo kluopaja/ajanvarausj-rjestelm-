@@ -2,8 +2,11 @@ from db import db
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 from os import urandom
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
+from collections import namedtuple
 
+
+### User session related functions ###
 
 def process_login(username, password):
     sql = "SELECT user_id, password_hash FROM Users WHERE username=:username"
@@ -52,6 +55,9 @@ def process_logout():
     del session['user_id']
     del session['username']
 
+
+
+### Poll related functions ###
 
 class Poll():
     #times are stored as python datetime.date or datetime.datetime
@@ -110,9 +116,15 @@ def process_new_poll(poll):
 
 #returns ids of all polls that user somehow part of
 #(either owner, participant or owner of a resource)
+
+#TODO think about which of these following 4 should take user id as a parameter
+#should this take some parameter?
+#TODO think how to replace this. just use Poll objects?
+
 def get_user_polls():
     tmp = get_user_poll_ids()
     return get_polls_by_ids(tmp)
+
 def get_user_poll_ids():
     if 'user_id' not in session:
         return []
@@ -146,7 +158,6 @@ def poll_ids_where_user_owns_resource(user_id):
     poll_ids = [x[0] for x in polls]
     return poll_ids
 
-
 def poll_ids_where_user_participant(user_id):
     sql = 'SELECT poll_id FROM UsersPolls WHERE user_id=:user_id'
 
@@ -172,8 +183,36 @@ def get_polls_by_ids(poll_ids):
     print(db_tuple_to_poll(polls[0]).poll_id)
     return [db_tuple_to_poll(x) for x in polls]
 
+def user_owns_poll(poll_id):
+    sql = "SELECT owner_user_id FROM Polls WHERE poll_id=:poll_id"
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    user = result.fetchone()
+
+    if user is None:
+        return False
+    if user[0] == session['user_id']:
+        return True
+
+    return False
+
+def user_is_participant(poll_id):
+    user_id = session.get('user_id')
+    sql = "SELECT COUNT(*) FROM UsersPolls WHERE \
+           poll_id=:poll_id AND user_id=:user_id"
+    tmp = db.session.execute(sql, {'poll_id': poll_id, 'user_id': user_id})
+    count = tmp.fetchone()[0]
+    if count > 0:
+        return True
+
+    return False
+
 def db_tuple_to_poll(t):
     return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
+
+
+
+
+### Invitation related functions ###
 
 #TODO fix, fails with large reservation_lengths
 def process_new_invitation(invitation_type, poll_id, resource_id,
@@ -222,27 +261,20 @@ def process_new_invitation(invitation_type, poll_id, resource_id,
     print("incorrect invitation type")
     return False
 
-def user_owns_resource(resource_id):
-    sql = "SELECT owner_user_id FROM Polls P, Resources R \
-            WHERE P.poll_id=R.owner_poll_id AND R.resource_id=:resource_id"
-    owner_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
-    print("user_owns_resource: ", resource_id, owner_id)
-    if owner_id is not None and owner_id[0] == session.get('user_id'):
-        return True
-    return False
+def get_invitation_type(url_id):
+    sql = "SELECT COUNT(*) FROM PollMembershipLinks WHERE url_id=:url_id"
+    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
+    if result[0] == 1:
+        return 'poll_participant'
+
+    sql = "SELECT COUNT(*) FROM ResourceMembershipLinks WHERE url_id=:url_id"
+    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
+    if result[0] == 1:
+        return 'resource_owner'
+
+    return None
 
 
-def user_owns_poll(poll_id):
-    sql = "SELECT owner_user_id FROM Polls WHERE poll_id=:poll_id"
-    result = db.session.execute(sql, {'poll_id': poll_id})
-    user = result.fetchone()
-
-    if user is None:
-        return False
-    if user[0] == session['user_id']:
-        return True
-
-    return False
 
 def get_participant_invitations(poll_id):
     sql = "SELECT url_id, reservation_length FROM PollMembershipLinks\
@@ -260,8 +292,6 @@ def get_resource_invitations(poll_id):
     result = db.session.execute(sql, {"poll_id": poll_id})
     resource_invitations = result.fetchall()
     return resource_invitations
-
-
 
 #TODO return named tuple after we know what field are necessary for it
 #we need poll name, poll description, reservation length, poll_id
@@ -292,20 +322,6 @@ def resource_invitation_by_url_id(url_id):
 
     return result[0]
 
-
-def get_invitation_type(url_id):
-    sql = "SELECT COUNT(*) FROM PollMembershipLinks WHERE url_id=:url_id"
-    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
-    if result[0] == 1:
-        return 'poll_participant'
-
-    sql = "SELECT COUNT(*) FROM ResourceMembershipLinks WHERE url_id=:url_id"
-    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
-    if result[0] == 1:
-        return 'resource_owner'
-
-    return None
-
 #TODO take invitation as a parameter and not as url_id
 def apply_poll_invitation(url_id):
     details = participant_invitation_by_url_id(url_id)
@@ -313,10 +329,42 @@ def apply_poll_invitation(url_id):
            VALUES (:user_id, :poll_id, :reservation_length)"
 
     #TODO think about doing this differently
+    #TODO split into functions
     user_id = session['user_id']
-    db.session.execute(sql, {'user_id': user_id, 'poll_id': details[3],
-                             'reservation_length': details[2]})
+    poll_id = details[3]
+    reservation_length = details[2]
+    db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id,
+                             'reservation_length': reservation_length})
+
+    #initialize user reservation preferences to 0
+    start, end = get_poll_date_range(poll_id)
+    end += timedelta(days=1)
+    sql = "INSERT INTO UserTimeSelections \
+           (user_id, poll_id, time_beginning, time_end, user_satisfaction) \
+           VALUES (:user_id, :poll_id, :start, :end, 0)"
+
+    db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id,
+                             'start': start, 'end': end})
+
     db.session.commit()
+
+def apply_resource_invitation(url_id):
+    details = resource_invitation_by_url_id(url_id)
+    user_id = session['user_id']
+    add_user_to_resource(user_id, details[3])
+    #TODO initialize resource time preferences to 0
+
+### Resource related functions ###
+
+def user_owns_resource(resource_id):
+    sql = "SELECT owner_user_id FROM Polls P, Resources R \
+            WHERE P.poll_id=R.owner_poll_id AND R.resource_id=:resource_id"
+    owner_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
+    print("user_owns_resource: ", resource_id, owner_id)
+    if owner_id is not None and owner_id[0] == session.get('user_id'):
+        return True
+    return False
+
 
 #TODO do not insert multiple times the same element!
 def add_user_to_resource(user_id, resource_id):
@@ -326,12 +374,6 @@ def add_user_to_resource(user_id, resource_id):
     db.session.commit()
 
 
-def apply_resource_invitation(url_id):
-    details = resource_invitation_by_url_id(url_id)
-    user_id = session['user_id']
-    add_user_to_resource(user_id, details[3])
-
-
 #TODO check that identical resource has not already been added
 def process_new_resource(poll_id, resource_description):
     if not user_owns_poll(poll_id):
@@ -339,7 +381,6 @@ def process_new_resource(poll_id, resource_description):
 
     sql = "INSERT INTO Resources (resource_description, owner_poll_id) \
            VALUES (:resource_description, :poll_id)"
-
     db.session.execute(sql, {'resource_description': resource_description,
                              'poll_id': poll_id})
     db.session.commit()
