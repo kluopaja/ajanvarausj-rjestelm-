@@ -15,46 +15,42 @@ CREATE TABLE Polls
     poll_end_time timestamp, --change name?
     has_final_results boolean
 );
---think about upper and lower case
---also about naming the tables
-CREATE TABLE UsersPolls  --does this need a primary key?
+CREATE TABLE PollMembers
+(
+    id SERIAL PRIMARY KEY,
+    poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE
+);
+CREATE TABLE MemberTimeSelections
+(
+    member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
+    --half open intervals [time_beginning, time_end)
+    time_beginning timestamp,
+    time_end timestamp,
+    satisfaction INTEGER
+);
+CREATE TABLE UsersPollMembers
 (
     user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
-    poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
-    reservation_length interval --name?
+    member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
+    reservation_length interval
 );
 CREATE TABLE Resources
 (
     resource_id SERIAL PRIMARY KEY,
-    resource_description TEXT,
-    owner_poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE
+    resource_description TEXT, --Should have a unique name/description
+    member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE 
+    --TODO rename to parent_poll_id
 );
 CREATE TABLE UsersResources
 (
     user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
     resource_id INTEGER REFERENCES Resources (resource_id) ON DELETE CASCADE
 );
-CREATE TABLE UserTimeSelections
-(
-    user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
-    poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
-    time_beginning timestamp,
-    time_end timestamp,
-    user_satisfaction INTEGER
-);
-CREATE TABLE ResourceTimeSelections
-(
-    resource_id INTEGER REFERENCES Resources (resource_id) ON DELETE CASCADE,
-    time_beginning timestamp,
-    time_end timestamp,
-    user_satisfaction INTEGER
-);
 CREATE TABLE PollMembershipLinks
 (
     poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
     url_id TEXT,
     reservation_length interval
-
 );
 CREATE TABLE ResourceMembershipLinks
 (
@@ -67,4 +63,3 @@ CREATE TABLE OptimizationResults
     user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
     appointment_start timestamp
 );
-
