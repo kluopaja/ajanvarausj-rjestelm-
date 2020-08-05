@@ -326,13 +326,19 @@ def resource_invitation_by_url_id(url_id):
     return result[0]
 
 #TODO take invitation as a parameter and not as url_id
+
+#adds user to a poll and initializes the user time preferences to 0
 def apply_poll_invitation(url_id):
     details = participant_invitation_by_url_id(url_id)
-
+    
     #TODO think about doing this differently
     #TODO split into functions
-    user_id = session['user_id']
     poll_id = details[3]
+
+    if user_is_participant(poll_id):
+        return False
+
+    user_id = session['user_id']
     reservation_length = details[2]
 
     sql = "INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id"
@@ -358,11 +364,14 @@ def apply_poll_invitation(url_id):
 
     db.session.commit()
 
+    return True
+
 def apply_resource_invitation(url_id):
     details = resource_invitation_by_url_id(url_id)
     user_id = session['user_id']
-    add_user_to_resource(user_id, details[3])
-    #TODO initialize resource time preferences to 0
+    resource_id = details[3]
+
+    return add_user_to_resource(user_id, resource_id)
 
 def get_user_poll_member_id(user_id, poll_id):
     sql = "SELECT member_id FROM PollMembers P, UsersPollMembers U \
@@ -394,19 +403,51 @@ def user_owns_parent_poll(resource_id):
 
     return False
 
+def user_in_resource(user_id, resource_id):
+    sql = "SELECT COUNT(*) FROM UsersResources WHERE \
+           resource_id=:resource_id AND user_id=:user_id"
 
-#TODO do not insert multiple times the same element!
+    count = db.session.execute(sql, {'user_id': user_id,
+                                     'resource_id': resource_id}).fetchone()
+    if count[0] == 1:
+        return True
+    if count[0] == 0:
+        return False
+    
+
 def add_user_to_resource(user_id, resource_id):
+    if user_in_resource(user_id, resource_id):
+        return False
+
     sql = "INSERT INTO UsersResources (user_id, resource_id) \
            VALUES (:user_id, :resouce_id)"
     db.session.execute(sql, {'user_id': user_id, 'resouce_id': resource_id})
     db.session.commit()
+    return True
 
+def resource_description_in_poll(poll_id, resource_description):
+    sql = "SELECT COUNT(*) FROM PollMembers M, Resources R \
+           WHERE M.id=R.resource_id AND M.poll_id=:poll_id \
+           AND R.resource_description=:resource_description"
+
+    tmp = db.session.execute(sql, 
+                            {'poll_id': poll_id,
+                             'resource_description': resource_description})
+    count = tmp.fetchone()
+    if count[0] == 1:
+        return True
+    
+    return False
 
 #TODO check that identical resource has not already been added
 def process_new_resource(poll_id, resource_description):
     if not user_owns_poll(poll_id):
         return False
+
+    #TODO return some error message
+    if resource_description_in_poll(poll_id, resource_description):
+        return False
+
     sql = "INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id"
     member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
 
