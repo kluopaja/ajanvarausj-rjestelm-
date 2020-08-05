@@ -249,7 +249,7 @@ def process_new_invitation(invitation_type, poll_id, resource_id,
         return True
     if invitation_type == 'resource_owner':
         #check user is the owner of the resource parent poll
-        if not user_owns_resource(resource_id):
+        if not user_owns_parent_poll(resource_id):
             print("user does not own the resource")
             return False
 
@@ -364,19 +364,34 @@ def apply_resource_invitation(url_id):
     add_user_to_resource(user_id, details[3])
     #TODO initialize resource time preferences to 0
 
+def get_user_poll_member_id(user_id, poll_id):
+    sql = "SELECT member_id FROM PollMembers P, UsersPollMembers U \
+           WHERE P.id=U.member_id AND P.poll_id=:poll_id \
+           AND U.user_id=:user_id"
+
+    tmp = db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id})
+    member_id = tmp.fetchone()
+    if member_id is None:
+        return None
+
+    return member_id[0]
+
 ### Resource related functions ###
 
-def user_owns_resource(resource_id):
-    sql = "SELECT COUNT(*) FROM UsersResources \
-            WHERE resource_id=:resource_id AND user_id=:user_id"
+def user_owns_parent_poll(resource_id):
+    sql = "SELECT COUNT(*) FROM Polls P, PollMembers M, Resources R \
+           WHERE P.poll_id=M.poll_id AND M.id=R.member_id \
+           AND P.owner_user_id=:user_id AND R.resource_id=:resource_id"
 
     user_id = session.get('user_id')
     count = db.session.execute(sql, {'user_id': user_id,
-                                     'resource_id': resource_id})
-
-    if user_id is not None and count > 0:
-        print("user_owns_resource: ", resource_id, owner_id)
+                                     'resource_id': resource_id}).fetchone()
+    if count[0] == 1:
         return True
+    if count[0] > 1:
+        print("ERROR! count should not be > 1")
+        return False
+
     return False
 
 
