@@ -32,11 +32,23 @@ def poll(poll_id):
         resource_invitations = get_resource_invitations(poll_id)
         resources = get_poll_resources(poll_id)
 
+    is_participant = user_is_participant(poll_id)
+    time_preferences = []
+    if is_participant:
+        time_preferences = get_user_time_preferences(session.get('user_id'),
+                                                     poll_id)
+        print("time_preferences ", time_preferences)
+
+    if 1 or owns_resources:
+        pass
+
     return render_template("poll.html", is_owner=is_owner,
                            poll_id=poll_id,
                            participant_invitations=participant_invitations,
                            resource_invitations=resource_invitations,
-                           resources=resources)
+                           resources=resources,
+                           is_participant=is_participant,
+                           time_preferences=time_preferences)
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():

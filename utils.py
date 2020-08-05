@@ -407,20 +407,128 @@ def add_user_to_resource(user_id, resource_id):
 def process_new_resource(poll_id, resource_description):
     if not user_owns_poll(poll_id):
         return False
+    sql = "INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id"
+    member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
 
-    sql = "INSERT INTO Resources (resource_description, owner_poll_id) \
-           VALUES (:resource_description, :poll_id)"
+    sql = "INSERT INTO Resources (resource_description, member_id) \
+            VALUES (:resource_description, :member_id)"
+
     db.session.execute(sql, {'resource_description': resource_description,
-                             'poll_id': poll_id})
+                             'member_id': member_id[0]})
     db.session.commit()
     return True
 
 def get_poll_resources(poll_id):
-    sql = "SELECT resource_description, resource_id FROM Resources\
-           WHERE owner_poll_id=:poll_id"
+    sql = "SELECT R.resource_description, R.resource_id FROM \
+           Polls P, PollMembers M, Resources R WHERE \
+           P.poll_id=M.poll_id AND M.id=R.member_id \
+           AND P.poll_id=:poll_id"
     result = db.session.execute(sql, {'poll_id': poll_id})
     resources = result.fetchall()
     if resources is None:
         return []
-
     return resources
+
+### Time preference related functions ###
+
+#TODO think if I should store both ends of the interval or just the beginning
+#TODO think if I need to modify the content of these
+TimeInterval = namedtuple('TimeInterval', ['start', 'end', 'satisfaction'])
+
+#time preferences for one day (date)
+PreferencesDay = namedtuple('PreferencesDay', ['date', 'intervals'])
+
+#type(day) = datetime.date
+#get an ordered list of time intervals that overlap with 'day'
+def get_member_time_preferences_for_day(member_id, day):
+    sql = "SELECT GREATEST(time_beginning, :day),\
+           LEAST(time_end, :day + '1 day'::interval), satisfaction FROM \
+           MemberTimeSelections WHERE member_id=:member_id \
+           AND time_end > :day AND time_beginning < (:day + '1 day'::interval)\
+           ORDER BY time_beginning"
+
+    result = db.session.execute(sql, {'member_id': member_id,
+                                      'day':day}).fetchall()
+
+    #print("result: ", result)
+    if result is None:
+        return []
+
+    return [TimeInterval(*x) for x in result]
+
+#TODO think if this should return a named tuple
+def get_time_preferences(member_id, first_date, last_date):
+    result = []
+    i = first_date
+    while i <= last_date:
+        tmp = get_member_time_preferences_for_day(member_id, i)
+        result.append(PreferencesDay(i,  tmp))
+        i += timedelta(days=1)
+
+    return result
+
+def get_user_time_preferences(user_id, poll_id):
+    first_date, last_date = get_poll_date_range(poll_id)
+    member_id = get_user_poll_member_id(user_id, poll_id)
+    print("userid, memberid", user_id, member_id, poll_id)
+    print(first_date, last_date)
+    return get_time_preferences(member_id, first_date, last_date)
+
+
+#TODO output to datetime.date
+def get_poll_date_range(poll_id):
+    sql = "SELECT first_appointment_date, last_appointment_date FROM \
+           Polls WHERE poll_id=:poll_id"
+    poll = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
+    if poll is None:
+        return None
+    return poll
+
+#Modifies existing time preference intervals so that truncates
+#partially overlapping intervals and removes completely overlapping intervals
+#and then adds the new inteval
+#start and end are datetime.datetime
+def add_member_time_preference(member_id, start, end, satisfaction):
+    #remove overlapping segments
+    sql = "SELECT * FROM MemberTimeSelections WHERE member_id=:member_id \
+           AND time_beginning >= :start AND time_end <= :end"
+
+    result = db.session.execute(sql, {'member_id': member_id, 'start': start,
+                                      'end': end}).fetchall()
+    print(result)
+    sql = "DELETE FROM MemberTimeSelections WHERE member_id=:member_id \
+           AND time_beginning >= :start AND time_end <= :end"
+
+    db.session.execute(sql, {'member_id': member_id, 'start': start,
+                                      'end': end})
+
+
+    #truncate partially overlapping segments
+    sql = "UPDATE MemberTimeSelections SET \
+           time_end = LEAST(time_end, :start), \
+           time_beginning =  GREATEST(time_beginning, :end) \
+           WHERE member_id=:member_id AND time_end > :start \
+           AND time_beginning < :end"
+
+    db.session.execute(sql, {'member_id': member_id, 'start': start,
+                              'end': end})
+
+    #add new segment
+    sql = "INSERT INTO MemberTimeSelections \
+           (member_id, time_beginning, time_end, satisfaction) \
+           VALUES \
+           (:member_id, :start, :end, :satisfaction)"
+
+    db.session.execute(sql, {'member_id': member_id, 'start': start,
+                             'end': end, 'satisfaction': satisfaction})
+
+    #TODO think if this function should commit.
+    db.session.commit()
+
+#TODO modify SQL INSERT INTO queries so that the queries would already
+#have the final parameter names. So the dict should be always: 'asdf': asdf etc
+
+
+#TODO This is the db.commit() applied too early sometimes now?
+#It should always be applied only when all the modifications have been
+#done!
