@@ -222,3 +222,19 @@ def new_resource():
                                error_message="Tuntematon virhe",
                                poll_id=request.form.get('poll_id'))
 
+@app.route('/new_time_preference', methods=['POST'])
+def new_time_preference():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    start_time = request.form.get('start')
+    end_time = request.form.get('end')
+    date = request.form.get('date')
+    satisfaction = request.form.get('satisfaction')
+    poll_id = request.form.get('poll_id')
+    process_new_time_preference(poll_id, start_time, end_time, date,
+                                satisfaction)
+    print(start_time, end_time, date, satisfaction, poll_id)
+    return redirect("/poll/"+poll_id)
+
+#TODO make one .html for failed poll actions

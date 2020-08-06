@@ -565,9 +565,32 @@ def add_member_time_preference(member_id, start, end, satisfaction):
     #TODO think if this function should commit.
     db.session.commit()
 
+def process_new_time_preference(poll_id, start_time, end_time, date,
+                                satisfaction):
+    start_time = datetime.time.fromisoformat(start_time)
+    end_time = datetime.time.fromisoformat(end_time)
+    date = datetime.date.fromisoformat(date)
+
+    user_id = session.get('user_id')
+    start_datetime = datetime.datetime.combine(date, start_time)
+    end_datetime = datetime.datetime.combine(date, end_time)
+
+    if start_datetime >= end_datetime:
+        print('start_datetime > end_datetime')
+        return False
+
+    if satisfaction not in ['0', '1', '2']:
+        print("invalid satisfaction value")
+        return False
+    member_id = get_user_poll_member_id(user_id, poll_id)
+    print("start_datetime, end_datetime: ", start_datetime, end_datetime)
+    add_member_time_preference(member_id, start_datetime, end_datetime, 
+                               satisfaction)
+    
+    return True
+
 #TODO modify SQL INSERT INTO queries so that the queries would already
 #have the final parameter names. So the dict should be always: 'asdf': asdf etc
-
 
 #TODO This is the db.commit() applied too early sometimes now?
 #It should always be applied only when all the modifications have been
