@@ -2,7 +2,7 @@ from db import db
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 from os import urandom
-from datetime import datetime, date, time, timedelta
+import datetime
 from collections import namedtuple
 
 
@@ -75,11 +75,11 @@ class Poll():
     @classmethod
     def from_form(self, owner, name, description, first_date, last_date,
             end_date, end_time, has_final_results):
-        first_date = date.fromisoformat(first_date)
-        last_date = date.fromisoformat(last_date)
-        end_date = date.fromisoformat(end_date)
-        end_time = time.fromisoformat(end_time)
-        end = datetime.combine(end_date, end_time)
+        first_date = datetime.date.fromisoformat(first_date)
+        last_date = datetime.date.fromisoformat(last_date)
+        end_date = datetime.date.fromisoformat(end_date)
+        end_time = datetime.time.fromisoformat(end_time)
+        end = datetime.datetime.combine(end_date, end_time)
         tmp = Poll(owner, name, description, first_date, last_date, end,
                    has_final_results)
 
@@ -352,13 +352,12 @@ def apply_poll_invitation(url_id):
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id[0],
                              'reservation_length': reservation_length})
 
-    #initialize user reservation preferences to 0
     start, end = get_poll_date_range(poll_id)
-    end += timedelta(days=1)
+    end += datetime.timedelta(days=1)
 
     #convert to datetime.datetime
-    start = datetime(start.year, start.month, start.day)
-    end = datetime(end.year, end.month, end.day)
+    start = datetime.datetime(start.year, start.month, start.day)
+    end = datetime.datetime(end.year, end.month, end.day)
 
     add_member_time_preference(member_id[0], start, end, 0)
 
@@ -504,7 +503,7 @@ def get_time_preferences(member_id, first_date, last_date):
     while i <= last_date:
         tmp = get_member_time_preferences_for_day(member_id, i)
         result.append(PreferencesDay(i,  tmp))
-        i += timedelta(days=1)
+        i += datetime.timedelta(days=1)
 
     return result
 
