@@ -209,6 +209,15 @@ def user_is_participant(poll_id):
 
     return False
 
+#TODO output to datetime.date
+def get_poll_date_range(poll_id):
+    sql = "SELECT first_appointment_date, last_appointment_date FROM \
+           Polls WHERE poll_id=:poll_id"
+    poll = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
+    if poll is None:
+        return None
+    return poll
+
 def db_tuple_to_poll(t):
     return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
 
