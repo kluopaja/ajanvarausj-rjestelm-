@@ -530,6 +530,18 @@ def get_poll_resources(poll_id):
         return []
     return resources
 
+def get_user_poll_resources(user_id, poll_id):
+    sql = "SELECT R.resource_description, R.resource_id, M.id FROM \
+           PollMembers M, Resources R, UsersResources U WHERE \
+           M.id=R.member_id AND R.resource_id=U.resource_id \
+           AND M.poll_id=:poll_id AND U.user_id=:user_id"
+
+    result = db.session.execute(sql, {'user_id': user_id,
+                                      'poll_id': poll_id})
+    resources = result.fetchall()
+    if resources is None:
+        return []
+    return resources
 
 
 
