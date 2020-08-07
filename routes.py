@@ -4,6 +4,7 @@ from werkzeug.urls import url_parse
 from flask import session, request, redirect
 
 from utils import *
+import times
 
 @app.route('/')
 def index():
@@ -14,6 +15,9 @@ def index():
 
 @app.route('/poll/<poll_id>')
 def poll(poll_id):
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
     #TODO
     #some check that user has any rights to see this poll
 
@@ -53,7 +57,7 @@ def poll(poll_id):
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
     if 'user_id' not in session:
-        return redirect('/login')
+        return render_template('login.html', need_login_redirect=True)
 
     if request.method == 'GET':
         return render_template("new_poll.html")
@@ -157,7 +161,7 @@ def invite(url_id):
     print('type of url_id', type(url_id))
     if not session.get('user_id', 0):
         session['login_redirect'] = "/invite/" + url_id
-        return redirect('/login')
+        return render_template('login.html', need_login_redirect=True)
 
     invitation_type = get_invitation_type(url_id)
     #check if url_id is in database
@@ -185,13 +189,14 @@ def invite(url_id):
             #TODO add message
             return redirect('/')
         else:
+            print("invitation failed")
             return redirect('/')
 
 
 @app.route('/new_invitation', methods=['POST', 'GET'])
 def new_invitation():
     if 'user_id' not in session:
-        return redirect('/')
+        return render_template('login.html', need_login_redirect=True)
 
     ok = process_new_invitation(request.form.get('invitation_type'),
                                 request.form.get('poll_id'),
@@ -210,7 +215,8 @@ def new_invitation():
 @app.route('/new_resource', methods=['POST'])
 def new_resource():
     if 'user_id' not in session:
-        return redirect('/')
+        return render_template('login.html', need_login_redirect=True)
+
     print("new resource, post: ", request.form)
     ok = process_new_resource(request.form.get('poll_id'),
                               request.form.get('resource_description'))
@@ -225,7 +231,9 @@ def new_resource():
 @app.route('/new_time_preference', methods=['POST'])
 def new_time_preference():
     if 'user_id' not in session:
-        return redirect('/')
+        return render_template('login.html', need_login_redirect=True)
+
+    #TODO check that user has rights to member_id
 
     start_time = request.form.get('start')
     end_time = request.form.get('end')
