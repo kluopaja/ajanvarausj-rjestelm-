@@ -158,7 +158,7 @@ def invite(url_id):
                                    url_id=url_id)
     if request.method == 'POST':
         print("user response: ", request.form['user_response'])
-        if request.form["user_response"] == "yes":
+        if request.form.get("user_response") == "yes":
             if invitation_type == 'poll_participant':
                 apply_poll_invitation(url_id)
             if invitation_type == 'resource_owner':
@@ -217,8 +217,9 @@ def new_time_preference():
     date = request.form.get('date')
     satisfaction = request.form.get('satisfaction')
     poll_id = request.form.get('poll_id')
-    process_new_time_preference(poll_id, start_time, end_time, date,
-                                satisfaction)
+    member_id = request.form.get('member_id')
+    times.process_new_preference(member_id, start_time, end_time, date,
+                                 satisfaction)
     print(start_time, end_time, date, satisfaction, poll_id)
     return redirect("/poll/"+poll_id)
 
