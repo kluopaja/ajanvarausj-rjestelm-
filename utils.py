@@ -45,12 +45,18 @@ def process_registration(username, password):
 
     return True
 
+def check_alphanum_string(s, min_length, max_length):
+    if len(s) < min_length or len(s) > max_length:
+        return False
+    try:
+        if not s.isalnum():
+            return False
+        return True
+    except:
+        return False
+        
 def check_username(username):
-    if len(username) == 0:
-        return False
-    if not username.isalnum():
-        return False
-    return True
+    return check_alphanum_string(s, 1, 20)
 
 def process_logout():
     del session['user_id']
@@ -83,17 +89,33 @@ class Poll():
         end = datetime.datetime.combine(end_date, end_time)
         tmp = Poll(owner, name, description, first_date, last_date, end,
                    has_final_results)
-
         return tmp
 
-def check_poll_validity(poll):
-    if None in [poll.name, poll.description, poll.first_date, poll.last_date,
-                poll.end]:
-        return False
-    return True
 
 
-def process_new_poll(poll):
+def process_new_poll(user_id, name, description, first_date, last_date,
+                     end_date, end_time):
+    try:
+        first_date = datetime.date.fromisoformat(first_date)
+        last_date = datetime.date.fromisoformat(last_date)
+        end_date = datetime.date.fromisoformat(end_date)
+        end_time = datetime.time.fromisoformat(end_time)
+        end = datetime.datetime.combine(end_date, end_time)
+    except ValueError:
+        return "Incorrect time/date formats!"
+
+    if first_date > last_date:
+        return "The last available date must be after the first one!"
+
+    if end <= datetime.today() + datetime.timedelta(seconds=2):
+        return "Poll end should not be in the past"
+
+    if check_alphanum_string(name, 1, 30):
+        return "Not valid poll name"
+
+    if check_alphanum_string(description, 1, 10000):
+        return "Not valid poll description"
+
     sql = "INSERT INTO Polls \
            (owner_user_id, poll_name, poll_description,  \
            first_appointment_date, last_appointment_date, \
@@ -101,6 +123,7 @@ def process_new_poll(poll):
            (:owner_user_id, :poll_name, :poll_description, \
            :first_appointment_date, :last_appointment_date, :poll_end_time, \
            :has_final_results)"
+
 
     poll_end_timestamp = poll.end
 
@@ -114,6 +137,7 @@ def process_new_poll(poll):
 
     db.session.execute(sql, parameter_dict)
     db.session.commit()
+    return None
 
 #returns ids of all polls that user somehow part of
 #(either owner, participant or owner of a resource)

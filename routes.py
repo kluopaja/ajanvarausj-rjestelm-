@@ -56,43 +56,26 @@ def new_poll():
     if request.method == 'GET':
         return render_template("new_poll.html")
     if request.method == 'POST':
-
-        poll = Poll.from_form(session['user_id'],
-                              request.form.get('poll_name'),
-                              request.form.get('poll_description'),
-                              request.form.get('first_appointment_date'),
-                              request.form.get('last_appointment_date'),
-                              request.form.get('poll_end_date'),
-                              request.form.get('poll_end_time'),
-                              False)
-
-        print(request.form)
-        print(poll.name,
-              poll.description, poll.first_date, poll.last_date, poll.end)
-
-        if not check_poll_validity(poll):
-            #TODO some note about what was wrong
-            print("not valid")
-            return render_template("new_poll.html")
+        error = process_new_poll(session['user_id'],
+                                 request.form.get('poll_name'),
+                                 request.form.get('poll_description'),
+                                 request.form.get('first_appointment_date'),
+                                 request.form.get('last_appointment_date'),
+                                 request.form.get('poll_end_date'),
+                                 request.form.get('poll_end_time'))
+        if error is not None:
+            print("not valid poll")
+            return render_template("new_poll")
 
         print(poll)
-
         process_new_poll(poll)
         return redirect("/")
-
-
-
-
-
-
 #TODO
 #storing the 'login_redirect' in the session was a very bad idea
-#what if the user visits the link, then does something else, 
+#what if the user visits the link, then does something else,
 #comes back to the site and logs in
 #then they will be redirected to the link site
-
 #how to login and then return to the same page?
-
 
 #TODO give the message as a GET parameter?
 @app.route('/login', methods=['GET', 'POST'])
