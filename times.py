@@ -50,12 +50,13 @@ def get_member_preferences(member_id, poll_id):
 
 #return list of (times, member_id)
 def get_poll_user_consumer_times(user_id, poll_id):
-    participant_times = [] 
+    participant_times = []
     member_id = utils.get_user_poll_member_id(user_id, poll_id)
-    tmp = (get_member_preferences(member_id, poll_id),
-           member_id)
+    if member_id is not None:
+        tmp = (get_member_preferences(member_id, poll_id),
+               member_id)
 
-    participant_times.append(tmp)
+        participant_times.append(tmp)
     return participant_times
 
 #return list of (times, member_id, resource_description)
