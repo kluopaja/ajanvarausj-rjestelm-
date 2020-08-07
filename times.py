@@ -14,16 +14,17 @@ PreferencesDay = namedtuple('PreferencesDay', ['date', 'intervals'])
 
 #type(day) = datetime.date
 #get an ordered list of time intervals that overlap with 'day'
-def get_member_time_preferences_for_day(member_id, day):
-    sql = "SELECT GREATEST(time_beginning, :day),\
-           LEAST(time_end, :day + '1 day'::interval), satisfaction FROM \
+def get_member_preferences_for_day(member_id, day):
+    sql = "SELECT CAST(GREATEST(time_beginning, :day) as time),\
+           CAST(LEAST(time_end, :day + '1 day'::interval - '1 s'::interval) \
+           as time), \
+           satisfaction FROM \
            MemberTimeSelections WHERE member_id=:member_id \
            AND time_end > :day AND time_beginning < (:day + '1 day'::interval)\
            ORDER BY time_beginning"
 
     result = db.session.execute(sql, {'member_id': member_id,
                                       'day':day}).fetchall()
-
     #print("result: ", result)
     if result is None:
         return []
