@@ -513,11 +513,14 @@ def process_new_resource(poll_id, resource_description):
 
     db.session.execute(sql, {'resource_description': resource_description,
                              'member_id': member_id[0]})
+
+    initialize_poll_member_times(member_id[0], poll_id, 0)
+
     db.session.commit()
     return True
 
 def get_poll_resources(poll_id):
-    sql = "SELECT R.resource_description, R.resource_id FROM \
+    sql = "SELECT R.resource_description, R.resource_id, M.id FROM \
            Polls P, PollMembers M, Resources R WHERE \
            P.poll_id=M.poll_id AND M.id=R.member_id \
            AND P.poll_id=:poll_id"
