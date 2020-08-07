@@ -10,28 +10,38 @@ import times
 ### User session related functions ###
 
 def process_login(username, password):
+    if username is None:
+        return "No username"
+
+    if password is None:
+        return "No password"
+
     sql = "SELECT user_id, password_hash FROM Users WHERE username=:username"
     user_query = db.session.execute(sql, {"username":username}).fetchone()
     print(user_query)
     if user_query is None:
-        return False
+        return "Username not found"
 
     if check_password_hash(user_query[1], password):
         session['user_id'] = user_query[0]
         session['username'] = username
-        return True
+        return None
 
-    return False
+    return "Incorrect password"
 
 def process_registration(username, password):
+    if username is None or not check_alphanum_string(username, 1, 20):
+        return "Username not valid"
+
+    if password is None or len(password) == 0:
+        return "Empty password not allowed"
+
     sql = "SELECT COUNT(*) FROM Users WHERE username=:username"
     user_count = db.session.execute(sql, {"username":username}).fetchone()
     print("user_count: ", user_count)
-    if user_count[0] > 0:
-        return False
 
-    if not check_username(username):
-        return False
+    if user_count[0] > 0:
+        return "Username already in use!"
 
     password_hash = generate_password_hash(password)
 
@@ -42,8 +52,7 @@ def process_registration(username, password):
     db.session.execute(sql, {'username': username,
                             'password_hash':password_hash})
     db.session.commit()
-
-    return True
+    return None
 
 def check_alphanum_string(s, min_length, max_length):
     if len(s) < min_length or len(s) > max_length:
@@ -54,15 +63,10 @@ def check_alphanum_string(s, min_length, max_length):
         return True
     except:
         return False
-        
-def check_username(username):
-    return check_alphanum_string(s, 1, 20)
 
 def process_logout():
     del session['user_id']
     del session['username']
-
-
 
 ### Poll related functions ###
 
@@ -107,13 +111,13 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     if first_date > last_date:
         return "The last available date must be after the first one!"
 
-    if end <= datetime.today() + datetime.timedelta(seconds=2):
+    if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
         return "Poll end should not be in the past"
 
-    if check_alphanum_string(name, 1, 30):
+    if not check_alphanum_string(name, 1, 30):
         return "Not valid poll name"
 
-    if check_alphanum_string(description, 1, 10000):
+    if not check_alphanum_string(description, 1, 10000):
         return "Not valid poll description"
 
     sql = "INSERT INTO Polls \
@@ -243,60 +247,63 @@ def get_poll_date_range(poll_id):
         return None
     return poll
 
+
 def db_tuple_to_poll(t):
     return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
 
-
-
-
 ### Invitation related functions ###
 
-#TODO fix, fails with large reservation_lengths
+#TODO contents divide into two functions
 def process_new_invitation(invitation_type, poll_id, resource_id,
                                 reservation_length):
-
-    if 'user_id' not in session:
-        return False
     print(invitation_type)
+
     if invitation_type == 'poll_participant':
-        #check if user has rights to do the operation
-        #and that the target poll exists
+        if poll_id is None:
+            return "No poll id was provided"
+
+        if reservation_length is None:
+            return "No resource_length was provided"
+        try:
+            reservation_length = int(reservation_length)
+        except ValueError:
+            return "Reservation length should be an integer"
+
+        if reservation_length > 24*60:
+            return "Maximum reservation length is 24 hours"
+        if reservation_length <= 0:
+            return "Reservation length should be positive"
+
         if not user_owns_poll(poll_id):
-            print("does not own")
-            return False
+            return "User does not own the poll"
 
-        #TODO
-        #check reservation_length
         url_id = urandom(16).hex()
-
         sql = "INSERT INTO PollMembershipLinks \
                (poll_id, url_id, reservation_length)\
-               VALUES (:poll_id, :url_id, :reservation_length)"
+               VALUES (:poll_id, :url_id, :reservation_seconds)"
 
-        #TODO find out a good way to put the reservation length to the
-        #database
-        #why is it string?
-        reservation_length = str(int(reservation_length)*60)
+        reservation_seconds = str(reservation_length*60)
         db.session.execute(sql, {'poll_id': poll_id, 'url_id': url_id,
-                                 'reservation_length': reservation_length})
+                                 'reservation_seconds': reservation_seconds})
         db.session.commit()
-        return True
-    if invitation_type == 'resource_owner':
+        return None
+
+    elif invitation_type == 'resource_owner':
+        if resource_id is None:
+            return "No resource id was provided"
         #check user is the owner of the resource parent poll
         if not user_owns_parent_poll(resource_id):
-            print("user does not own the resource")
-            return False
+            return "User does not own the resource"
 
         url_id = urandom(16).hex()
-
         sql = "INSERT INTO ResourceMembershipLinks \
                (resource_id, url_id) VALUES (:resource_id, :url_id)"
         db.session.execute(sql, {'resource_id': resource_id, 'url_id': url_id})
         db.session.commit()
-        return True
+        return None
 
-    print("incorrect invitation type")
-    return False
+    else:
+        return "Incorrect invitation type"
 
 def get_invitation_type(url_id):
     sql = "SELECT COUNT(*) FROM PollMembershipLinks WHERE url_id=:url_id"
@@ -371,8 +378,13 @@ def initialize_poll_member_times(member_id, poll_id, satisfaction):
     times.add_member_preference(member_id, start, end, 0)
 
 #adds user to a poll and initializes the user time preferences to 0
+#assumes that the url_id is valid
 def apply_poll_invitation(url_id):
     details = participant_invitation_by_url_id(url_id)
+
+    #this should never be possible
+    if details is None:
+        return "No invitation found"
 
     #TODO think about doing this differently
     #TODO split into functions
@@ -380,7 +392,7 @@ def apply_poll_invitation(url_id):
 
     if user_is_participant(poll_id):
         print('already participant')
-        return False
+        return "User is already a participant"
 
     user_id = session['user_id']
     reservation_length = details[2]
@@ -400,13 +412,14 @@ def apply_poll_invitation(url_id):
 
     db.session.commit()
 
-    return True
+    return None
 
+
+#assumes that the url_id is valid
 def apply_resource_invitation(url_id):
     details = resource_invitation_by_url_id(url_id)
     user_id = session['user_id']
     resource_id = details[3]
-
     return add_user_to_resource(user_id, resource_id)
 
 def get_user_poll_member_id(user_id, poll_id):
@@ -470,40 +483,47 @@ def user_in_resource(user_id, resource_id):
         return True
     if count[0] == 0:
         return False
-    
+
 
 def add_user_to_resource(user_id, resource_id):
     if user_in_resource(user_id, resource_id):
-        return False
+        return "User already in the resource"
 
     sql = "INSERT INTO UsersResources (user_id, resource_id) \
            VALUES (:user_id, :resouce_id)"
     db.session.execute(sql, {'user_id': user_id, 'resouce_id': resource_id})
     db.session.commit()
-    return True
+    return None
 
 def resource_description_in_poll(poll_id, resource_description):
     sql = "SELECT COUNT(*) FROM PollMembers M, Resources R \
            WHERE M.id=R.resource_id AND M.poll_id=:poll_id \
            AND R.resource_description=:resource_description"
 
-    tmp = db.session.execute(sql, 
+    tmp = db.session.execute(sql,
                             {'poll_id': poll_id,
                              'resource_description': resource_description})
     count = tmp.fetchone()
     if count[0] == 1:
         return True
-    
+
     return False
 
-#TODO check that identical resource has not already been added
 def process_new_resource(poll_id, resource_description):
-    if not user_owns_poll(poll_id):
-        return False
+    print("process_new_resource", poll_id)
 
-    #TODO return some error message
+    if poll_id is None:
+        return "No poll id was provided"
+    if resource_description is None:
+        return "No resource descrption was provided"
+
+
+    if not user_owns_poll(poll_id):
+        return "User does not own the poll"
+
     if resource_description_in_poll(poll_id, resource_description):
-        return False
+        return "Resource with an identical resource_descrpition already \
+                exists in the poll"
 
     sql = "INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id"
     member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
@@ -515,9 +535,9 @@ def process_new_resource(poll_id, resource_description):
                              'member_id': member_id[0]})
 
     initialize_poll_member_times(member_id[0], poll_id, 0)
-
     db.session.commit()
-    return True
+
+    return None
 
 def get_poll_resources(poll_id):
     sql = "SELECT R.resource_description, R.resource_id, M.id FROM \

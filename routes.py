@@ -65,7 +65,7 @@ def new_poll():
                                  request.form.get('poll_end_time'))
         if error is not None:
             print("not valid poll")
-            return render_template("new_poll")
+            return render_template("error.html", message=error)
 
         return redirect("/")
 #TODO
@@ -91,6 +91,7 @@ def login():
 
         return redirect(url)
 
+    error = 'Unknown error'
     if session.get('user_id', 0):
         return redirect_to_next(default='/');
 
@@ -99,18 +100,17 @@ def login():
 
     elif request.method == 'POST':
         print("post request", request.form)
-
-        if process_login(request.form['username'], request.form['password']):
+        error = process_login(request.form['username'],
+                              request.form['password'])
+        if error is None:
             return redirect_to_next(default='/')
 
     return render_template('login.html',
-                           message='Kirjautuminen epäonnistui,yritä uudelleen')
-
+                            message='Kirjautuminen epäonnistui: ' + error)
 
 @app.route('/logout')
 def logout():
     process_logout()
-
     return render_template("logout.html")
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -119,17 +119,18 @@ def register():
         return render_template("register.html")
     if request.method == 'POST':
         print("register: ", request.form)
-        is_ok = process_registration(request.form['username'],
-                                      request.form['password'])
+        error = process_registration(request.form.get('username'),
+                                      request.form.get('password'))
         #after successful registration, automatically log the user in
         #and redirect to login
-        if is_ok:
+        if error is None:
             process_login(request.form['username'],
                           request.form['password'])
             return redirect('/login')
 
+    message = "Käyttäjätunnuksen luonti epäonnistui: " + error
     return render_template("register.html",
-                           message='Käyttäjätunnuksen luonti epäonnistui,yritä uudelleen')
+                           message=message)
 
 @app.route('/invite/<url_id>', methods=['POST', 'GET'])
 def invite(url_id):
@@ -158,9 +159,13 @@ def invite(url_id):
         print("user response: ", request.form['user_response'])
         if request.form.get("user_response") == "yes":
             if invitation_type == 'poll_participant':
-                apply_poll_invitation(url_id)
+                error = apply_poll_invitation(url_id)
             if invitation_type == 'resource_owner':
-                apply_resource_invitation(url_id)
+                error = apply_resource_invitation(url_id)
+            if error is not None:
+                message = "Kutsumisen hyväksyminen epäonnistui: " + error
+                return render_template("error.html", message=message)
+
             #TODO add message
             return redirect('/')
         else:
@@ -168,23 +173,29 @@ def invite(url_id):
             return redirect('/')
 
 
+
+#TODO
+#all error messages that require the user to return some poll could
+#be handled with one html page
+#do we even need any other error page redirections than a poll?
+#if not, then one error.html should be enough
 @app.route('/new_invitation', methods=['POST', 'GET'])
 def new_invitation():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
-    ok = process_new_invitation(request.form.get('invitation_type'),
-                                request.form.get('poll_id'),
-                                request.form.get('resource_id'),
-                                request.form.get('reservation_length'))
+    error = process_new_invitation(request.form.get('invitation_type'),
+                                   request.form.get('poll_id'),
+                                   request.form.get('resource_id'),
+                                   request.form.get('reservation_length'))
 
     print("new invitation request", request.form)
-    print("ok? ", ok)
-    if ok:
+    print("error? ", error)
+    if error is None:
         return redirect('/poll/'+request.form.get('poll_id'))
     else:
         return render_template("new_invitation_failed.html",
-                               error_message="Tuntematon virhe",
+                               error_message=error,
                                poll_id=request.form.get('poll_id'))
 
 @app.route('/new_resource', methods=['POST'])
@@ -193,14 +204,14 @@ def new_resource():
         return render_template('login.html', need_login_redirect=True)
 
     print("new resource, post: ", request.form)
-    ok = process_new_resource(request.form.get('poll_id'),
+    error = process_new_resource(request.form.get('poll_id'),
                               request.form.get('resource_description'))
-    if ok:
+    if error is None:
         return redirect('/poll/'+request.form.get('poll_id'))
     else:
         print("creation of new resource failed")
         return render_template("new_resource_failed.html",
-                               error_message="Tuntematon virhe",
+                               error_message=error,
                                poll_id=request.form.get('poll_id'))
 
 @app.route('/new_time_preference', methods=['POST'])
@@ -208,17 +219,17 @@ def new_time_preference():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
-    #TODO check that user has rights to member_id
+    error = times.process_new_preference(request.form.get('member_id'),
+                                         request.form.get('start'),
+                                         request.form.get('end'),
+                                         request.form.get('date'),
+                                         request.form.get('satisfaction'))
 
-    start_time = request.form.get('start')
-    end_time = request.form.get('end')
-    date = request.form.get('date')
-    satisfaction = request.form.get('satisfaction')
-    poll_id = request.form.get('poll_id')
-    member_id = request.form.get('member_id')
-    times.process_new_preference(member_id, start_time, end_time, date,
-                                 satisfaction)
-    print(start_time, end_time, date, satisfaction, poll_id)
-    return redirect("/poll/"+poll_id)
+    if error is None:
+        return redirect("/poll/"+request.form.get('poll_id', 0))
+    else:
+        print("creating new time preference failed")
+        #TODO error message
+        return render_template("error.html", message=error)
 
 #TODO make one .html for failed poll actions

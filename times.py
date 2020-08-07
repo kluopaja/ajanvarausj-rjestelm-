@@ -140,25 +140,29 @@ def add_member_preference(member_id, start, end, satisfaction):
     db.session.commit()
 
 def process_new_preference(member_id, start_time, end_time, date,
-                                satisfaction):
-    start_time = datetime.time.fromisoformat(start_time)
-    end_time = datetime.time.fromisoformat(end_time)
-    date = datetime.date.fromisoformat(date)
+                           satisfaction):
+    try:
+        start_time = datetime.time.fromisoformat(start_time)
+        end_time = datetime.time.fromisoformat(end_time)
+        date = datetime.date.fromisoformat(date)
+        start_datetime = datetime.datetime.combine(date, start_time)
+        end_datetime = datetime.datetime.combine(date, end_time)
+    except ValueError:
+        return "Incorrect time format"
 
-    start_datetime = datetime.datetime.combine(date, start_time)
-    end_datetime = datetime.datetime.combine(date, end_time)
-
-    if start_datetime >= end_datetime:
-        print('start_datetime > end_datetime')
-        return False
+    if start_datetime > end_datetime:
+        return "The length of the time segment was negative"
 
     if satisfaction not in ['0', '1', '2']:
-        print("invalid satisfaction value")
-        return False
+        return "Invalid satisfaction value"
+
+
 
     print("start_datetime, end_datetime: ", start_datetime, end_datetime)
+    #TODO check that user has rights to member_id
+
     add_member_preference(member_id, start_datetime, end_datetime,
                          satisfaction)
 
-    return True
+    return None
 
