@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from os import urandom
 import datetime
 from collections import namedtuple
+import times
 
 
 ### User session related functions ###
@@ -335,16 +336,26 @@ def resource_invitation_by_url_id(url_id):
     return result[0]
 
 #TODO take invitation as a parameter and not as url_id
+def initialize_poll_member_times(member_id, poll_id, satisfaction):
+    start, end = get_poll_date_range(poll_id)
+    end += datetime.timedelta(days=1)
+
+    #convert to datetime.datetime
+    start = datetime.datetime(start.year, start.month, start.day)
+    end = datetime.datetime(end.year, end.month, end.day)
+
+    times.add_member_preference(member_id, start, end, 0)
 
 #adds user to a poll and initializes the user time preferences to 0
 def apply_poll_invitation(url_id):
     details = participant_invitation_by_url_id(url_id)
-    
+
     #TODO think about doing this differently
     #TODO split into functions
     poll_id = details[3]
 
     if user_is_participant(poll_id):
+        print('already participant')
         return False
 
     user_id = session['user_id']
@@ -361,14 +372,7 @@ def apply_poll_invitation(url_id):
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id[0],
                              'reservation_length': reservation_length})
 
-    start, end = get_poll_date_range(poll_id)
-    end += datetime.timedelta(days=1)
-
-    #convert to datetime.datetime
-    start = datetime.datetime(start.year, start.month, start.day)
-    end = datetime.datetime(end.year, end.month, end.day)
-
-    add_member_time_preference(member_id[0], start, end, 0)
+    initialize_poll_member_times(member_id[0], poll_id, 0)
 
     db.session.commit()
 
