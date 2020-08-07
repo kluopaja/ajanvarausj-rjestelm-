@@ -67,8 +67,6 @@ def new_poll():
             print("not valid poll")
             return render_template("new_poll")
 
-        print(poll)
-        process_new_poll(poll)
         return redirect("/")
 #TODO
 #storing the 'login_redirect' in the session was a very bad idea
