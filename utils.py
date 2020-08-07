@@ -393,7 +393,28 @@ def get_user_poll_member_id(user_id, poll_id):
 
     return member_id[0]
 
+
 ### Resource related functions ###
+def get_resource_member_id(resource_id):
+    sql = "SELECT member_id FROM Resources WHERE resource_id=:resource_id"
+
+    member_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
+    if member_id is None:
+        return None
+
+    return member_id[0]
+
+
+def get_resource_parent_poll(resource_id):
+    sql = "SELECT P.poll_id FROM PollMembers P, Resources R \
+           WHERE P.id=R.member_id AND R.resource_id=:resource_id"
+
+    poll_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
+
+    if poll_id is None:
+        return None
+
+    return poll_id[0]
 
 def user_owns_parent_poll(resource_id):
     sql = "SELECT COUNT(*) FROM Polls P, PollMembers M, Resources R \

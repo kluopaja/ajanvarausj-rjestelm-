@@ -27,32 +27,26 @@ def poll(poll_id):
     resource_invitations = None
     #list of (resource_description, resource_id)
     resources = None
-
+    
+    current_poll = get_polls_by_ids([poll_id])[0]
 
     is_owner = user_owns_poll(poll_id)
-    print("is owner: ", is_owner)
     if is_owner:
         participant_invitations = get_participant_invitations(poll_id)
         resource_invitations = get_resource_invitations(poll_id)
         resources = get_poll_resources(poll_id)
 
-    is_participant = user_is_participant(poll_id)
-    time_preferences = []
-    if is_participant:
-        time_preferences = get_user_time_preferences(session.get('user_id'),
-                                                     poll_id)
-        print("time_preferences ", time_preferences)
-
-    if 1 or owns_resources:
-        pass
-
+    user_id = session.get('user_id')
+    consumer_times = times.get_poll_user_consumer_times(user_id, poll_id)
+    resource_times = times.get_poll_user_resource_times(user_id, poll_id)
     return render_template("poll.html", is_owner=is_owner,
-                           poll_id=poll_id,
+                           poll=current_poll,
                            participant_invitations=participant_invitations,
                            resource_invitations=resource_invitations,
                            resources=resources,
-                           is_participant=is_participant,
-                           time_preferences=time_preferences)
+                           participant_times=consumer_times,
+                           resource_times=resource_times)
+ 
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():

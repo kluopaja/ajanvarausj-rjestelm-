@@ -1,6 +1,7 @@
 import datetime
 from collections import namedtuple
-from utils import *
+from db import db
+import utils
 
 ### Time preference related functions ###
 
@@ -30,31 +31,48 @@ def get_member_time_preferences_for_day(member_id, day):
     return [TimeInterval(*x) for x in result]
 
 #TODO think if this should return a named tuple
-def get_time_preferences(member_id, first_date, last_date):
+def get_preferences_for_range(member_id, first_date, last_date):
     result = []
     i = first_date
     while i <= last_date:
-        tmp = get_member_time_preferences_for_day(member_id, i)
-        result.append(PreferencesDay(i,  tmp))
+        tmp = get_member_preferences_for_day(member_id, i)
+        result.append(PreferencesDay(i, tmp))
         i += datetime.timedelta(days=1)
 
     return result
 
-def get_user_time_preferences(user_id, poll_id):
-    first_date, last_date = get_poll_date_range(poll_id)
-    member_id = get_user_poll_member_id(user_id, poll_id)
-    print("userid, memberid", user_id, member_id, poll_id)
+def get_member_preferences(member_id, poll_id):
+    first_date, last_date = utils.get_poll_date_range(poll_id)
+    print("userid, memberid", member_id, poll_id)
     print(first_date, last_date)
-    return get_time_preferences(member_id, first_date, last_date)
+    return get_preferences_for_range(member_id, first_date, last_date)
 
-def get_resource_time_preferences(user_id, poll_id):
-    pass
+#return list of (times, member_id)
+def get_poll_user_consumer_times(user_id, poll_id):
+    participant_times = [] 
+    member_id = utils.get_user_poll_member_id(user_id, poll_id)
+    tmp = (get_member_preferences(member_id, poll_id),
+           member_id)
+
+    participant_times.append(tmp)
+    return participant_times
+
+#return list of (times, member_id, resource_description)
+def get_poll_user_resource_times(user_id, poll_id):
+    #(resource_description, resource_id, member_id)
+    tmp = utils.get_user_poll_resources(user_id, poll_id)
+    #(times, member_id, resource_description)
+    resource_times = []
+    for x in tmp:
+        resource_times.append((get_member_preferences(x[2], poll_id),
+                               x[2], x[0]))
+    return resource_times
 
 #Modifies existing time preference intervals so that truncates
 #partially overlapping intervals and removes completely overlapping intervals
 #and then adds the new inteval
 #start and end are datetime.datetime
-def add_member_time_preference(member_id, start, end, satisfaction):
+def add_member_preference(member_id, start, end, satisfaction):
     #fetch a segment inside which the new segment is
     #ooooooo
     # nnnn
@@ -121,13 +139,12 @@ def add_member_time_preference(member_id, start, end, satisfaction):
     #TODO think if this function should commit.
     db.session.commit()
 
-def process_new_time_preference(poll_id, start_time, end_time, date,
+def process_new_preference(member_id, start_time, end_time, date,
                                 satisfaction):
     start_time = datetime.time.fromisoformat(start_time)
     end_time = datetime.time.fromisoformat(end_time)
     date = datetime.date.fromisoformat(date)
 
-    user_id = session.get('user_id')
     start_datetime = datetime.datetime.combine(date, start_time)
     end_datetime = datetime.datetime.combine(date, end_time)
 
@@ -138,10 +155,10 @@ def process_new_time_preference(poll_id, start_time, end_time, date,
     if satisfaction not in ['0', '1', '2']:
         print("invalid satisfaction value")
         return False
-    member_id = get_user_poll_member_id(user_id, poll_id)
+
     print("start_datetime, end_datetime: ", start_datetime, end_datetime)
-    add_member_time_preference(member_id, start_datetime, end_datetime,
-                               satisfaction)
+    add_member_preference(member_id, start_datetime, end_datetime,
+                         satisfaction)
 
     return True
 
