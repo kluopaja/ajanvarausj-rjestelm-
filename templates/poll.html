@@ -1,5 +1,70 @@
 {% extends "base.html" %}
 {% block content %}
+<h2>Kysely: {{ poll.name }}</h2>
+<p>Kuvaus: {{ poll.description }}</h2>
+<p>Kyselyn päättymisaika: {{ poll.end }}</p>
+
+{% if participant_times|length > 0 %}
+    <h2>Varaustoiveet</h2>
+    <p>Lisää uusi toive. Uusi toive ylikirjoittaa
+    vanhat alle jäävät toiveet.</p>
+    {% for day in participant_times[0][0] %}
+        <h3>{{ day.date }}</h3>
+        {% for interval in day.intervals %}
+        <p>{{ interval[0] }}&ndash;{{ interval[1]}}: {{ interval[2] }}</p>
+        {% endfor %}
+        <form action="/new_time_preference" method="post">
+            <label for=2>Sopii hyvin</label>
+            <input type="radio" name="satisfaction" id=2 value=2>
+            <label for=1>Sopii tarvittaessa</label>
+            <input type="radio" name="satisfaction" id=1 value=1>
+            <label for=0>Ei sovi</label>
+            <input type="radio" name="satisfaction" id=0 value=0>
+            <br>
+            <label for="start">Aikavälin alku</label>
+            <input type="time" name="start" id="start">
+            <label for="start">Aikavälin loppu</label>
+            <input type="time" name="end" id="end">
+            <br>
+            <input type="submit" value="Lisää toive">
+            <input type="hidden" name="date" value={{ day.date }}>
+            <input type="hidden" name="member_id" 
+                   value={{ participant_times[0][1] }}>
+            <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+        </form>
+    {% endfor %}
+{% endif %}
+{% if resource_times|length > 0 %}
+    <h2>Resurssien tarjontatoiveet</h2>
+    {% for resource in resource_times %}
+        <h3>Muokkaa aikoja resurssissa {{ resource[2] }}</h3>
+        {% for day in resource[0] %}
+            <h3>{{ day.date }}</h3>
+            {% for interval in day.intervals %}
+            <p>{{ interval[0] }}&ndash;{{ interval[1]}}: {{ interval[2] }}</p>
+            {% endfor %}
+            <form action="/new_time_preference" method="post">
+                <label for=2>Sopii hyvin</label>
+                <input type="radio" name="satisfaction" id=2 value=2>
+                <label for=1>Sopii tarvittaessa</label>
+                <input type="radio" name="satisfaction" id=1 value=1>
+                <label for=0>Ei sovi</label>
+                <input type="radio" name="satisfaction" id=0 value=0>
+                <br>
+                <label for="start">Aikavälin alku</label>
+                <input type="time" name="start" id="start">
+                <label for="start">Aikavälin loppu</label>
+                <input type="time" name="end" id="end">
+                <br>
+                <input type="submit" value="Lisää toive">
+                <input type="hidden" name="date" value={{ day.date }}>
+                <input type="hidden" name="member_id"
+                       value={{ resource[1] }}>
+                <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+            </form>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
 {% if is_owner %}
 <h2>Aktiiviset vastaajakutsumislinkit:</h2>
 <ul>
@@ -17,7 +82,7 @@
     <input type="number" min=1 value=60 name="reservation_length" 
            id="reservation_length">
     <input type="submit" value="Luo linkki">
-    <input type="hidden" name="poll_id" value={{ poll_id }}>
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
     <input type="hidden" name="invitation_type" value="poll_participant">
 </ul>
 </form>
@@ -27,7 +92,7 @@
     <label for="resource_description">Resurssin kuvaus:</label>
     <input type="text" name="resource_description" id="resource_description">
     <input type="submit" value="Luo resurssi">
-    <input type="hidden" name="poll_id" value={{ poll_id }}>
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
 </form>
 
 <h2>Aktiiviset resurssit:</h2>
@@ -63,7 +128,7 @@
     <br>
     <input type="submit" value="Luo linkki">
     <input type="hidden" name="invitation_type" value="resource_owner">
-    <input type="hidden" name="poll_id" value={{ poll_id }}>
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
 
 </form>
 
