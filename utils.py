@@ -129,15 +129,14 @@ def process_new_poll(user_id, name, description, first_date, last_date,
            :has_final_results)"
 
 
-    poll_end_timestamp = poll.end
 
-    parameter_dict = {'owner_user_id': poll.owner,
-                      'poll_end_time': poll_end_timestamp,
-                      'first_appointment_date': poll.first_date,
-                      'last_appointment_date': poll.last_date,
-                      'poll_name': poll.name,
-                      'poll_description': poll.description,
-                      'has_final_results': poll.has_final_results}
+    parameter_dict = {'owner_user_id': user_id,
+                      'poll_end_time': end,
+                      'first_appointment_date': first_date,
+                      'last_appointment_date': last_date,
+                      'poll_name': name,
+                      'poll_description': description,
+                      'has_final_results': False}
 
     db.session.execute(sql, parameter_dict)
     db.session.commit()
