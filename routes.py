@@ -5,6 +5,7 @@ from flask import session, request, redirect
 
 from utils import *
 import times
+import optimization
 
 @app.route('/')
 def index():
