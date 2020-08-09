@@ -39,8 +39,8 @@ def poll(poll_id):
         optimization_results = optimization.get_optimization_results(poll_id)
 
     user_id = session.get('user_id')
-    consumer_times = times.get_poll_user_consumer_times(user_id, poll_id)
-    resource_times = times.get_poll_user_resource_times(user_id, poll_id)
+    consumer_times = times.get_consumer_times_for_each_day(user_id, poll_id)
+    resource_times = times.get_resource_times_for_each_day(user_id, poll_id)
     return render_template("poll.html", is_owner=is_owner,
                            poll=current_poll,
                            participant_invitations=participant_invitations,

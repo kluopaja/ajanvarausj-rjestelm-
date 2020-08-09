@@ -33,7 +33,7 @@ def get_member_preferences_for_day(member_id, day):
     return [TimeInterval(*x) for x in result]
 
 #TODO think if this should return a named tuple
-def get_preferences_for_range(member_id, first_date, last_date):
+def get_preferences_for_days_range(member_id, first_date, last_date):
     result = []
     i = first_date
     while i <= last_date:
@@ -43,31 +43,31 @@ def get_preferences_for_range(member_id, first_date, last_date):
 
     return result
 
-def get_member_preferences(member_id, poll_id):
+def get_member_times_for_each_day(member_id, poll_id):
     first_date, last_date = utils.get_poll_date_range(poll_id)
-    print("userid, memberid", member_id, poll_id)
-    print(first_date, last_date)
-    return get_preferences_for_range(member_id, first_date, last_date)
+    return get_preferences_for_days_range(member_id, first_date, last_date)
 
-#return list of (times, member_id)
-def get_poll_user_consumer_times(user_id, poll_id):
+#return list x of (times, member_id, reservation_length)
+#x[i][0] are the times for day i of the poll
+def get_consumer_times_for_each_day(user_id, poll_id):
     participant_times = []
     member_id = utils.get_user_poll_member_id(user_id, poll_id)
     if member_id is not None:
-        tmp = (get_member_preferences(member_id, poll_id),
-               member_id)
+        tmp = (get_member_times_for_each_day(member_id, poll_id),
+               member_id, utils.get_member_reservation_length(member_id))
 
         participant_times.append(tmp)
     return participant_times
 
-#return list of (times, member_id, resource_description)
-def get_poll_user_resource_times(user_id, poll_id):
+#return list x of (times, member_id, resource_description)
+#x[i][0] are the times for day i of the poll
+def get_resource_times_for_each_day(user_id, poll_id):
     #(resource_description, resource_id, member_id)
     tmp = utils.get_user_poll_resources(user_id, poll_id)
     #(times, member_id, resource_description)
     resource_times = []
     for x in tmp:
-        resource_times.append((get_member_preferences(x[2], poll_id),
+        resource_times.append((get_member_times_for_each_day(x[2], poll_id),
                                x[2], x[0]))
     return resource_times
 
@@ -110,6 +110,7 @@ def get_customer_times(poll_id):
 #partially overlapping intervals and removes completely overlapping intervals
 #and then adds the new inteval
 #start and end are datetime.datetime
+#TODO concatenate subsequent time intervals with the same satisfaction value
 def add_member_preference(member_id, start, end, satisfaction):
     #fetch a segment inside which the new segment is
     #ooooooo
