@@ -240,7 +240,7 @@ def user_owns_poll(poll_id):
 
     if user is None:
         return False
-    if user[0] == session['user_id']:
+    if user[0] == session.get('user_id', 0):
         return True
 
     return False
