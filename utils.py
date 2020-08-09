@@ -108,6 +108,8 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     except ValueError:
         return "Incorrect time/date formats!"
 
+    if end.minute%5 != 0:
+        return "End time should be divisible by 5 minutes"
     if first_date > last_date:
         return "The last available date must be after the first one!"
 
@@ -306,6 +308,8 @@ def process_new_invitation(invitation_type, poll_id, resource_id,
             return "Maximum reservation length is 24 hours"
         if reservation_length <= 0:
             return "Reservation length should be positive"
+        if reservation_length%5 != 0:
+            return "Reservation length should be divisible by 5 min"
 
         if not user_owns_poll(poll_id):
             return "User does not own the poll"

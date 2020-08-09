@@ -192,6 +192,9 @@ def process_new_preference(member_id, start_time, end_time, date,
     if start_datetime > end_datetime:
         return "The length of the time segment was negative"
 
+    if start_datetime.minute%5 != 0 or end_datetime.minute%5 != 0:
+        return "All times should be divisible by 5 minutes"
+
     member_type = utils.get_member_type(member_id)
     if member_type == 'consumer':
         if satisfaction not in ['0', '1', '2']:
