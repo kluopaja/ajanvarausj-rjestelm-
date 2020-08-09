@@ -4,8 +4,19 @@ Aineopintojen harjoitustyö: Tietokantasovellus
 
 Ajanvarausjärjestelmä, joka pyrkii maksimoimoimaan onnistuneiden varauksien ja käyttäjien tyytyväisyyden määrän. 
 
-Käyttäjälle näytetään mahdolliset ajat, joille käyttäjä määrittelee hyvyysarvot. Kun kaikki käyttäjät ovat valintansa tehneet tai aikaraja on umpeutunut, jakaa järjestelmä ajat käyttäjille.
+Tämänhetkinen tilanne:
 
-Ylläpitäjä pystyy luomaan uusia ajanvarauskyselyitä. Tehdessään uuden ajanvarauskyselyn, ylläpitäjä valitsee ensin ajanvaraukseen kutsuttavat käyttäjät. Ylläpitäjä luo myös joukon resursseja. Jokaiselle resurssi-käyttäjä -parille voidaan määritellä sallittujen ajanvarauksien joukko. Lopulta resurssi voidaan kuitenkin kohdistaa jokaisella ajanhetkellä vain yhdelle käyttäjälle. Ylläpitäjä määrittelee myös ajanvarauskyselyn loppumisajankohdan. 
+Käyttäjät pystyvät rekisteröitymään ja kirjautumaan sovellukseen.
 
-Loppumisajankohdan jälkeen ylläpitäjä voi tarkastella järjestelmän antamaa ratkaisua ja tehdä siihen vielä itse muutoksia. 
+Kirjautuneet käyttäjät voivat luoda kyselyitä. Kyselyn luoneesta käyttäjästä tulee kyselyn omistaja, jolla on muita laajemmat valtuudet hallinnoida kyselyä.
+
+Omistaja pystyy luomaan kyselyihin varattavia resursseja. Resurssit ovat tällä hetkellä kaikki identtisiä (esim. voisi vastata montaa identtistä huonetta). 
+
+Omistaja voi myös luoda kyselyyn linkkejä, joilla pystyy kutsumaan muita kirjautuneita käyttäjiä varaamaan halutun pituisia aikoja kyselystä. Linkeillä voi kutsua myös muita käyttäjiä hallinnoimaan kyselyn resurssien saatavuutta. Tällä hetkellä kyselyn omistajankin pitää vierailla kyselylinkeissä lisätäkseen itsensä näihin toimintoihin.
+
+Kyselyyn vastaajaksi kutsuttu käyttäjä voi määritellä itselleen sopivat ajat ja näillä arvot "sopii tarvittaessa" ja "sopii hyvin".
+
+Tällä hetkellä aikatoiveiden katselemisen ja päivittämisen käytettävyys on hyin heikko, mutta tätä olisi tarkoitus parantaa seuraavaa välipalautusta varten.
+
+Kyselyn omistaja voi myös optimoida ajanvaraukset, jolloin sovellus pyrkii jakamaan kyselyn resursseja kyselyyn vastanneiden käyttäjille käyttäjiden toiveet huomioiden.
+
