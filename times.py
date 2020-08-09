@@ -192,9 +192,13 @@ def process_new_preference(member_id, start_time, end_time, date,
     if start_datetime > end_datetime:
         return "The length of the time segment was negative"
 
-    if satisfaction not in ['0', '1', '2']:
-        return "Invalid satisfaction value"
-
+    member_type = utils.get_member_type(member_id)
+    if member_type == 'consumer':
+        if satisfaction not in ['0', '1', '2']:
+            return "Invalid satisfaction value"
+    if member_type == 'resource':
+        if satisfaction not in ['0', '1']:
+            return "Invalid satisfaction value"
 
 
     print("start_datetime, end_datetime: ", start_datetime, end_datetime)

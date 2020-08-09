@@ -270,6 +270,20 @@ def get_poll_date_range(poll_id):
 def db_tuple_to_poll(t):
     return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
 
+
+def get_member_type(member_id):
+    sql = "SELECT COUNT(*) FROM UsersPollMembers WHERE member_id=:member_id"
+    count = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    if count[0] > 0:
+        return "consumer"
+
+    sql = "SELECT COUNT(*) FROM Resources WHERE member_id=:member_id"
+    count = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    if count[0] > 0:
+        return "resource"
+
+    return None
+
 ### Invitation related functions ###
 
 #TODO contents divide into two functions

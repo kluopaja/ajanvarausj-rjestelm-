@@ -36,6 +36,7 @@
 {% endif %}
 {% if resource_times|length > 0 %}
     <h2>Resurssien tarjontatoiveet</h2>
+    <p>0 = Ei sovi, 1 = Sopii</p>
     {% for resource in resource_times %}
         <h3>Muokkaa aikoja resurssissa {{ resource[2] }}</h3>
         {% for day in resource[0] %}
@@ -44,11 +45,9 @@
             <p>{{ interval[0] }}&ndash;{{ interval[1]}}: {{ interval[2] }}</p>
             {% endfor %}
             <form action="/new_time_preference" method="post">
-                <label for=2>Sopii hyvin</label>
-                <input type="radio" name="satisfaction" id=2 value=2>
-                <label for=1>Sopii tarvittaessa</label>
-                <input type="radio" name="satisfaction" id=1 value=1>
-                <label for=0>Ei sovi</label>
+                <label for=1>Sopii:</label>
+                <input type="radio" name="satisfaction" id=1 value=1 checked>
+                <label for=0>Ei sovi:</label>
                 <input type="radio" name="satisfaction" id=0 value=0>
                 <br>
                 <label for="start">Aikavälin alku:</label>
