@@ -46,13 +46,14 @@ def process_optimize_poll(poll_id):
 
 def optimize_poll(poll_id):
     resources = times.get_resource_times(poll_id)
-    print(resources)
-    resource_times, resource_ids= zip(*resources)
+    if len(resources) == 0:
+        return ([], 0)
+    resource_times, resource_ids = zip(*resources)
     customers = times.get_customer_times(poll_id)
-    customer_times, customer_ids, reservation_lengths = zip(*customers)
-    
     if len(customers) == 0:
         return ([], 0)
+    customer_times, customer_ids, reservation_lengths = zip(*customers)
+    
 
     
     #TODO use get poll range
