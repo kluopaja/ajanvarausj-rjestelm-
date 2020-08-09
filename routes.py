@@ -31,10 +31,12 @@ def poll(poll_id):
     current_poll = get_polls_by_ids([poll_id])[0]
 
     is_owner = user_owns_poll(poll_id)
+    optimization_results = []
     if is_owner:
         participant_invitations = get_participant_invitations(poll_id)
         resource_invitations = get_resource_invitations(poll_id)
         resources = get_poll_resources(poll_id)
+        optimization_results = optimization.get_optimization_results(poll_id)
 
     user_id = session.get('user_id')
     consumer_times = times.get_poll_user_consumer_times(user_id, poll_id)
@@ -45,8 +47,9 @@ def poll(poll_id):
                            resource_invitations=resource_invitations,
                            resources=resources,
                            participant_times=consumer_times,
-                           resource_times=resource_times)
- 
+                           resource_times=resource_times,
+                           optimization_results=optimization_results)
+
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
@@ -229,7 +232,15 @@ def new_time_preference():
         return redirect("/poll/"+request.form.get('poll_id', 0))
     else:
         print("creating new time preference failed")
-        #TODO error message
         return render_template("error.html", message=error)
+
+@app.route('/optimize_poll', methods=['POST'])
+def optimize_poll():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = optimization.process_optimize_poll(request.form.get('poll_id'))
+    if error is None:
+        return redirect("/poll/"+request.form.get('poll_id', 0))
 
 #TODO make one .html for failed poll actions
