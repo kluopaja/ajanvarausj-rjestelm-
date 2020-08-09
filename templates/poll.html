@@ -21,10 +21,10 @@
             <label for=0>Ei sovi</label>
             <input type="radio" name="satisfaction" id=0 value=0>
             <br>
-            <label for="start">Aikavälin alku</label>
-            <input type="time" name="start" id="start">
-            <label for="start">Aikavälin loppu</label>
-            <input type="time" name="end" id="end">
+            <label for="start">Aikavälin alku:</label>
+            <input type="time" name="start" id="start" step="300">
+            <label for="start">Aikavälin loppu:</label>
+            <input type="time" name="end" id="end" step="300">
             <br>
             <input type="submit" value="Lisää toive">
             <input type="hidden" name="date" value={{ day.date }}>
@@ -51,10 +51,10 @@
                 <label for=0>Ei sovi</label>
                 <input type="radio" name="satisfaction" id=0 value=0>
                 <br>
-                <label for="start">Aikavälin alku</label>
-                <input type="time" name="start" id="start">
-                <label for="start">Aikavälin loppu</label>
-                <input type="time" name="end" id="end">
+                <label for="start">Aikavälin alku:</label>
+                <input type="time" name="start" id="start" step=300>
+                <label for="start">Aikavälin loppu:</label>
+                <input type="time" name="end" id="end" step=300>
                 <br>
                 <input type="submit" value="Lisää toive">
                 <input type="hidden" name="date" value={{ day.date }}>
@@ -78,8 +78,8 @@
 <form action="/new_invitation" method="post">
 <h2>Luo uusi vastaajienkutsumislinkki</h2>
 <ul>
-    <label for="reservation_length">Varauksen pituus minuutteina</label>
-    <input type="number" min=1 value=60 name="reservation_length" 
+    <label for="reservation_length">Varauksen pituus minuutteina (5 min tarkkuus)</label>
+    <input type="number" min=5 value=60 step=5 name="reservation_length" 
            id="reservation_length">
     <input type="submit" value="Luo linkki">
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
