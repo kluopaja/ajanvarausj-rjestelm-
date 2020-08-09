@@ -20,3 +20,9 @@ Tällä hetkellä aikatoiveiden katselemisen ja päivittämisen käytettävyys o
 
 Kyselyn omistaja voi myös optimoida ajanvaraukset, jolloin sovellus pyrkii jakamaan kyselyn resursseja kyselyyn vastanneiden käyttäjille käyttäjiden toiveet huomioiden.
 
+Sovellusta voi testata osoitteessa http://boiling-falls-99919.herokuapp.com/
+Jo luotuja käyttäjiä ovat (Käyttäjä, salasana):
+(tiina, kissa2)
+(uolevi, kissa2)
+(maija, kissa2)
+(kaaleppi, kissa2)
