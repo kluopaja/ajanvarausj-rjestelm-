@@ -8,17 +8,24 @@
     <h2>Varaustoiveet</h2>
     <p>Lisää uusi toive. Uusi toive ylikirjoittaa
     vanhat alle jäävät toiveet.</p>
+    <p>Varattavan ajan pituus: {{ participant_times[0][2] }}</p>
+    <p>0 = Ei sovi, 1 = Sopii tarvittaessa, 2 = Sopii hyvin</p>
+    <h3>Esimerkki:</h3>
+    <p>Jos aikatoiveenasi on väli [10:00 - 11:00) "Sopii hyvin" ja muut ajat
+    "Ei sovi", niin 30 min aika voi silloin alkaa milloin tahansa välillä
+    [10:00, 10:30)</p>
+
     {% for day in participant_times[0][0] %}
         <h3>{{ day.date }}</h3>
         {% for interval in day.intervals %}
         <p>{{ interval[0] }}&ndash;{{ interval[1]}}: {{ interval[2] }}</p>
         {% endfor %}
         <form action="/new_time_preference" method="post">
-            <label for=2>Sopii hyvin</label>
-            <input type="radio" name="satisfaction" id=2 value=2>
-            <label for=1>Sopii tarvittaessa</label>
+            <label for=2>Sopii hyvin:</label>
+            <input type="radio" name="satisfaction" id=2 value=2 checked>
+            <label for=1>Sopii tarvittaessa:</label>
             <input type="radio" name="satisfaction" id=1 value=1>
-            <label for=0>Ei sovi</label>
+            <label for=0>Ei sovi:</label>
             <input type="radio" name="satisfaction" id=0 value=0>
             <br>
             <label for="start">Aikavälin alku:</label>
@@ -116,7 +123,7 @@
 </table>
 
 
-
+{% if resources|length > 0 %}
 <h2>Luo uusi resurssikutsu</h2>
 <form action="/new_invitation" method="post">
     {% for resource in resources %}
