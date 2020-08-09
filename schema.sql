@@ -60,6 +60,7 @@ CREATE TABLE ResourceMembershipLinks
 CREATE TABLE OptimizationResults
 (
     poll_id INTEGER REFERENCES Polls (poll_id) ON DELETE CASCADE,
-    user_id INTEGER REFERENCES Users (user_id) ON DELETE CASCADE,
+    customer_member_id INTEGER REFERENCES Members (id) ON DELETE CASCADE,
+    resource_member_id INTEGER REFERENCES Members (id) ON DELETE CASCADE,
     appointment_start timestamp
 );
