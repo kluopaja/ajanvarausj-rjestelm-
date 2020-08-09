@@ -142,12 +142,32 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     db.session.commit()
     return None
 
+#returns list of member_ids 
+def get_poll_resource_members(poll_id):
+    sql = "SELECT M.id FROM PollMembers M, Resources R \
+           WHERE M.id=R.member_id AND M.poll_id=:poll_id"
+    member_ids = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
+    if member_ids is None:
+        return []
+
+    return [x[0] for x in member_ids]
+
+
+#returns list of member_ids 
+def get_poll_customer_members(poll_id):
+    sql = "SELECT M.id FROM PollMembers M, UsersPollMembers U \
+           WHERE M.id=U.member_id AND M.poll_id=:poll_id"
+    member_ids = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
+    if member_ids is None:
+        return []
+
+    return [x[0] for x in member_ids]
+
+
 #returns ids of all polls that user somehow part of
 #(either owner, participant or owner of a resource)
-
 #TODO think about which of these following 4 should take user id as a parameter
 #should this take some parameter?
-#TODO think how to replace this. just use Poll objects?
 
 def get_user_polls():
     tmp = get_user_poll_ids()
@@ -433,6 +453,15 @@ def get_user_poll_member_id(user_id, poll_id):
 
     return member_id[0]
 
+def get_member_reservation_length(member_id):
+    sql = "SELECT reservation_length FROM UsersPollMembers \
+           WHERE member_id=:member_id"
+    length = db.session.execute(sql, {'member_id': member_id}).fetchone()
+
+    if length is None:
+        return None
+
+    return length[0]
 
 ### Resource related functions ###
 def get_resource_member_id(resource_id):

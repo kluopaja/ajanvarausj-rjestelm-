@@ -2,6 +2,7 @@ import datetime
 from collections import namedtuple
 from db import db
 import utils
+import optimization
 
 ### Time preference related functions ###
 
@@ -69,6 +70,41 @@ def get_poll_user_resource_times(user_id, poll_id):
         resource_times.append((get_member_preferences(x[2], poll_id),
                                x[2], x[0]))
     return resource_times
+
+
+#return list of TimeIntervals
+def get_member_times(member_id):
+    sql = "SELECT time_beginning, time_end, satisfaction FROM \
+           MemberTimeSelections WHERE member_id=:member_id \
+           ORDER BY time_beginning"
+
+    result = db.session.execute(sql, {'member_id': member_id}).fetchall()
+    if result is None:
+        return []
+
+    return [TimeInterval(*x) for x in result]
+
+
+#return list x of (times, member_id)
+def get_members_times(member_ids):
+    return [get_member_times(x) for x in member_ids]
+
+#return list x of (times, member_id)
+#one element for each member_id
+def get_resource_times(poll_id):
+    member_ids = utils.get_poll_resource_members(poll_id)
+    times = get_members_times(member_ids)
+    return list(zip(times, member_ids))
+
+#return list x of (times, member_id, reservation_length)
+#one element for each member_id
+def get_customer_times(poll_id):
+    member_ids = utils.get_poll_customer_members(poll_id)
+    times = get_members_times(member_ids)
+    lengths = [utils.get_member_reservation_length(x) for x in member_ids]
+
+    return list(zip(times, member_ids, lengths))
+
 
 #Modifies existing time preference intervals so that truncates
 #partially overlapping intervals and removes completely overlapping intervals
