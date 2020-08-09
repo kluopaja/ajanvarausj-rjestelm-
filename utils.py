@@ -114,10 +114,10 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
         return "Poll end should not be in the past"
 
-    if not check_alphanum_string(name, 1, 30):
+    if name is None or len(name) < 1 or len(name) > 30:
         return "Not valid poll name"
 
-    if not check_alphanum_string(description, 1, 10000):
+    if description is None or len(description) < 1 or len(description) > 10000:
         return "Not valid poll description"
 
     sql = "INSERT INTO Polls \
