@@ -117,7 +117,7 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     if name is None or len(name) < 1 or len(name) > 30:
         return "Not valid poll name"
 
-    if description is None or len(description) < 1 or len(description) > 10000:
+    if description is None or len(description) == 0 or len(description) > 10000:
         return "Not valid poll description"
 
     sql = "INSERT INTO Polls \
@@ -513,9 +513,10 @@ def process_new_resource(poll_id, resource_description):
 
     if poll_id is None:
         return "No poll id was provided"
-    if resource_description is None:
+    if resource_description is None or len(resource_description) == 0:
         return "No resource descrption was provided"
-
+    if len(resource_description) > 10000:
+        return "Resource description too long (> 10000 characters)"
 
     if not user_owns_poll(poll_id):
         return "User does not own the poll"
