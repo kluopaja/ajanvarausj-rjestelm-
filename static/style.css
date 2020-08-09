@@ -13,7 +13,7 @@ form li + li {
     margin-top: 1em;
 }
 label {
-    display: block;
+    display: block-inline;
     margin-bottom: 0.2em;
 }
 
