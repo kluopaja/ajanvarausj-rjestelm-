@@ -108,8 +108,8 @@ def login():
 
     elif request.method == 'POST':
         print("post request", request.form)
-        error = process_login(request.form['username'],
-                              request.form['password'])
+        error = process_login(request.form.get('username'),
+                              request.form.get('password'))
         if error is None:
             return redirect_to_next(default='/')
 
@@ -132,8 +132,8 @@ def register():
         #after successful registration, automatically log the user in
         #and redirect to login
         if error is None:
-            process_login(request.form['username'],
-                          request.form['password'])
+            process_login(request.form.get('username'),
+                          request.form.get('password'))
             return redirect('/login')
 
     message = "Käyttäjätunnuksen luonti epäonnistui: " + error
