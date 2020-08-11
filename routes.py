@@ -34,7 +34,7 @@ def poll(poll_id):
     is_owner = user_owns_poll(poll_id)
     optimization_results = []
     if is_owner:
-        participant_invitations = get_participant_invitations(poll_id)
+        participant_invitations = get_customer_invitations(poll_id)
         resource_invitations = get_resource_invitations(poll_id)
         resources = get_poll_resources(poll_id)
         optimization_results = optimization.get_optimization_results(poll_id)
@@ -149,21 +149,22 @@ def invite(url_id):
         return render_template('invalid_invitation.html')
 
     if request.method == 'GET':
-        if invitation_type == 'poll_participant':
+        if invitation_type == 'poll_customer':
             #TODO think if the url_id should be in 'details'
             return render_template("confirm_poll_invitation.html",
-                                   details=participant_invitation_by_url_id(url_id),
+                                   details=customer_type_details_by_url_id(url_id),
                                    url_id=url_id)
 
         if invitation_type == 'resource_owner':
             return render_template("confirm_resource_invitation.html",
-                                   details=resource_invitation_by_url_id(url_id),
+                                   details=resource_details_by_url_id(url_id),
                                    url_id=url_id)
     if request.method == 'POST':
         print("user response: ", request.form['user_response'])
         if request.form.get("user_response") == "yes":
-            if invitation_type == 'poll_participant':
-                error = apply_poll_invitation(url_id)
+            print("invitation type: ", invitation_type)
+            if invitation_type == 'poll_customer':
+                error = apply_new_customer_invitation(url_id)
             if invitation_type == 'resource_owner':
                 error = apply_resource_invitation(url_id)
             if error is not None:
@@ -190,7 +191,7 @@ def new_invitation():
 
     error = process_new_invitation(request.form.get('invitation_type'),
                                    request.form.get('poll_id'),
-                                   request.form.get('resource_id'),
+                                   request.form.get('member_id'),
                                    request.form.get('reservation_length'))
 
     print("new invitation request", request.form)
@@ -209,7 +210,7 @@ def new_resource():
 
     print("new resource, post: ", request.form)
     error = process_new_resource(request.form.get('poll_id'),
-                              request.form.get('resource_description'))
+                              request.form.get('resource_name'))
     if error is None:
         return redirect('/poll/'+request.form.get('poll_id'))
     else:
@@ -223,11 +224,11 @@ def new_time_preference():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
-    error = times.process_new_preference(request.form.get('member_id'),
-                                         request.form.get('start'),
-                                         request.form.get('end'),
-                                         request.form.get('date'),
-                                         request.form.get('satisfaction'))
+    error = times.process_new_grading(request.form.get('member_id'),
+                                      request.form.get('start'),
+                                      request.form.get('end'),
+                                      request.form.get('date'),
+                                      request.form.get('satisfaction'))
 
     if error is None:
         return redirect("/poll/"+request.form.get('poll_id', 0))
