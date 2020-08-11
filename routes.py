@@ -28,8 +28,12 @@ def poll(poll_id):
     resource_invitations = None
     #list of (resource_description, resource_id)
     resources = None
-    
-    current_poll = get_polls_by_ids([poll_id])[0]
+
+    current_poll = get_polls_by_ids([poll_id])
+    if len(current_poll) == 0:
+        current_poll = None
+    else:
+        current_poll = current_poll[0]
 
     is_owner = user_owns_poll(poll_id)
     optimization_results = []
