@@ -99,7 +99,7 @@ def intervals_to_array(time_intervals, start, end):
         i = a
         while i < b:
             #     print(i)
-            arr[i] = x.satisfaction
+            arr[i] = x.grade
             i += 1
     return arr
     
@@ -212,14 +212,15 @@ def random_restarts(f, n, resources, customers):
 
 def save_optimization(assignments, poll_id):
     print('saving: ', assignments)
-    sql = 'DELETE FROM OptimizationResults WHERE poll_id=:poll_id'
+    sql = 'DELETE FROM OptimizationResults O WHERE O.customer_member_id IN \
+            (SELECT P.id FROM PollMembers P WHERE P.poll_id=:poll_id)'
+
     db.session.execute(sql, {'poll_id': poll_id})
     sql = 'INSERT INTO OptimizationResults \
-           (poll_id, customer_member_id, resource_member_id, appointment_start) \
-           VALUES (:poll_id, :customer_member_id, :resource_member_id, :appointment_start)'
+           (customer_member_id, resource_member_id, appointment_start) \
+           VALUES (:customer_member_id, :resource_member_id, :appointment_start)'
     for x in assignments:
-        db.session.execute(sql, {'poll_id': poll_id,
-                                 'customer_member_id': x.customer_member_id,
+        db.session.execute(sql, {'customer_member_id': x.customer_member_id,
                                  'resource_member_id': x.resource_member_id,
                                  'appointment_start': x.time})
     db.session.commit()

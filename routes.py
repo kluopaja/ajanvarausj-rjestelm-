@@ -22,7 +22,7 @@ def poll(poll_id):
     #some check that user has any rights to see this poll
 
     #list of (url_id, reservation_length)
-    participant_invitations = None
+    customer_invitations = None
     #list of (url_id, resource_description)
     resource_invitations = None
     #list of (resource_description, resource_id)
@@ -37,20 +37,20 @@ def poll(poll_id):
     is_owner = user_owns_poll(poll_id)
     optimization_results = []
     if is_owner:
-        participant_invitations = get_customer_invitations(poll_id)
+        customer_invitations = get_customer_invitations(poll_id)
         resource_invitations = get_resource_invitations(poll_id)
         resources = get_poll_resources(poll_id)
         optimization_results = optimization.get_optimization_results(poll_id)
 
     user_id = session.get('user_id')
-    consumer_times = times.get_consumer_times_for_each_day(user_id, poll_id)
+    customer_times = times.get_customer_times_for_each_day(user_id, poll_id)
     resource_times = times.get_resource_times_for_each_day(user_id, poll_id)
     return render_template('poll.html', is_owner=is_owner,
                            poll=current_poll,
-                           participant_invitations=participant_invitations,
+                           customer_invitations=customer_invitations,
                            resource_invitations=resource_invitations,
                            resources=resources,
-                           participant_times=consumer_times,
+                           customer_times=customer_times,
                            resource_times=resource_times,
                            optimization_results=optimization_results)
 

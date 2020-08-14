@@ -257,7 +257,7 @@ def db_tuple_to_poll(t):
 
 def get_member_type(member_id):
     sql = 'SELECT CASE \
-           WHEN COUNT(C.member_id) > 0 THEN \'consumer\' \
+           WHEN COUNT(C.member_id) > 0 THEN \'customer\' \
            WHEN COUNT(R.member_id) > 0 THEN \'resource\' \
            END \
            FROM Customers C FULL JOIN Resources R ON FALSE WHERE \
@@ -442,17 +442,18 @@ def apply_resource_invitation(url_id):
     member_id = details[3]
     return give_access_to_member(user_id, member_id)
 
-def get_user_poll_member_id(user_id, poll_id):
-    sql = 'SELECT member_id FROM PollMembers P, UsersPollMembers U \
-           WHERE P.id=U.member_id AND P.poll_id=:poll_id \
-           AND U.user_id=:user_id'
+def get_user_poll_customer_member_ids(user_id, poll_id):
+    sql = 'SELECT P.id FROM PollMembers P, UsersPollMembers U, \
+           Customers C \
+           WHERE P.id=U.member_id AND P.id=C.member_id AND \
+           P.poll_id=:poll_id AND U.user_id=:user_id'
 
     tmp = db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id})
-    member_id = tmp.fetchone()
-    if member_id is None:
-        return None
+    member_ids = tmp.fetchall()
+    if member_ids is None:
+        return []
 
-    return member_id[0]
+    return [x[0] for x in member_ids]
 
 def get_customer_reservation_length(member_id):
     sql = 'SELECT reservation_length FROM Customers WHERE member_id=:member_id'

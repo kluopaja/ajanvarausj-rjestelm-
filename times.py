@@ -49,15 +49,14 @@ def get_member_times_for_each_day(member_id, poll_id):
 
 #return list x of (times, member_id, reservation_length)
 #x[i][0] are the times for day i of the poll
-def get_consumer_times_for_each_day(user_id, poll_id):
-    participant_times = []
-    member_id = utils.get_user_poll_member_id(user_id, poll_id)
-    if member_id is not None:
+def get_customer_times_for_each_day(user_id, poll_id):
+    customer_times = []
+    member_ids = utils.get_user_poll_customer_member_ids(user_id, poll_id)
+    for member_id in member_ids:
         tmp = (get_member_times_for_each_day(member_id, poll_id),
                member_id, utils.get_customer_reservation_length(member_id))
-
-        participant_times.append(tmp)
-    return participant_times
+        customer_times.append(tmp)
+    return customer_times
 
 #return list x of (times, member_id, resource_description)
 #x[i][0] are the times for day i of the poll
@@ -102,7 +101,7 @@ def get_resource_times(poll_id):
 def get_customer_times(poll_id):
     member_ids = utils.get_poll_customer_members(poll_id)
     times = get_members_times(member_ids)
-    lengths = [utils.get_member_reservation_length(x) for x in member_ids]
+    lengths = [utils.get_customer_reservation_length(x) for x in member_ids]
 
     return list(zip(times, member_ids, lengths))
 
@@ -197,7 +196,7 @@ def process_new_grading(member_id, start_time, end_time, date,
         return 'All times should be divisible by 5 minutes'
 
     member_type = utils.get_member_type(member_id)
-    if member_type == 'consumer':
+    if member_type == 'customer':
         if time_grade not in ['0', '1', '2']:
             return 'Invalid time grade value'
     if member_type == 'resource':
