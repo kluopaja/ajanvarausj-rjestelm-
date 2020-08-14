@@ -23,13 +23,13 @@ class TimelimitError(Exception):
 
 def process_optimize_poll(poll_id):
     if poll_id is None:
-        return "No poll_id was given"
+        return 'No poll_id was given'
     if not utils.user_owns_poll(poll_id):
-        return "Current user does not own the poll"
+        return 'Current user does not own the poll'
     optimize_poll(poll_id)
-    """
+    '''
     def handler(signum, frame):
-        print("optimization timeout!")
+        print('optimization timeout!')
         raise TimelimitError();
     signal.signal(signal.SIGALRM, handler)
     try:
@@ -37,10 +37,10 @@ def process_optimize_poll(poll_id):
         optimize_poll_2(poll_id)
         signal.alarm(0)
     except TimelimitError:
-        return "Timelimit exceeded in optimization"
+        return 'Timelimit exceeded in optimization'
     except:
-        return "Unkown error in optimization"
-    """
+        return 'Unkown error in optimization'
+    '''
 
     return None
 
@@ -58,7 +58,7 @@ def optimize_poll(poll_id):
     
     #TODO use get poll range
     print(customer_times)
-    print("customer times", customer_times[0])
+    print('customer times', customer_times[0])
     start = customer_times[0][0].start
     end = customer_times[0][-1].end
     #convert time to discrete 5 min intervals
@@ -152,7 +152,7 @@ def greedy_1(resources, customers):
         return best_assignment
 
 
-    #print("resources \n", resources)
+    #print('resources \n', resources)
     #print('\n')
     resources = copy.deepcopy(resources)
     customers = copy.deepcopy(customers)
@@ -177,9 +177,9 @@ def greedy_1(resources, customers):
         resource_sums = [calculate_satisfaction_sum(x, length)
                          for x in resource_times]
 
-        #print("resource_sums, ", resource_sums)
+        #print('resource_sums, ', resource_sums)
         best = find_assignment(customer_sums[i], resource_sums)
-        #print("best ", best)
+        #print('best ', best)
         if best == (0, 0, 0):
             continue
         
@@ -187,7 +187,7 @@ def greedy_1(resources, customers):
             resource_times[best[2]][j] = 0
 
         total_satisfaction += best[0]
-        #print("best ", best)
+        #print('best ', best)
         #print(customer_m_ids,i)
         #print(customer_m_ids[i])
         #print(resource_m_ids[best[2]])
@@ -211,12 +211,12 @@ def random_restarts(f, n, resources, customers):
     return best_assignment
 
 def save_optimization(assignments, poll_id):
-    print("saving: ", assignments)
-    sql = "DELETE FROM OptimizationResults WHERE poll_id=:poll_id"
+    print('saving: ', assignments)
+    sql = 'DELETE FROM OptimizationResults WHERE poll_id=:poll_id'
     db.session.execute(sql, {'poll_id': poll_id})
-    sql = "INSERT INTO OptimizationResults \
+    sql = 'INSERT INTO OptimizationResults \
            (poll_id, customer_member_id, resource_member_id, appointment_start) \
-           VALUES (:poll_id, :customer_member_id, :resource_member_id, :appointment_start)"
+           VALUES (:poll_id, :customer_member_id, :resource_member_id, :appointment_start)'
     for x in assignments:
         db.session.execute(sql, {'poll_id': poll_id,
                                  'customer_member_id': x.customer_member_id,
@@ -229,12 +229,12 @@ OptimizationResult = namedtuple('OptimizationResult', ['username',
                                                       'resource_description',
                                                       'time'])
 def get_optimization_results(poll_id):
-    sql = "SELECT U.username, R.resource_name, O.time_start \
+    sql = 'SELECT U.username, R.resource_name, O.time_start \
            FROM PollMembers P1, PollMembers P2, UsersPollMembers M, Users U, \
            Resources R, OptimizationResults O \
            WHERE P1.id=O.customer_member_id AND P2.id=O.resource_member_id \
            AND P1.id=M.member_id AND M.user_id=U.id \
-           AND P2.id=R.member_id AND P1.poll_id=:poll_id"
+           AND P2.id=R.member_id AND P1.poll_id=:poll_id'
 
     results = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     if results is None:
