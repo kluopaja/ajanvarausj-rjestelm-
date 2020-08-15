@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+{% set active_page = "owner" %}
+{% include "poll_navi.html" %}
+<h2>Aktiiviset vastaajakutsumislinkit:</h2>
+<ul>
+<table>
+<tr><th>Url</th><th>Varauksen pituus</th></tr>
+{% for invitation in customer_invitations %}
+<tr><td>{{ url_for('invite', url_id=invitation[0], _external=True) }}</td><td>{{ invitation[1] }}</td></tr>
+{% endfor %}
+</table>
+
+<form action="/new_invitation" method="post">
+<h2>Luo uusi vastaajienkutsumislinkki</h2>
+<ul>
+    <label for="reservation_length">Varauksen pituus minuutteina (5 min tarkkuus)</label>
+    <input type="number" min=5 value=60 step=5 name="reservation_length" 
+           id="reservation_length">
+    <input type="submit" value="Luo linkki">
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    <input type="hidden" name="invitation_type" value="poll_customer">
+</ul>
+</form>
+
+<h2>Luo uusi resurssi:</h2>
+<form action="/new_resource" method="post">
+    <label for="resource_name">Resurssin nimi:</label>
+    <input type="text" name="resource_name" id="resource_name">
+    <input type="submit" value="Luo resurssi">
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+</form>
+
+<h2>Aktiiviset resurssit:</h2>
+<table>
+<tr>
+    <th>Resurssin id</th><th>Resurssin kuvaus</th>
+<tr>
+{% for resource in resources %}
+<tr>
+    <td>{{ resource[1] }}</td>
+    <td>{{ resource[0] }}</td>
+
+</tr>
+{% endfor %}
+</table>
+<h2>Aktiiviset resurssikutsulinkit</h2>
+<table>
+<tr><th>Url</th><th>Resurssin kuvaus</th></tr>
+{% for invitation in resource_invitations %}
+<tr><td>{{ url_for('invite', url_id=invitation[0], _external=True) }}</td><td>{{ invitation[1] }}</td></tr>
+{% endfor %}
+</table>
+
+
+{% if resources|length > 0 %}
+<h2>Luo uusi resurssikutsu</h2>
+<form action="/new_invitation" method="post">
+    {% for resource in resources %}
+    <label for={{ resource[1] }}>{{ resource[0] }}</label>
+    <input type="radio" name="member_id" id={{ resource[1] }}
+           value={{ resource[1] }}>
+    {% endfor %}
+    <br>
+    <input type="submit" value="Luo linkki">
+    <input type="hidden" name="invitation_type" value="resource_owner">
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+
+</form>
+{% endif %}
+<h2>Optimointi</h2>
+<form action="/optimize_poll" method="post">
+    <input type="submit" value="Optimoi ajanvaraukset">
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+</form>
+<h2>Optimoinnin tulokset:</h2>
+{% if optimization_results|length > 0 %}
+<table>
+    <tr><th>Käyttäjänimi</th><th>Resurssin kuvaus</th><th>Aika</th></tr>
+{% for result in optimization_results %}
+    <tr>
+        <td>{{ result.username }}</td><td>{{ result.resource_name }}</td>
+        <td>{{ result.time }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% else %}
+<p>Ei tuloksia tai optimointia ei ole suoritettu</p>
+{% endif %}
+
+{% endblock %}

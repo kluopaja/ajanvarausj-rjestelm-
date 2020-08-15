@@ -20,6 +20,30 @@ def poll(poll_id):
 
     #TODO
     #some check that user has any rights to see this poll
+    current_poll = get_polls_by_ids([poll_id])
+    if len(current_poll) == 0:
+        current_poll = None
+    else:
+        current_poll = current_poll[0]
+
+    is_owner = user_owns_poll(poll_id)
+
+    user_id = session.get('user_id')
+    ids = get_user_poll_customer_member_ids(user_id, poll_id)
+    customer_details = [(x,get_customer_reservation_length(x)) for x in ids]
+    user_resources = get_user_poll_resources(user_id, poll_id)
+
+    grade_descriptions = ['ei sovi', 'sopii', 'sopii hyvin']
+    return render_template('poll.html', is_owner=is_owner,
+                           poll=current_poll,
+                           user_customers=customer_details,
+                           user_resources=user_resources,
+                           grade_descriptions=grade_descriptions)
+
+@app.route('/poll/<poll_id>/owner')
+def poll_owner(poll_id):
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
 
     #list of (url_id, reservation_length)
     customer_invitations = None
@@ -35,25 +59,76 @@ def poll(poll_id):
         current_poll = current_poll[0]
 
     is_owner = user_owns_poll(poll_id)
-    optimization_results = []
-    if is_owner:
-        customer_invitations = get_customer_invitations(poll_id)
-        resource_invitations = get_resource_invitations(poll_id)
-        resources = get_poll_resources(poll_id)
-        optimization_results = optimization.get_optimization_results(poll_id)
 
-    user_id = session.get('user_id')
-    customer_times = times.get_customer_times_for_each_day(user_id, poll_id)
-    resource_times = times.get_resource_times_for_each_day(user_id, poll_id)
-    return render_template('poll.html', is_owner=is_owner,
+    if not is_owner:
+        error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
+        return render_template('error.html', message=error)
+
+    customer_invitations = get_customer_invitations(poll_id)
+    resource_invitations = get_resource_invitations(poll_id)
+    print('customer invitations ', customer_invitations)
+    resources = get_poll_resources(poll_id)
+    optimization_results = optimization.get_optimization_results(poll_id)
+
+
+    return render_template('poll_owner.html', 
                            poll=current_poll,
                            customer_invitations=customer_invitations,
                            resource_invitations=resource_invitations,
                            resources=resources,
-                           customer_times=customer_times,
-                           resource_times=resource_times,
                            optimization_results=optimization_results)
 
+@app.route('/poll/<poll_id>/results')
+def poll_results(poll_id):
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    current_poll = get_polls_by_ids([poll_id])
+    if len(current_poll) == 0:
+        current_poll = None
+    else:
+        current_poll = current_poll[0]
+
+    return render_template('poll_results.html',
+                           poll=current_poll);
+@app.route('/poll/<poll_id>/<member_id>/times')
+def poll_times(poll_id, member_id):
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    user_id = session.get('user_id')
+    if not user_has_access(user_id, member_id):
+        error = 'Ei oikeuksia muokata aikoja'
+        return render_template('error.html', message=error)
+
+    current_poll = get_polls_by_ids([poll_id])
+    if len(current_poll) == 0:
+        current_poll = None
+    else:
+        current_poll = current_poll[0]
+
+    member_type = get_member_type(member_id)
+    member_times = times.get_member_times_for_each_day(member_id, poll_id)
+    member_name = ''
+    reservation_length = 0
+    if member_type == 'resource':
+        member_name = get_resource_name(member_id)
+        grade_descriptions = ['Ei käytettävissä', 'Käytettävissä']
+
+    if member_type == 'customer':
+        reservation_length = get_customer_reservation_length(member_id)
+        grade_descriptions = ['Ei sovi', 'Sopii tarvittaessa', 'Sopii hyvin']
+
+
+    return render_template('poll_times.html',
+                            poll=current_poll,
+                            member_times=member_times,
+                            grade_descriptions=grade_descriptions,
+                            member_type=member_type,
+                            member_name=member_name,
+                            reservation_length=reservation_length);
+    
+    
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "poll_navi.html" %}
+{% if member_type == 'customer' %}
+<h2>Katso ja muokkaa varaustoivetta</h2>
+<p>Varauksen pituus: {{ reservation_length }}</p>
+<p>Lisää uusi toive. Uusi toive ylikirjoittaa
+vanhat alle jäävät toiveet.</p>
+<h3>Esimerkki:</h3>
+<p>Jos aikatoiveenasi on väli [10:00, 11:00) "Sopii hyvin" ja muut ajat
+"Ei sovi", niin 30 min aika voi silloin alkaa milloin tahansa välillä
+[10:00, 10:30)</p>
+{% endif %}
+{% if member_type == 'resource' %} 
+<h2>Resurssin saatavuus</h2>
+<p>Resurssin nimi: {{ member_name }}</p>
+{% endif %}
+{% if member_times|length > 0 %}
+    {% for day in member_times %}
+            <h3>{{ day.date }}</h3>
+            {% for interval in day.intervals %}
+            <p>{{ interval[0] }}&ndash;{{ interval[1]}}: {{ interval[2] }}</p>
+            {% endfor %}
+            <form action="/new_time_preference" method="post">
+                {% if member_type == 'customer' %}
+                <label for=2>{{ grade_descriptions[2] }}</label>
+                <input type="radio" name="satisfaction" id=1 value=1 checked>
+                {% endif %}
+                <label for=1>{{ grade_descriptions[1] }}</label>
+                <input type="radio" name="satisfaction" id=1 value=1 checked>
+                <label for=0>{{ grade_descriptions[0] }}</label>
+                <input type="radio" name="satisfaction" id=0 value=0>
+                <br>
+                <label for="start">Aikavälin alku:</label>
+                <input type="time" name="start" id="start" step=300>
+                <label for="start">Aikavälin loppu:</label>
+                <input type="time" name="end" id="end" step=300>
+                <br>
+                <input type="submit" value="Lisää toive">
+                <input type="hidden" name="date" value={{ day.date }}>
+                <input type="hidden" name="member_id"
+                       value={{ day[1] }}>
+                <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+            </form>
+    {% endfor %}
+{% endif %}
+{% endblock %}

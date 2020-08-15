@@ -597,10 +597,18 @@ def get_user_poll_resources(user_id, poll_id):
     return resources
 
 
+def get_resource_name(member_id):
+    sql = 'SELECT R.resource_name FROM PollMembers P, Resources R \
+           WHERE P.id=R.member_id AND P.id=:member_id'
 
-#TODO modify SQL INSERT INTO queries so that the queries would already
-#have the final parameter names. So the dict should be always: 'asdf': asdf etc
+    result = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    if result is None:
+        return ""
+
+    return result[0]
 
 #TODO This is the db.commit() applied too early sometimes now?
 #It should always be applied only when all the modifications have been
 #done!
+
+
