@@ -193,7 +193,7 @@ def poll_ids_owned_by(user_id):
 
 
 def poll_ids_where_user_is_member(user_id):
-    sql = 'SELECT P.id FROM PollMembers P, UsersPollMembers U \
+    sql = 'SELECT P.poll_id FROM PollMembers P, UsersPollMembers U \
            WHERE P.id=U.member_id AND U.user_id=:user_id'
     result = db.session.execute(sql, {'user_id':user_id})
     polls = result.fetchall()

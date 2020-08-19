@@ -36,7 +36,8 @@ CREATE TABLE Customers
 );
 CREATE TABLE Resources
 (
-    resource_name TEXT UNIQUE,
+    --Note this cannot be UNIQUE because same names can be used in many polls
+    resource_name TEXT,
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE 
 );
 CREATE TABLE UsersPollMembers
