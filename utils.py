@@ -279,6 +279,43 @@ def get_user_poll_resources(user_id, poll_id):
         return []
     return resources
 
+def get_poll_resources(poll_id):
+    sql = 'SELECT R.resource_name, M.id FROM \
+           PollMembers M, Resources R WHERE \
+           M.id=R.member_id AND M.poll_id=:poll_id'
+
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    resources = result.fetchall()
+    if resources is None:
+        return []
+    return resources
+
+#need member_id, reservation_length, (customer_name, TODO)
+def get_user_poll_customers(user_id, poll_id):
+    sql = 'SELECT P.id, C.reservation_length FROM PollMembers P, UsersPollMembers U, \
+           Customers C \
+           WHERE P.id=U.member_id AND P.id=C.member_id AND \
+           P.poll_id=:poll_id AND U.user_id=:user_id'
+
+    tmp = db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id})
+    customers = tmp.fetchall()
+    if customers is None:
+        return []
+
+    return customers
+
+def get_poll_customers(poll_id):
+    sql = 'SELECT P.id, C.reservation_length FROM PollMembers P, \
+           Customers C \
+           WHERE P.id=C.member_id AND P.poll_id=:poll_id'
+
+    tmp = db.session.execute(sql, {'poll_id': poll_id})
+    customers = tmp.fetchall()
+    if customers is None:
+        return []
+
+    return customers
+
 def resource_name_in_poll(poll_id, resource_name):
     sql = 'SELECT COUNT(*) FROM PollMembers M, Resources R \
            WHERE M.id=R.member_id AND M.poll_id=:poll_id \
@@ -293,16 +330,6 @@ def resource_name_in_poll(poll_id, resource_name):
 
     return False
 
-def get_poll_resources(poll_id):
-    sql = 'SELECT R.resource_name, M.id FROM \
-           PollMembers M, Resources R WHERE \
-           M.id=R.member_id AND M.poll_id=:poll_id'
-
-    result = db.session.execute(sql, {'poll_id': poll_id})
-    resources = result.fetchall()
-    if resources is None:
-        return []
-    return resources
 
 def get_customer_invitations(poll_id):
     sql = 'SELECT url_id, reservation_length FROM NewCustomerLinks\

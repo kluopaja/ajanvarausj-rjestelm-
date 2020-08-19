@@ -29,14 +29,14 @@ def poll(poll_id):
     is_owner = user_owns_poll(poll_id)
 
     user_id = session.get('user_id')
-    ids = get_user_poll_customer_member_ids(user_id, poll_id)
-    customer_details = [(x,get_customer_reservation_length(x)) for x in ids]
+    user_customers = get_user_poll_customers(user_id, poll_id)
     user_resources = get_user_poll_resources(user_id, poll_id)
 
+    #do we need this here?
     grade_descriptions = ['ei sovi', 'sopii', 'sopii hyvin']
     return render_template('poll.html', is_owner=is_owner,
                            poll=current_poll,
-                           user_customers=customer_details,
+                           user_customers=user_customers,
                            user_resources=user_resources,
                            grade_descriptions=grade_descriptions)
 
@@ -68,6 +68,7 @@ def poll_owner(poll_id):
     resource_invitations = get_resource_invitations(poll_id)
     print('customer invitations ', customer_invitations)
     resources = get_poll_resources(poll_id)
+
     optimization_results = optimization.get_optimization_results(poll_id)
 
 
