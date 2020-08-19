@@ -33,6 +33,9 @@ CREATE TABLE Customers
 (
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
     reservation_length interval
+    --number_reservations INTEGER,
+    --modifiable boolean,
+    --CHECK(number_reservations > 0)
 );
 CREATE TABLE Resources
 (
@@ -49,6 +52,10 @@ CREATE TABLE NewCustomerLinks
     poll_id INTEGER REFERENCES Polls (id) ON DELETE CASCADE,
     url_id TEXT,
     reservation_length interval
+    --number_reservations INTEGER,
+    --link_type TEXT,
+    --CHECK(number_reservations > 0),
+    --CHECK(link_type='single_user' OR link_type='invitation')
 );
 CREATE TABLE ResourceMembershipLinks
 (
