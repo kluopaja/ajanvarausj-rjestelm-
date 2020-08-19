@@ -229,7 +229,7 @@ def user_is_customer(poll_id):
 
     sql = 'SELECT COUNT(*) \
            FROM PollMembers P, Customers C, UsersPollMembers U WHERE \
-           P.id=C.member_id AND P.id=U.member_id AND P.id=:poll_id \
+           P.id=C.member_id AND P.id=U.member_id AND P.poll_id=:poll_id \
            AND U.user_id=:user_id'
 
     tmp = db.session.execute(sql, {'poll_id': poll_id, 'user_id': user_id})
