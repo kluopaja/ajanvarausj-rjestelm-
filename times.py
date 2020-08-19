@@ -3,6 +3,7 @@ from collections import namedtuple
 from db import db
 import utils
 import optimization
+import json
 
 ### Time preference related functions ###
 
@@ -11,15 +12,17 @@ import optimization
 TimeInterval = namedtuple('TimeInterval', ['start', 'end', 'grade'])
 
 #time preferences for one day (date)
-PreferencesDay = namedtuple('PreferencesDay', ['date', 'intervals'])
+GradesInDate = namedtuple('GradesInDate', ['date', 'intervals'])
 
 #type(day) = datetime.date
 #get an ordered list of time intervals that overlap with 'day'
-def get_member_preferences_for_day(member_id, day):
+def get_minute_grades_for_day(member_id, day):
+    def to_minutes(t):
+        return t.hour*60 + t.minute;
+
     sql = 'SELECT CAST(GREATEST(time_beginning, :day) as time),\
-           CAST(LEAST(time_end, :day + \'1 day\'::interval - \'1 s\'::interval) \
-           as time), \
-           grade FROM \
+           CAST(LEAST(time_end, :day + \'1 day\'::interval) \
+           as time), grade FROM \
            MemberTimeGrades WHERE member_id=:member_id \
            AND time_end > :day AND time_beginning < (:day + \'1 day\'::interval)\
            ORDER BY time_beginning'
@@ -30,46 +33,36 @@ def get_member_preferences_for_day(member_id, day):
     if result is None:
         return []
 
-    return [TimeInterval(*x) for x in result]
+    out = []
+    for x in result:
+        mins_0 = to_minutes(x[0])
+        mins_1 = to_minutes(x[1])
+        #note that time period can never end at the beginning of the
+        #current day
+        if mins_1 == 0:
+            mins_1 = 24*60;
+        out.append(TimeInterval(mins_0, mins_1, x[2]))
+    return out
+
 
 #TODO think if this should return a named tuple
-def get_preferences_for_days_range(member_id, first_date, last_date):
+def get_minute_grades_for_days_range(member_id, first_date, last_date):
     result = []
     i = first_date
     while i <= last_date:
-        tmp = get_member_preferences_for_day(member_id, i)
-        result.append(PreferencesDay(i, tmp))
+        tmp = get_minute_grades_for_day(member_id, i)
+        result.append(GradesInDate(i.isoformat(), tmp))
         i += datetime.timedelta(days=1)
 
     return result
 
-def get_member_times_for_each_day(member_id, poll_id):
+#returns a list of GradesInDate
+#time intervals are minutes from the beginning of the day
+#dates in isoformat
+def get_minute_grades(member_id, poll_id):
     first_date, last_date = utils.get_poll_date_range(poll_id)
-    return get_preferences_for_days_range(member_id, first_date, last_date)
+    return get_minute_grades_for_days_range(member_id, first_date, last_date)
 
-#return list x of (times, member_id, reservation_length)
-#x[i][0] are the times for day i of the poll
-def get_customer_times_for_each_day(user_id, poll_id):
-    customer_times = []
-    member_ids = utils.get_user_poll_customer_member_ids(user_id, poll_id)
-    for member_id in member_ids:
-        tmp = (get_member_times_for_each_day(member_id, poll_id),
-               member_id, utils.get_customer_reservation_length(member_id))
-        customer_times.append(tmp)
-    return customer_times
-
-#return list x of (times, member_id, resource_description)
-#x[i][0] are the times for day i of the poll
-def get_resource_times_for_each_day(user_id, poll_id):
-    #(resource_description, resource_id, member_id)
-    tmp = utils.get_user_poll_resources(user_id, poll_id)
-    print('user poll resources ', tmp)
-    #(times, member_id, resource_description)
-    resource_times = []
-    for x in tmp:
-        resource_times.append((get_member_times_for_each_day(x[1], poll_id),
-                               x[1], x[0]))
-    return resource_times
 
 
 #return list of TimeIntervals
@@ -175,19 +168,19 @@ def add_member_time_grading(member_id, start, end, time_grade):
     db.session.execute(sql, {'member_id': member_id, 'start': start,
                              'end': end, 'grade': time_grade})
 
-    #TODO think if this function should commit.
-    db.session.commit()
 
-def process_new_grading(member_id, start_time, end_time, date,
-                           time_grade):
+#start and end are minutes from the beginning of the day
+def process_new_grading(member_id, start, end, date, time_grade):
     try:
-        start_time = datetime.time.fromisoformat(start_time)
-        end_time = datetime.time.fromisoformat(end_time)
-        date = datetime.date.fromisoformat(date)
-        start_datetime = datetime.datetime.combine(date, start_time)
-        end_datetime = datetime.datetime.combine(date, end_time)
+        date = datetime.datetime.fromisoformat(date)
+        start_datetime = date + datetime.timedelta(seconds=start*60)
+        end_datetime = date + datetime.timedelta(seconds=end*60)
     except ValueError:
         return 'Incorrect time format'
+    except TypeError:
+        return 'Time values missing'
+    except:
+        return 'Unknown error with times'
 
     if start_datetime > end_datetime:
         return 'The length of the time segment was negative'
@@ -195,12 +188,14 @@ def process_new_grading(member_id, start_time, end_time, date,
     if start_datetime.minute%5 != 0 or end_datetime.minute%5 != 0:
         return 'All times should be divisible by 5 minutes'
 
+    print('member_id ', member_id)
+    print('time grade', time_grade)
     member_type = utils.get_member_type(member_id)
     if member_type == 'customer':
-        if time_grade not in ['0', '1', '2']:
+        if time_grade not in [0, 1, 2]:
             return 'Invalid time grade value'
     if member_type == 'resource':
-        if time_grade not in ['0', '1']:
+        if time_grade not in [0, 1]:
             return 'Invalid time grade value'
 
     if member_type is None:
@@ -208,9 +203,46 @@ def process_new_grading(member_id, start_time, end_time, date,
 
     print('start_datetime, end_datetime: ', start_datetime, end_datetime)
     #TODO check that user has rights to member_id
-
+    #TODO.fcheck that the start_datetime and end_datetime are within the 
+    #allowed poll range!
     add_member_time_grading(member_id, start_datetime, end_datetime,
                          time_grade)
-
+    db.session.commit()
     return None
 
+def process_grading_list(member_id, data):
+    try:
+        data = json.loads(data)
+    except:
+        return "Invalid data json string"
+
+    try:
+        error = None
+        for day in data:
+            print(day);
+            for interval in day[1]:
+                print(interval)
+                error = process_new_grading(member_id, interval[0], interval[1],
+                                            day[0], interval[2]);
+        if error is not None:
+            return error
+        db.session.commit()
+    except Exception as e:
+        print(e);
+        return "Error when parsing the the grading json" + str(data);
+
+def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
+    try:
+        start_time = datetime.time.fromisoformat(start_time);
+        end_time = datetime.time.fromisoformat(end_time);
+        start = start_time.hour*60 + start_time.min;
+        end = end_time.hour*60 + end_time.min;
+    except:
+        return "Incorrect time format"
+
+    try:
+        time_grade = int(time_grade);
+    except:
+        return "Time grade not an integer"
+
+    return process_new_grading(member_id, start, end, date, time_grade);
