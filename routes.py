@@ -252,7 +252,12 @@ def invite(url_id):
                 return render_template('error.html', message=message)
 
             #TODO add message
-            return redirect('/')
+            poll_id = request.form.get('poll_id')
+            if poll_id is None:
+                message = "Uudelleenohjaus epäonnistui"
+                return render_template("error.html", message=message)
+
+            return redirect('/poll/' + poll_id)
         else:
             print('invitation failed')
             return redirect('/')
@@ -277,7 +282,7 @@ def new_invitation():
     print('new invitation request', request.form)
     print('error? ', error)
     if error is None:
-        return redirect('/poll/'+request.form.get('poll_id'))
+        return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
         return render_template('new_invitation_failed.html',
                                error_message=error,
@@ -292,7 +297,7 @@ def new_resource():
     error = process_new_resource(request.form.get('poll_id'),
                               request.form.get('resource_name'))
     if error is None:
-        return redirect('/poll/'+request.form.get('poll_id'))
+        return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
         print('creation of new resource failed')
         return render_template('new_resource_failed.html',
@@ -318,7 +323,13 @@ def new_time_preference():
                                                request.form.get('satisfaction'))
 
     if error is None:
-        return redirect('/poll/'+request.form.get('poll_id', 0))
+        poll_id = request.form.get('poll_id')
+        member_id = request.form.get('member_id')
+        if poll_id is None or member_id is None:
+            message = "Uudelleenohjaus epäonnistui"
+            return render_template('error.html', message=message)
+
+        return redirect('/poll/'+poll_id+'/'+member_id+'/times')
     else:
         print('creating new time preference failed')
         return render_template('error.html', message=error)
@@ -330,6 +341,8 @@ def optimize_poll():
 
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
-        return redirect('/poll/'+request.form.get('poll_id', 0))
+        return redirect('/poll/'+request.form.get('poll_id', 0)+'/owner')
+
+    return render_template('error.html', message=error)
 
 #TODO make one .html for failed poll actions

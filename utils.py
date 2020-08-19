@@ -369,10 +369,10 @@ def customer_type_details_by_url_id(url_id):
     return result[0]
 
 
-#we need poll name, poll description, resource description, member_id
+#we need poll name, poll description, resource description, member_id, poll_id
 def resource_details_by_url_id(url_id):
     sql = 'SELECT P.poll_name, P.poll_description, R.resource_name, \
-           M.id \
+           M.id, P.id \
            FROM Polls P, PollMembers M, Resources R, ResourceMembershipLinks L \
            WHERE P.id=M.poll_id AND M.id=R.member_id \
            AND M.id=L.member_id AND L.url_id=:url_id'
