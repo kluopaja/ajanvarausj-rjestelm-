@@ -96,7 +96,6 @@ class Poll():
         return tmp
 
 
-
 def process_new_poll(user_id, name, description, first_date, last_date,
                      end_date, end_time):
     try:
@@ -191,7 +190,6 @@ def poll_ids_owned_by(user_id):
     poll_ids = [x[0] for x in polls]
     return poll_ids
 
-
 def poll_ids_where_user_is_member(user_id):
     sql = 'SELECT P.poll_id FROM PollMembers P, UsersPollMembers U \
            WHERE P.id=U.member_id AND U.user_id=:user_id'
@@ -202,7 +200,6 @@ def poll_ids_where_user_is_member(user_id):
 
     poll_ids = [x[0] for x in polls]
     return poll_ids
-
 
 def get_polls_by_ids(poll_ids):
     if len(poll_ids) == 0:
@@ -242,7 +239,6 @@ def user_is_customer(poll_id):
 
     return False
 
-#TODO output to datetime.date
 def get_poll_date_range(poll_id):
     sql = 'SELECT first_appointment_date, last_appointment_date FROM \
            Polls WHERE id=:poll_id'
@@ -254,20 +250,77 @@ def get_poll_date_range(poll_id):
 def db_tuple_to_poll(t):
     return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
 
+def get_user_poll_customer_member_ids(user_id, poll_id):
+    sql = 'SELECT P.id FROM PollMembers P, UsersPollMembers U, \
+           Customers C \
+           WHERE P.id=U.member_id AND P.id=C.member_id AND \
+           P.poll_id=:poll_id AND U.user_id=:user_id'
 
-def get_member_type(member_id):
-    sql = 'SELECT CASE \
-           WHEN COUNT(C.member_id) > 0 THEN \'customer\' \
-           WHEN COUNT(R.member_id) > 0 THEN \'resource\' \
-           END \
-           FROM Customers C FULL JOIN Resources R ON FALSE WHERE \
-           C.member_id=:member_id OR R.member_id=:member_id'
+    tmp = db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id})
+    member_ids = tmp.fetchall()
+    if member_ids is None:
+        return []
 
-    member_type = db.session.execute(sql, {'member_id': member_id}).fetchone()
-    print('member_type[0] ', member_type[0])
-    if member_type[0] is None:
-        return None
-    return member_type[0]
+    return [x[0] for x in member_ids]
+
+#what should these return?
+#Now they just return some random things... Maybe only member_ids?
+#TODO look at user.get_user_poll_member_ids and similar to these
+def get_user_poll_resources(user_id, poll_id):
+    sql = 'SELECT R.resource_name, M.id FROM \
+           PollMembers M, UsersPollMembers U, Resources R WHERE \
+           M.id=R.member_id AND M.id=U.member_id \
+           AND M.poll_id=:poll_id AND U.user_id=:user_id'
+
+    result = db.session.execute(sql, {'user_id': user_id,
+                                      'poll_id': poll_id})
+    resources = result.fetchall()
+    if resources is None:
+        return []
+    return resources
+
+def resource_name_in_poll(poll_id, resource_name):
+    sql = 'SELECT COUNT(*) FROM PollMembers M, Resources R \
+           WHERE M.id=R.member_id AND M.poll_id=:poll_id \
+           AND R.resource_name=:resource_name'
+
+    tmp = db.session.execute(sql,
+                            {'poll_id': poll_id,
+                             'resource_name': resource_name})
+    count = tmp.fetchone()
+    if count[0] == 1:
+        return True
+
+    return False
+
+def get_poll_resources(poll_id):
+    sql = 'SELECT R.resource_name, M.id FROM \
+           PollMembers M, Resources R WHERE \
+           M.id=R.member_id AND M.poll_id=:poll_id'
+
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    resources = result.fetchall()
+    if resources is None:
+        return []
+    return resources
+
+def get_customer_invitations(poll_id):
+    sql = 'SELECT url_id, reservation_length FROM NewCustomerLinks\
+           WHERE poll_id=:poll_id'
+
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    invitations = result.fetchall()
+    return invitations
+
+def get_resource_invitations(poll_id):
+    sql = 'SELECT L.url_id, R.resource_name \
+           FROM PollMembers P, Resources R, ResourceMembershipLinks L \
+           WHERE P.poll_id=:poll_id AND P.id=R.member_id \
+           AND P.id=L.member_id'
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    resource_invitations = result.fetchall()
+    return resource_invitations
+
 
 ### Invitation related functions ###
 
@@ -337,22 +390,6 @@ def get_invitation_type(url_id):
 
     return None
 
-def get_customer_invitations(poll_id):
-    sql = 'SELECT url_id, reservation_length FROM NewCustomerLinks\
-           WHERE poll_id=:poll_id'
-
-    result = db.session.execute(sql, {'poll_id': poll_id})
-    invitations = result.fetchall()
-    return invitations
-
-def get_resource_invitations(poll_id):
-    sql = 'SELECT L.url_id, R.resource_name \
-           FROM PollMembers P, Resources R, ResourceMembershipLinks L \
-           WHERE P.poll_id=:poll_id AND P.id=R.member_id \
-           AND P.id=L.member_id'
-    result = db.session.execute(sql, {'poll_id': poll_id})
-    resource_invitations = result.fetchall()
-    return resource_invitations
 
 #TODO return named tuple after we know what field are necessary for it
 #we need poll name, poll description, reservation length, poll_id
@@ -382,16 +419,6 @@ def resource_details_by_url_id(url_id):
         return None
 
     return result[0]
-
-def initialize_poll_member_times(member_id, poll_id, grade):
-    start, end = get_poll_date_range(poll_id)
-    end += datetime.timedelta(days=1)
-
-    #convert to datetime.datetime
-    start = datetime.datetime(start.year, start.month, start.day)
-    end = datetime.datetime(end.year, end.month, end.day)
-
-    times.add_member_time_grading(member_id, start, end, grade)
 
 #TODO take invitation as a parameter and not as url_id
 #adds user to a poll and initializes the user time preferences to 0
@@ -442,19 +469,8 @@ def apply_resource_invitation(url_id):
     member_id = details[3]
     return give_access_to_member(user_id, member_id)
 
-def get_user_poll_customer_member_ids(user_id, poll_id):
-    sql = 'SELECT P.id FROM PollMembers P, UsersPollMembers U, \
-           Customers C \
-           WHERE P.id=U.member_id AND P.id=C.member_id AND \
-           P.poll_id=:poll_id AND U.user_id=:user_id'
 
-    tmp = db.session.execute(sql, {'user_id': user_id, 'poll_id': poll_id})
-    member_ids = tmp.fetchall()
-    if member_ids is None:
-        return []
-
-    return [x[0] for x in member_ids]
-
+### Member related functions ###
 def get_customer_reservation_length(member_id):
     sql = 'SELECT reservation_length FROM Customers WHERE member_id=:member_id'
     length = db.session.execute(sql, {'member_id': member_id}).fetchone()
@@ -464,27 +480,30 @@ def get_customer_reservation_length(member_id):
 
     return length[0]
 
-### Resource related functions ###
-def get_resource_member_id(resource_id):
-    sql = 'SELECT member_id FROM Resources WHERE resource_id=:resource_id'
+#TODO remove poll_id from the parameters!
+def initialize_poll_member_times(member_id, poll_id, grade):
+    start, end = get_poll_date_range(poll_id)
+    end += datetime.timedelta(days=1)
 
-    member_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
-    if member_id is None:
+    #convert to datetime.datetime
+    start = datetime.datetime(start.year, start.month, start.day)
+    end = datetime.datetime(end.year, end.month, end.day)
+
+    times.add_member_time_grading(member_id, start, end, grade)
+
+def get_member_type(member_id):
+    sql = 'SELECT CASE \
+           WHEN COUNT(C.member_id) > 0 THEN \'customer\' \
+           WHEN COUNT(R.member_id) > 0 THEN \'resource\' \
+           END \
+           FROM Customers C FULL JOIN Resources R ON FALSE WHERE \
+           C.member_id=:member_id OR R.member_id=:member_id'
+
+    member_type = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    print('member_type[0] ', member_type[0])
+    if member_type[0] is None:
         return None
-
-    return member_id[0]
-
-
-#TODO Remove
-def get_member_parent_poll(member_id):
-    sql = 'SELECT P.poll_id FROM PollMembers P, Resources R \
-           WHERE P.id=R.member_id AND R.resource_id=:resource_id'
-
-    poll_id = db.session.execute(sql, {'resource_id': resource_id}).fetchone()
-    if poll_id is None:
-        return None
-
-    return poll_id[0]
+    return member_type[0]
 
 def user_owns_parent_poll(member_id):
     sql = 'SELECT COUNT(*) FROM Polls P, PollMembers M \
@@ -523,19 +542,15 @@ def give_access_to_member(user_id, member_id):
     db.session.commit()
     return None
 
-def resource_name_in_poll(poll_id, resource_name):
-    sql = 'SELECT COUNT(*) FROM PollMembers M, Resources R \
-           WHERE M.id=R.member_id AND M.poll_id=:poll_id \
-           AND R.resource_name=:resource_name'
+def get_resource_name(member_id):
+    sql = 'SELECT R.resource_name FROM PollMembers P, Resources R \
+           WHERE P.id=R.member_id AND P.id=:member_id'
 
-    tmp = db.session.execute(sql,
-                            {'poll_id': poll_id,
-                             'resource_name': resource_name})
-    count = tmp.fetchone()
-    if count[0] == 1:
-        return True
+    result = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    if result is None:
+        return ""
 
-    return False
+    return result[0]
 
 def process_new_resource(poll_id, resource_name):
     print('process_new_resource', poll_id)
@@ -567,48 +582,4 @@ def process_new_resource(poll_id, resource_name):
     db.session.commit()
 
     return None
-
-
-def get_poll_resources(poll_id):
-    sql = 'SELECT R.resource_name, M.id FROM \
-           PollMembers M, Resources R WHERE \
-           M.id=R.member_id AND M.poll_id=:poll_id'
-
-    result = db.session.execute(sql, {'poll_id': poll_id})
-    resources = result.fetchall()
-    if resources is None:
-        return []
-    return resources
-
-#what should these return?
-#Now they just return some random things... Maybe only member_ids?
-#TODO look at user.get_user_poll_member_id and similar to these
-def get_user_poll_resources(user_id, poll_id):
-    sql = 'SELECT R.resource_name, M.id FROM \
-           PollMembers M, UsersPollMembers U, Resources R WHERE \
-           M.id=R.member_id AND M.id=U.member_id \
-           AND M.poll_id=:poll_id AND U.user_id=:user_id'
-
-    result = db.session.execute(sql, {'user_id': user_id,
-                                      'poll_id': poll_id})
-    resources = result.fetchall()
-    if resources is None:
-        return []
-    return resources
-
-
-def get_resource_name(member_id):
-    sql = 'SELECT R.resource_name FROM PollMembers P, Resources R \
-           WHERE P.id=R.member_id AND P.id=:member_id'
-
-    result = db.session.execute(sql, {'member_id': member_id}).fetchone()
-    if result is None:
-        return ""
-
-    return result[0]
-
-#TODO This is the db.commit() applied too early sometimes now?
-#It should always be applied only when all the modifications have been
-#done!
-
 
