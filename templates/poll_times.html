@@ -17,7 +17,7 @@ vanhat alle jäävät toiveet.</p>
 {% endif %}
 <div id="day_editors"></div>
 <script type="text/javascript" src="/static/poll_times.js"></script>
-<script>
+<script nonce={{ csp_nonce() }}>
     let time_grades = {{ time_grades|tojson }};
     let grade_descriptions = {{ grade_descriptions|tojson }};
     let member_id = {{ member_id }};
