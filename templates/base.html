@@ -15,12 +15,15 @@
         <a href="/register">Uusi käyttäjä</a>
         {% endif %}
         <hr>
-
-        {% for poll in polls %}
-            <a href="/poll/{{ poll[0] }}">{{ poll[1] }}</a>
-            <br>
-        {% endfor %}
-
+        {% with messages = get_flashed_messages() %}
+            <ul>
+            {% if messages %}
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            {% endif %}
+            </ul>
+        {% endwith %}
         {% block content %}{% endblock %}
 
     </body>

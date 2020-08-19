@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template
 from werkzeug.urls import url_parse
-from flask import session, request, redirect
+from flask import session, request, redirect, flash
 
 from utils import *
 import times
@@ -150,6 +150,7 @@ def new_poll():
             print('not valid poll')
             return render_template('error.html', message=error)
 
+        flash("Kyselyn luonti onnistui")
         return redirect('/')
 #TODO
 #storing the 'login_redirect' in the session was a very bad idea
@@ -186,6 +187,7 @@ def login():
         error = process_login(request.form.get('username'),
                               request.form.get('password'))
         if error is None:
+            flash("Kirjautuminen onnistui")
             return redirect_to_next(default='/')
 
     return render_template('login.html',
@@ -209,6 +211,8 @@ def register():
         if error is None:
             process_login(request.form.get('username'),
                           request.form.get('password'))
+
+            flash("Rekisteröityminen onnistui")
             return redirect('/login')
 
     message = 'Käyttäjätunnuksen luonti epäonnistui: ' + error
@@ -251,7 +255,7 @@ def invite(url_id):
                 message = 'Kutsumisen hyväksyminen epäonnistui: ' + error
                 return render_template('error.html', message=message)
 
-            #TODO add message
+            flash("Kutsun hyväksyminen onnistui")
             poll_id = request.form.get('poll_id')
             if poll_id is None:
                 message = "Uudelleenohjaus epäonnistui"
@@ -282,6 +286,7 @@ def new_invitation():
     print('new invitation request', request.form)
     print('error? ', error)
     if error is None:
+        flash("Uuden kutsun luonti onnistui")
         return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
         return render_template('new_invitation_failed.html',
@@ -297,6 +302,7 @@ def new_resource():
     error = process_new_resource(request.form.get('poll_id'),
                               request.form.get('resource_name'))
     if error is None:
+        flash("Uuden resurssin luonti onnistui")
         return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
         print('creation of new resource failed')
@@ -325,6 +331,7 @@ def new_time_preference():
     if error is None:
         poll_id = request.form.get('poll_id')
         member_id = request.form.get('member_id')
+        flash("Aikavalintojen tallennus onnistui");
         if poll_id is None or member_id is None:
             message = "Uudelleenohjaus epäonnistui"
             return render_template('error.html', message=message)
@@ -341,6 +348,7 @@ def optimize_poll():
 
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
+        flash("Ajanvarauksien optimointi onnistui");
         return redirect('/poll/'+request.form.get('poll_id', 0)+'/owner')
 
     return render_template('error.html', message=error)
