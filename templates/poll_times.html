@@ -36,7 +36,7 @@ dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
             <form action="/new_time_preference" method="post">
                 {% if member_type == 'customer' %}
                 <label for=2>{{ grade_descriptions[2] }}</label>
-                <input type="radio" name="satisfaction" id=1 value=1 checked>
+                <input type="radio" name="satisfaction" id=2 value=2 checked>
                 {% endif %}
                 <label for=1>{{ grade_descriptions[1] }}</label>
                 <input type="radio" name="satisfaction" id=1 value=1 checked>
@@ -51,7 +51,7 @@ dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
                 <input type="submit" value="Lisää toive">
                 <input type="hidden" name="date" value={{ day.date }}>
                 <input type="hidden" name="member_id"
-                       value={{ day[1] }}>
+                       value={{ member_id }}>
                 <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
             </form>
     {% endfor %}

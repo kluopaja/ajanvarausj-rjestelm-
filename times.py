@@ -233,16 +233,22 @@ def process_grading_list(member_id, data):
 
 def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
     try:
-        start_time = datetime.time.fromisoformat(start_time);
-        end_time = datetime.time.fromisoformat(end_time);
-        start = start_time.hour*60 + start_time.min;
-        end = end_time.hour*60 + end_time.min;
+        start_time = datetime.time.fromisoformat(start_time)
+        end_time = datetime.time.fromisoformat(end_time)
+        start = int(start_time.hour*60 + start_time.second/60)
+        end = int(end_time.hour*60 + end_time.second/60)
     except:
         return "Incorrect time format"
+
 
     try:
         time_grade = int(time_grade);
     except:
         return "Time grade not an integer"
+    print("fallback ", member_id, start, end, time_grade);
 
-    return process_new_grading(member_id, start, end, date, time_grade);
+    error = process_new_grading(member_id, start, end, date, time_grade);
+    if error is None:
+        db.session.commit();
+
+    return error;
