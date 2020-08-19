@@ -217,12 +217,12 @@ def save_optimization(assignments, poll_id):
 
     db.session.execute(sql, {'poll_id': poll_id})
     sql = 'INSERT INTO OptimizationResults \
-           (customer_member_id, resource_member_id, appointment_start) \
-           VALUES (:customer_member_id, :resource_member_id, :appointment_start)'
+           (customer_member_id, resource_member_id, time_start) \
+           VALUES (:customer_member_id, :resource_member_id, :time_start)'
     for x in assignments:
         db.session.execute(sql, {'customer_member_id': x.customer_member_id,
                                  'resource_member_id': x.resource_member_id,
-                                 'appointment_start': x.time})
+                                 'time_start': x.time})
     db.session.commit()
 
 
