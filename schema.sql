@@ -27,7 +27,7 @@ CREATE TABLE MemberTimeGrades
     --half open intervals [time_beginning, time_end)
     time_beginning timestamp,
     time_end timestamp,
-    grade INTEGER, CHECK(time_beginning < time_end)
+    grade INTEGER
 );
 CREATE TABLE Customers
 (
