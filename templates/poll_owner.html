@@ -2,6 +2,23 @@
 {% block content %}
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
+{% if customers|length > 0 %}
+<h2>Kyselyn varaukset</h2>
+<table>
+    <tr><th>Varauksen id</th><th>Varauksen kesto</th>
+{% for customer in customers %}
+<tr>
+    <td>{{ customer[0] }}</td>
+    <td>{{ customer[1] }}</td>
+    <td>
+    <a href="/poll/{{ poll.poll_id }}/{{ customer[0] }}/times">
+    Siirry varaukseen
+    </a>
+    </td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
 <h2>Aktiiviset vastaajakutsumislinkit:</h2>
 <ul>
 <table>
@@ -40,6 +57,10 @@
 <tr>
     <td>{{ resource[1] }}</td>
     <td>{{ resource[0] }}</td>
+    <td>
+    <a href="/poll/{{ poll.poll_id }}/{{ resource[1] }}/times">
+    Siirry resurssiin
+    </a>
 
 </tr>
 {% endfor %}

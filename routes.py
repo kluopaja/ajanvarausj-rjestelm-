@@ -67,6 +67,8 @@ def poll_owner(poll_id):
     customer_invitations = get_customer_invitations(poll_id)
     resource_invitations = get_resource_invitations(poll_id)
     print('customer invitations ', customer_invitations)
+
+    customers = get_poll_customers(poll_id)
     resources = get_poll_resources(poll_id)
 
     optimization_results = optimization.get_optimization_results(poll_id)
@@ -76,6 +78,7 @@ def poll_owner(poll_id):
                            poll=current_poll,
                            customer_invitations=customer_invitations,
                            resource_invitations=resource_invitations,
+                           customers=customers,
                            resources=resources,
                            optimization_results=optimization_results)
 
