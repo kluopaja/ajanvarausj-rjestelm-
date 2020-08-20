@@ -74,7 +74,7 @@ def poll_owner(poll_id):
     optimization_results = optimization.get_optimization_results(poll_id)
 
 
-    return render_template('poll_owner.html', 
+    return render_template('poll_owner.html',
                            poll=current_poll,
                            customer_invitations=customer_invitations,
                            resource_invitations=resource_invitations,
@@ -135,8 +135,8 @@ def poll_times(poll_id, member_id):
                             member_type=member_type,
                             member_name=member_name,
                             reservation_length=reservation_length);
-    
-    
+
+
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
@@ -157,7 +157,7 @@ def new_poll():
             print('not valid poll')
             return render_template('error.html', message=error)
 
-        flash("Kyselyn luonti onnistui")
+        flash('Kyselyn luonti onnistui')
         return redirect('/')
 #TODO
 #storing the 'login_redirect' in the session was a very bad idea
@@ -194,7 +194,7 @@ def login():
         error = process_login(request.form.get('username'),
                               request.form.get('password'))
         if error is None:
-            flash("Kirjautuminen onnistui")
+            flash('Kirjautuminen onnistui')
             return redirect_to_next(default='/')
 
     return render_template('login.html',
@@ -219,7 +219,7 @@ def register():
             process_login(request.form.get('username'),
                           request.form.get('password'))
 
-            flash("Rekisteröityminen onnistui")
+            flash('Rekisteröityminen onnistui')
             return redirect('/login')
 
     message = 'Käyttäjätunnuksen luonti epäonnistui: ' + error
@@ -262,11 +262,11 @@ def invite(url_id):
                 message = 'Kutsumisen hyväksyminen epäonnistui: ' + error
                 return render_template('error.html', message=message)
 
-            flash("Kutsun hyväksyminen onnistui")
+            flash('Kutsun hyväksyminen onnistui')
             poll_id = request.form.get('poll_id')
             if poll_id is None:
-                message = "Uudelleenohjaus epäonnistui"
-                return render_template("error.html", message=message)
+                message = 'Uudelleenohjaus epäonnistui'
+                return render_template('error.html', message=message)
 
             return redirect('/poll/' + poll_id)
         else:
@@ -293,7 +293,7 @@ def new_invitation():
     print('new invitation request', request.form)
     print('error? ', error)
     if error is None:
-        flash("Uuden kutsun luonti onnistui")
+        flash('Uuden kutsun luonti onnistui')
         return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
         return render_template('new_invitation_failed.html',
@@ -326,7 +326,7 @@ def new_resource():
     error = process_new_resource(request.form.get('poll_id'),
                               request.form.get('resource_name'))
     if error is None:
-        flash("Uuden resurssin luonti onnistui")
+        flash('Uuden resurssin luonti onnistui')
         return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
         print('creation of new resource failed')
@@ -355,9 +355,9 @@ def new_time_preference():
     if error is None:
         poll_id = request.form.get('poll_id')
         member_id = request.form.get('member_id')
-        flash("Aikavalintojen tallennus onnistui");
+        flash('Aikavalintojen tallennus onnistui');
         if poll_id is None or member_id is None:
-            message = "Uudelleenohjaus epäonnistui"
+            message = 'Uudelleenohjaus epäonnistui'
             return render_template('error.html', message=message)
 
         return redirect('/poll/'+poll_id+'/'+member_id+'/times')
@@ -372,7 +372,7 @@ def optimize_poll():
 
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
-        flash("Ajanvarauksien optimointi onnistui");
+        flash('Ajanvarauksien optimointi onnistui');
         return redirect('/poll/'+request.form.get('poll_id', 0)+'/owner')
 
     return render_template('error.html', message=error)

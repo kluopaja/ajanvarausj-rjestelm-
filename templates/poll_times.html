@@ -22,7 +22,7 @@ vanhat alle jäävät toiveet.</p>
 "Ei sovi", niin 30 min aika voi silloin alkaa milloin tahansa välillä
 [10:00, 10:30)</p>
 {% endif %}
-{% if member_type == 'resource' %} 
+{% if member_type == 'resource' %}
 <h2>Resurssin saatavuus</h2>
 <p>Resurssin nimi: {{ member_name }}</p>
 {% endif %}
@@ -33,7 +33,7 @@ vanhat alle jäävät toiveet.</p>
     let grade_descriptions = {{ grade_descriptions|tojson }};
     let member_id = {{ member_id }};
     let poll_id = {{ poll.poll_id }};
-dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id, 
+dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
                           poll_id)
     document.querySelector("div[id=day_editors").appendChild(dom);
 </script>

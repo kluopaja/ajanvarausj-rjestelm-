@@ -222,7 +222,7 @@ def process_new_grading(member_id, start, end, date, time_grade):
 
     print('start_datetime, end_datetime: ', start_datetime, end_datetime)
     #TODO check that user has rights to member_id
-    #TODO.fcheck that the start_datetime and end_datetime are within the 
+    #TODO.fcheck that the start_datetime and end_datetime are within the
     #allowed poll range!
     add_member_time_grading(member_id, start_datetime, end_datetime,
                          time_grade)
@@ -233,7 +233,7 @@ def process_grading_list(member_id, data):
     try:
         data = json.loads(data)
     except:
-        return "Invalid data json string"
+        return 'Invalid data json string'
 
     try:
         error = None
@@ -248,7 +248,7 @@ def process_grading_list(member_id, data):
         db.session.commit()
     except Exception as e:
         print(e);
-        return "Error when parsing the the grading json" + str(data);
+        return 'Error when parsing the the grading json' + str(data);
 
 def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
     try:
@@ -257,7 +257,7 @@ def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
         start = int(start_time.hour*60 + start_time.second/60)
         end = int(end_time.hour*60 + end_time.second/60)
     except:
-        return "Incorrect time format"
+        return 'Incorrect time format'
 
 
     try:

@@ -141,7 +141,7 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     db.session.commit()
     return None
 
-#returns list of member_ids 
+#returns list of member_ids
 def get_poll_resource_members(poll_id):
     sql = 'SELECT M.id FROM PollMembers M, Resources R \
            WHERE M.id=R.member_id AND M.poll_id=:poll_id'
@@ -152,7 +152,7 @@ def get_poll_resource_members(poll_id):
     return [x[0] for x in member_ids]
 
 
-#returns list of member_ids 
+#returns list of member_ids
 def get_poll_customer_members(poll_id):
     sql = 'SELECT M.id FROM PollMembers M, Customers C \
            WHERE M.id=C.member_id AND M.poll_id=:poll_id'
@@ -575,7 +575,7 @@ def get_resource_name(member_id):
 
     result = db.session.execute(sql, {'member_id': member_id}).fetchone()
     if result is None:
-        return ""
+        return ''
 
     return result[0]
 
