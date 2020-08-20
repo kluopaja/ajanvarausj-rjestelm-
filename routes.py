@@ -95,7 +95,7 @@ def poll_results(poll_id):
 
     return render_template('poll_results.html',
                            poll=current_poll);
-@app.route('/poll/<poll_id>/<member_id>/times')
+@app.route('/poll/<int:poll_id>/<int:member_id>/times')
 def poll_times(poll_id, member_id):
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
