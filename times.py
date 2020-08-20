@@ -1,6 +1,7 @@
 import datetime
 from collections import namedtuple
 from db import db
+from flask import session
 import utils
 import optimization
 import json
@@ -182,11 +183,29 @@ def process_new_grading(member_id, start, end, date, time_grade):
     except:
         return 'Unknown error with times'
 
+    try:
+        time_grade = int(time_grade)
+    except:
+        return 'Time grade not an integer'
+
+    try:
+        member_id = int(member_id)
+    except:
+        return 'Member id not an interger'
+
     if start_datetime > end_datetime:
         return 'The length of the time segment was negative'
 
     if start_datetime.minute%5 != 0 or end_datetime.minute%5 != 0:
         return 'All times should be divisible by 5 minutes'
+    print('fallback ', member_id, start, end, time_grade);
+
+    user_id = session.get('user_id')
+    #check user rights
+    print('user owns ... ', utils.user_owns_parent_poll(member_id))
+    if not utils.user_owns_parent_poll(member_id) and \
+       not utils.user_has_access(user_id, member_id):
+        return 'User has no rights to add new time grades'
 
     print('member_id ', member_id)
     print('time grade', time_grade)

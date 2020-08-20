@@ -4,6 +4,17 @@
 {% if member_type == 'customer' %}
 <h2>Katso ja muokkaa varaustoivetta</h2>
 <p>Varauksen pituus: {{ reservation_length }}</p>
+{% if is_owner %}
+<form action="/modify_customer" method="POST">
+    <label for="reservation_length">Varauksen pituus minuutteina (5 min tarkkuus)
+    </label>
+    <input type="number" id="reservation_length" name="reservation_length"
+           min=5 value={{ reservation_length }} step=5>
+    <input type="submit" value="Muuta">
+    <input type="hidden" name="poll_id" value = {{ poll.poll_id }}>
+    <input type="hidden" name="member_id" value={{ member_id }}>
+</form>
+{% endif %}
 <p>Lisää uusi toive. Uusi toive ylikirjoittaa
 vanhat alle jäävät toiveet.</p>
 <h3>Esimerkki:</h3>

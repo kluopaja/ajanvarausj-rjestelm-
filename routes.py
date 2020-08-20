@@ -101,7 +101,9 @@ def poll_times(poll_id, member_id):
         return render_template('login.html', need_login_redirect=True)
 
     user_id = session.get('user_id')
-    if not user_has_access(user_id, member_id):
+    is_owner = user_owns_parent_poll(member_id)
+
+    if not is_owner and not user_has_access(user_id, member_id):
         error = 'Ei oikeuksia muokata aikoja'
         return render_template('error.html', message=error)
 
@@ -125,6 +127,7 @@ def poll_times(poll_id, member_id):
 
 
     return render_template('poll_times.html',
+                            is_owner=is_owner,
                             poll=current_poll,
                             member_id=member_id,
                             time_grades=member_times,
@@ -296,6 +299,23 @@ def new_invitation():
         return render_template('new_invitation_failed.html',
                                error_message=error,
                                poll_id=request.form.get('poll_id'))
+
+@app.route('/modify_customer', methods=['POST'])
+def modity_customer():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = process_modify_customer(request.form.get('member_id'),
+                                    request.form.get('reservation_length'));
+
+    if error is None:
+        flash('Varaustoiveen pituuden muutos onnistui')
+        poll_id = request.form.get('poll_id', 0)
+        member_id = request.form.get('member_id', 0)
+        return redirect('/poll/' + poll_id + '/' + member_id + '/times')
+    else:
+        return render_template('error.html', message=error)
+
 
 @app.route('/new_resource', methods=['POST'])
 def new_resource():

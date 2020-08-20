@@ -610,3 +610,37 @@ def process_new_resource(poll_id, resource_name):
 
     return None
 
+def process_modify_customer(member_id, reservation_length):
+    print(member_id, reservation_length)
+    try:
+        member_id = int(member_id)
+        reservation_length = int(reservation_length)
+    except:
+        return 'Inputs were not integers'
+
+    if reservation_length <= 0:
+        return 'Reservation length has to be positive'
+
+    if reservation_length % 5 != 0:
+        return 'Reservation length has to be divisible by 5 min'
+
+    #TODO this should probably be done elsewhere so we could easily allow
+    #also other users than the admin to modify the customer
+    if not user_owns_parent_poll(member_id):
+        return 'User has no rights to modify the customer'
+
+    error = update_reservation_length(member_id, reservation_length)
+    db.session.commit()
+    return error
+
+#reservation_length should be minutes
+def update_reservation_length(member_id, reservation_length):
+    #to seconds
+    length_str = str(reservation_length*60)
+    sql = 'UPDATE Customers SET reservation_length=:length_str \
+           WHERE member_id=:member_id'
+
+    db.session.execute(sql, {'member_id': member_id,
+                             'length_str': length_str})
+    return None
+
