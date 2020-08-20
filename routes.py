@@ -13,7 +13,7 @@ def index():
     return render_template('index.html', polls=polls)
 
 
-@app.route('/poll/<poll_id>')
+@app.route('/poll/<int:poll_id>')
 def poll(poll_id):
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
@@ -40,7 +40,7 @@ def poll(poll_id):
                            user_resources=user_resources,
                            grade_descriptions=grade_descriptions)
 
-@app.route('/poll/<poll_id>/owner')
+@app.route('/poll/<int:poll_id>/owner')
 def poll_owner(poll_id):
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
@@ -82,7 +82,7 @@ def poll_owner(poll_id):
                            resources=resources,
                            optimization_results=optimization_results)
 
-@app.route('/poll/<poll_id>/results')
+@app.route('/poll/<int:poll_id>/results')
 def poll_results(poll_id):
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
