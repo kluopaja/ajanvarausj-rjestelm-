@@ -548,6 +548,21 @@ def user_owns_parent_poll(member_id):
 
     return False
 
+def member_in_poll(member_id, poll_id):
+    sql = 'SELECT COUNT(*) FROM PollMembers WHERE id=:member_id \
+           AND poll_id=:poll_id'
+
+    count = db.session.execute(sql, {'member_id': member_id,
+                                     'poll_id': poll_id}).fetchone()
+
+    if count[0] == 1:
+        return True
+
+    return False
+
+
+#TODO how should this be named? should be separate from having
+#an access through poll ownership
 def user_has_access(user_id, member_id):
     sql = 'SELECT COUNT(*) FROM UsersPollMembers WHERE \
            member_id=:member_id AND user_id=:user_id'

@@ -107,6 +107,10 @@ def poll_times(poll_id, member_id):
         error = 'Ei oikeuksia muokata aikoja'
         return render_template('error.html', message=error)
 
+    if not member_in_poll(member_id, poll_id):
+        error = 'Tarkista url. Jäsen ei kuulu kyselyyn'
+        return render_template('error.html', message=error)
+
     current_poll = get_polls_by_ids([poll_id])
     if len(current_poll) == 0:
         current_poll = None
