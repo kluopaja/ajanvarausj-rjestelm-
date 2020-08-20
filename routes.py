@@ -338,6 +338,19 @@ def new_resource():
                                error_message=error,
                                poll_id=request.form.get('poll_id'))
 
+@app.route('/delete_member', methods=['POST'])
+def delete_member():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = process_delete_member(request.form.get('member_id'))
+
+    if error is None:
+        flash('Jäsenen poisto onnistui')
+        return redirect('/poll/'+request.form.get('poll_id', 0)+'/owner')
+    else:
+        return render_template('error.html', message=error)
+
 @app.route('/new_time_preference', methods=['POST'])
 def new_time_preference():
     if 'user_id' not in session:

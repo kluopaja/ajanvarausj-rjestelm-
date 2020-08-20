@@ -645,7 +645,8 @@ def process_modify_customer(member_id, reservation_length):
         return 'User has no rights to modify the customer'
 
     error = update_reservation_length(member_id, reservation_length)
-    db.session.commit()
+    if error is None:
+        db.session.commit()
     return error
 
 #reservation_length should be minutes
@@ -659,3 +660,22 @@ def update_reservation_length(member_id, reservation_length):
                              'length_str': length_str})
     return None
 
+def process_delete_member(member_id):
+    try:
+        member_id = int(member_id)
+    except:
+        return "Member id not an interger"
+
+    if not user_owns_parent_poll(member_id):
+        return "User has no rights to delete the member"
+
+    #TODO check if the poll has final results. In that case, don't proceed
+
+    delete_member(member_id)
+    db.session.commit()
+
+#member id should be an integer
+#does not check any rights
+def delete_member(member_id):
+    sql = 'DELETE FROM PollMembers WHERE id=:member_id'
+    db.session.execute(sql, {'member_id': member_id})

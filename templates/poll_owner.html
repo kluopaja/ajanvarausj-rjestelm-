@@ -15,6 +15,13 @@
     Siirry varaukseen
     </a>
     </td>
+    <td>
+    <form action="/delete_member" method="POST">
+        <input type="submit" value="Poista varaus">
+        <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+        <input type="hidden" name="member_id" value={{ customer[0] }}>
+    </form>
+    </td>
 </tr>
 {% endfor %}
 </table>
@@ -61,6 +68,13 @@
     <a href="/poll/{{ poll.poll_id }}/{{ resource[1] }}/times">
     Siirry resurssiin
     </a>
+    <td>
+    <form action="/delete_member" method="POST">
+        <input type="submit" value="Poista resurssi">
+        <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+        <input type="hidden" name="member_id" value={{ resource[1] }}>
+    </form>
+    </td>
 
 </tr>
 {% endfor %}
