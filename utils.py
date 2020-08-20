@@ -65,8 +65,10 @@ def check_alphanum_string(s, min_length, max_length):
         return False
 
 def process_logout():
-    del session['user_id']
-    del session['username']
+    if 'user_id' in session:
+        del session['user_id']
+    if 'username' in session:
+        del session['username']
 
 ### Poll related functions ###
 
