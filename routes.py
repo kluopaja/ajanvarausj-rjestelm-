@@ -64,20 +64,20 @@ def poll_owner(poll_id):
         error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
         return render_template('error.html', message=error)
 
-    customer_invitations = get_customer_invitations(poll_id)
-    resource_invitations = get_resource_invitations(poll_id)
-    print('customer invitations ', customer_invitations)
+    #note that we already know that poll_id is an integer
+    new_customer_links = get_new_customer_links(poll_id)
+    customer_access_links = get_customer_access_links(poll_id)
+    resource_access_links = get_resource_access_links(poll_id)
 
     customers = get_poll_customers(poll_id)
     resources = get_poll_resources(poll_id)
 
     optimization_results = optimization.get_optimization_results(poll_id)
-
-
     return render_template('poll_owner.html',
                            poll=current_poll,
-                           customer_invitations=customer_invitations,
-                           resource_invitations=resource_invitations,
+                           new_customer_links=new_customer_links,
+                           customer_access_links=customer_access_links,
+                           resource_access_links=resource_access_links,
                            customers=customers,
                            resources=resources,
                            optimization_results=optimization_results)
@@ -230,79 +230,81 @@ def register():
     return render_template('register.html',
                            message=message)
 
-@app.route('/invite/<url_id>', methods=['POST', 'GET'])
-def invite(url_id):
-    print('type of url_id', type(url_id))
+#create a new customer with a link
+@app.route('/new_customer/<url_id>', methods=['POST', 'GET'])
+def new_customer(url_id):
+    if not session.get('user_id', 0):
+        session['login_redirect'] = '/invite/' + url_id
+        return render_template('login.html', need_login_redirect=True)
+
+    if request.method == 'GET':
+        #TODO think if the url_id should be in 'details'
+        return render_template('confirm_poll_invitation.html',
+                               details=customer_type_details_by_url_id(url_id),
+                               url_id=url_id)
+    if request.method == 'POST':
+        #TODO this should return the member id of the new customer
+        error = process_new_customer_url(url_id,
+                                         request.form.get('reservation_length'),
+                                         request.form.get('customer_name'))
+        if error is None:
+            flash('Uusi asiakas luotu onnistuneesti')
+            poll_id = request.form.get('poll_id')
+
+            return redirect('/poll/'+poll_id)
+        return render_template('error.html', message=error)
+
+@app.route('/access/<url_id>', methods=['POST', 'GET'])
+def access(url_id):
     if not session.get('user_id', 0):
         session['login_redirect'] = '/invite/' + url_id
         #TODO rename 'need_login_redirect' to 'login_needed_error'
         return render_template('login.html', need_login_redirect=True)
 
-    invitation_type = get_invitation_type(url_id)
-    #check if url_id is in database
-    if invitation_type is None:
-        return render_template('invalid_invitation.html')
-
     if request.method == 'GET':
-        if invitation_type == 'poll_customer':
-            #TODO think if the url_id should be in 'details'
-            return render_template('confirm_poll_invitation.html',
-                                   details=customer_type_details_by_url_id(url_id),
-                                   url_id=url_id)
-
-        if invitation_type == 'resource_owner':
-            return render_template('confirm_resource_invitation.html',
-                                   details=resource_details_by_url_id(url_id),
-                                   url_id=url_id)
+        return render_template('confirm_member_access_link.html',
+                               details=member_details_by_url_id(url_id),
+                               url_id=url_id)
     if request.method == 'POST':
-        print('user response: ', request.form['user_response'])
-        if request.form.get('user_response') == 'yes':
-            print('invitation type: ', invitation_type)
-            if invitation_type == 'poll_customer':
-                error = apply_new_customer_invitation(url_id)
-            if invitation_type == 'resource_owner':
-                error = apply_resource_invitation(url_id)
-            if error is not None:
-                message = 'Kutsumisen hyväksyminen epäonnistui: ' + error
-                return render_template('error.html', message=message)
+        error = process_access(url_id)
+        if error is not None:
+            message = 'Kutsumisen hyväksyminen epäonnistui: ' + error
+            return render_template('error.html', message=message)
 
-            flash('Kutsun hyväksyminen onnistui')
-            poll_id = request.form.get('poll_id')
-            if poll_id is None:
-                message = 'Uudelleenohjaus epäonnistui'
-                return render_template('error.html', message=message)
+        flash('Muokkausoikeus hyväksytty')
+        poll_id = request.form.get('poll_id', 0)
+        member_id = request.form.get('member_id', 0)
+        return redirect('/poll/' + poll_id + '/' + member_id + '/times')
 
-            return redirect('/poll/' + poll_id)
-        else:
-            print('invitation failed')
-            return redirect('/')
-
-
-
-#TODO
-#all error messages that require the user to return some poll could
-#be handled with one html page
-#do we even need any other error page redirections than a poll?
-#if not, then one error.html should be enough
-@app.route('/new_invitation', methods=['POST', 'GET'])
-def new_invitation():
+@app.route('/new_new_customer_link', methods=['POST', 'GET'])
+def new_new_customer_link():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
-    error = process_new_invitation(request.form.get('invitation_type'),
-                                   request.form.get('poll_id'),
-                                   request.form.get('member_id'),
-                                   request.form.get('reservation_length'))
+    error = process_new_new_customer_link(request.form.get('poll_id'))
 
-    print('new invitation request', request.form)
-    print('error? ', error)
     if error is None:
         flash('Uuden kutsun luonti onnistui')
         return redirect('/poll/'+request.form.get('poll_id')+'/owner')
     else:
+        #TODO REPLACE
         return render_template('new_invitation_failed.html',
                                error_message=error,
                                poll_id=request.form.get('poll_id'))
+
+@app.route('/new_member_access_link', methods=['POST'])
+def new_member_access_link():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = process_new_member_access_link(request.form.get('member_id'))
+
+    if error is None:
+        flash('Uuden oikeuslinkin luonti onnistui')
+    else:
+        flash('Uuden oikeuslinkin luonti epäonnistui:\n' + error)
+
+    return redirect('/poll/'+request.form.get('poll_id')+'/owner')
 
 @app.route('/modify_customer', methods=['POST'])
 def modity_customer():

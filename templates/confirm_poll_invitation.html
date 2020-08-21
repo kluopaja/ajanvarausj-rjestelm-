@@ -3,15 +3,20 @@
 <h2>Sinut on kutsuttu osallistumaan kyselyyn:</h2>
 <p>Kyselyn nimi: {{ details[0] }}</p>
 <p>Kyselyn kuvaus: {{ details[1] }}</p>
-<p>Varattavan ajan pituus: {{ details[2] }}</p>
-<form action="/invite/{{url_id}}" method="POST">
-    <p>Haluatko hyväksyä kutsun?</p>
-    <label for="yes">Kyllä</label>
-    <input type="radio" name="user_response" id="yes" value="yes" checked>
-    <label for="no">En</label>
-    <input type="radio" name="user_response" id="no" value="no">
+<p>Voit tässä hyväksyä kutsun ja luoda itsellesi varaajaroolin
+kyselyyn</p>
+<p>Voit käyttää tätä linkkiä uudelleen luodaksesi itsellesi
+muita varaajarooleja.</p>
+<form action="/new_customer/{{url_id}}" method="POST">
+    <label for="reservation_length">Varattavan ajan pituus:</label>
+    <input type="number" id="reservation_length"
+           name="reservation_length" min=5 value=60 step=5>
+    <label for="customer_name">
+        Varaajaroolin nimi
+    </label>
+    <input type="text" id="customer_name" name="customer_name">
     <br>
-    <input type="submit" value="Lähetä vastaus">
-    <input type="hidden" name="poll_id" value={{ details[3] }}>
+    <input type="submit" value="Luo varaajarooli">
+    <input type="hidden" name="poll_id" value={{ details[2] }}>
 </form>
 {% endblock %}

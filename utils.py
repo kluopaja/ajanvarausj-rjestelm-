@@ -117,6 +117,7 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
         return 'Poll end should not be in the past'
 
+    #TODO be more descriptivie
     if name is None or len(name) < 1 or len(name) > 30:
         return 'Not valid poll name'
 
@@ -307,8 +308,8 @@ def get_user_poll_customers(user_id, poll_id):
     return customers
 
 def get_poll_customers(poll_id):
-    sql = 'SELECT P.id, C.reservation_length FROM PollMembers P, \
-           Customers C \
+    sql = 'SELECT P.id, C.reservation_length, C.customer_name \
+           FROM PollMembers P, Customers C \
            WHERE P.id=C.member_id AND P.poll_id=:poll_id'
 
     tmp = db.session.execute(sql, {'poll_id': poll_id})
@@ -333,78 +334,66 @@ def resource_name_in_poll(poll_id, resource_name):
     return False
 
 
-def get_customer_invitations(poll_id):
-    sql = 'SELECT url_id, reservation_length FROM NewCustomerLinks\
+def get_new_customer_links(poll_id):
+    sql = 'SELECT url_id FROM NewCustomerLinks\
            WHERE poll_id=:poll_id'
 
     result = db.session.execute(sql, {'poll_id': poll_id})
     invitations = result.fetchall()
+    #does this return none if no links were found?
+    print("get_new_customer_links", invitations)
     return invitations
 
-def get_resource_invitations(poll_id):
-    sql = 'SELECT L.url_id, R.resource_name \
-           FROM PollMembers P, Resources R, ResourceMembershipLinks L \
-           WHERE P.poll_id=:poll_id AND P.id=R.member_id \
+def get_customer_access_links(poll_id):
+    sql = 'SELECT L.url_id, C.customer_name, P.id, C.reservation_length \
+           FROM PollMembers P, Customers C, MemberAccessLinks L \
+           WHERE P.poll_id=:poll_id AND P.id=C.member_id \
            AND P.id=L.member_id'
     result = db.session.execute(sql, {'poll_id': poll_id})
-    resource_invitations = result.fetchall()
-    return resource_invitations
+    access_links = result.fetchall()
+    return access_links
 
+def get_resource_access_links(poll_id):
+    sql = 'SELECT L.url_id, R.resource_name, P.id \
+           FROM PollMembers P, Resources R, MemberAccessLinks L \
+           WHERE P.poll_id=:poll_id AND P.id=R.member_id \
+           AND P.id=L.member_id'
+
+    result = db.session.execute(sql, {'poll_id': poll_id})
+    access_links = result.fetchall()
+    return access_links
 
 ### Invitation related functions ###
 
-def process_new_invitation(invitation_type, poll_id, member_id,
-                                reservation_length):
-    print(invitation_type)
+def process_new_new_customer_link(poll_id):
+    if poll_id is None:
+        return 'No poll id was provided'
 
-    if invitation_type == 'poll_customer':
-        if poll_id is None:
-            return 'No poll id was provided'
+    if not user_owns_poll(poll_id):
+        return 'User does not own the poll'
 
-        if reservation_length is None:
-            return 'No resource_length was provided'
-        try:
-            reservation_length = int(reservation_length)
-        except ValueError:
-            return 'Reservation length should be an integer'
+    url_id = urandom(16).hex()
+    sql = 'INSERT INTO NewCustomerLinks \
+           (poll_id, url_id) \
+           VALUES (:poll_id, :url_id)'
 
-        if reservation_length > 24*60:
-            return 'Maximum reservation length is 24 hours'
-        if reservation_length <= 0:
-            return 'Reservation length should be positive'
-        if reservation_length%5 != 0:
-            return 'Reservation length should be divisible by 5 min'
+    db.session.execute(sql, {'poll_id': poll_id, 'url_id': url_id})
+    db.session.commit()
+    return None
 
-        if not user_owns_poll(poll_id):
-            return 'User does not own the poll'
+def process_new_member_access_link(member_id):
+    if member_id is None:
+        return 'No member id was provided'
+    #check user is the owner of the resource parent poll
+    if not user_owns_parent_poll(member_id):
+        return 'User does not own the parent poll'
 
-        url_id = urandom(16).hex()
-        sql = 'INSERT INTO NewCustomerLinks \
-               (poll_id, url_id, reservation_length) \
-               VALUES (:poll_id, :url_id, :reservation_seconds)'
-
-        reservation_seconds = str(reservation_length*60)
-        db.session.execute(sql, {'poll_id': poll_id, 'url_id': url_id,
-                                 'reservation_seconds': reservation_seconds})
-        db.session.commit()
-        return None
-
-    elif invitation_type == 'resource_owner':
-        if member_id is None:
-            return 'No member id was provided'
-        #check user is the owner of the resource parent poll
-        if not user_owns_parent_poll(member_id):
-            return 'User does not own the parent poll'
-
-        url_id = urandom(16).hex()
-        sql = 'INSERT INTO ResourceMembershipLinks \
-               (member_id, url_id) VALUES (:member_id, :url_id)'
-        db.session.execute(sql, {'member_id': member_id, 'url_id': url_id})
-        db.session.commit()
-        return None
-
-    else:
-        return 'Incorrect invitation type'
+    url_id = urandom(16).hex()
+    sql = 'INSERT INTO MemberAccessLinks \
+           (member_id, url_id) VALUES (:member_id, :url_id)'
+    db.session.execute(sql, {'member_id': member_id, 'url_id': url_id})
+    db.session.commit()
+    return None
 
 def get_invitation_type(url_id):
     sql = 'SELECT COUNT(*) FROM NewCustomerLinks WHERE url_id=:url_id'
@@ -412,19 +401,25 @@ def get_invitation_type(url_id):
     if result[0] == 1:
         return 'poll_customer'
 
-    sql = 'SELECT COUNT(*) FROM ResourceMembershipLinks WHERE url_id=:url_id'
+    sql = 'SELECT COUNT(*) FROM MemberAccessLinks WHERE url_id=:url_id'
     result = db.session.execute(sql, {'url_id': url_id}).fetchone()
     if result[0] == 1:
-        return 'resource_owner'
+        return 'member_access'
 
     return None
 
+def get_new_customer_link_poll_id(url_id):
+    sql = 'SELECT poll_id FROM NewCustomerLinks WHERE url_id=:url_id'
+    poll_id = db.session.execute(sql, {'url_id': url_id}).fetchone()
+    if poll_id is None:
+        return None
+
+    return poll_id[0]
 
 #TODO return named tuple after we know what field are necessary for it
 #we need poll name, poll description, reservation length, poll_id
 def customer_type_details_by_url_id(url_id):
-    sql = 'SELECT poll_name, poll_description, reservation_length, \
-           P.id \
+    sql = 'SELECT P.poll_name, poll_description, P.id \
            FROM Polls P, NewCustomerLinks L \
            WHERE P.id=L.poll_id AND L.url_id=:url_id'
 
@@ -435,12 +430,19 @@ def customer_type_details_by_url_id(url_id):
     return result[0]
 
 
-#we need poll name, poll description, resource description, member_id, poll_id
-def resource_details_by_url_id(url_id):
-    sql = 'SELECT P.poll_name, P.poll_description, R.resource_name, \
-           M.id, P.id \
-           FROM Polls P, PollMembers M, Resources R, ResourceMembershipLinks L \
-           WHERE P.id=M.poll_id AND M.id=R.member_id \
+#we need poll name, poll description, name, member_id, poll_id, member type
+#TODO it's horrible, change after modifying the database more
+def member_details_by_url_id(url_id):
+    sql = 'SELECT P.poll_name, P.poll_description, \
+           COALESCE(C.customer_name, R.resource_name), \
+           M.id, P.id, \
+           CASE \
+           WHEN C.member_id IS NULL THEN \'resource\' \
+           ELSE \'customer\' END \
+           FROM Customers C FULL JOIN Resources R ON FALSE, \
+           Polls P, PollMembers M, MemberAccessLinks L \
+           WHERE P.id=M.poll_id AND \
+           (M.id=R.member_id or M.id=C.member_id)\
            AND M.id=L.member_id AND L.url_id=:url_id'
 
     result = db.session.execute(sql, {'url_id': url_id}).fetchall()
@@ -449,54 +451,73 @@ def resource_details_by_url_id(url_id):
 
     return result[0]
 
-#TODO take invitation as a parameter and not as url_id
-#adds user to a poll and initializes the user time preferences to 0
-#assumes that the url_id is valid
-def apply_new_customer_invitation(url_id):
-    details = customer_type_details_by_url_id(url_id)
+def process_new_customer_url(url_id, reservation_length, customer_name):
+    poll_id = get_new_customer_link_poll_id(url_id)
+    if poll_id is None:
+        return "No poll corresponding to the link found"
 
-    #this should never be possible
-    if details is None:
-        return 'No invitation found'
+    try:
+        reservation_length = int(reservation_length)
+    except ValueError:
+        return 'Reservation length should be an integer'
 
-    #TODO think about doing this differently
-    #TODO split into functions
-    poll_id = details[3]
+    if reservation_length > 24*60:
+        return 'Reservation too long (over 24 hours)'
+    if reservation_length <= 0:
+        return 'Reservation length cannot be negative'
+    if reservation_length%5 != 0:
+        return 'Reservation length should be divisible by 5 min'
 
-    if user_is_customer(poll_id):
-        print('already customer')
-        return 'User is already a customer'
+    if customer_name is None or len(customer_name) == 0:
+        return 'Customer name missing'
+    if len(customer_name) > 30:
+        return 'Customer name too long (over 30 characters)'
 
-    user_id = session['user_id']
-    reservation_length = details[2]
-
-    sql = 'INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id'
-
-    member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
-
-    sql = 'INSERT INTO UsersPollMembers \
-          (user_id, member_id) VALUES \
-          (:user_id, :member_id)'
-
-    db.session.execute(sql, {'user_id': user_id, 'member_id': member_id[0]})
-
-    sql = 'INSERT INTO Customers (member_id, reservation_length) VALUES \
-           (:member_id, :reservation_length)'
-    db.session.execute(sql, {'member_id': member_id[0],
-                             'reservation_length': reservation_length})
-
-    initialize_poll_member_times(member_id[0], poll_id, 0)
+    user_id = session.get('user_id')
+    member_id = add_new_customer(poll_id, reservation_length, customer_name)
+    print('process_new_customer_url ', member_id)
+    give_access_to_member(user_id, member_id)
     db.session.commit()
 
+
+#returns member_id
+#assumes that parameters are correct
+#reservation_length is in minutes
+def add_new_customer(poll_id, reservation_length, customer_name):
+    sql = 'INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id'
+    member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()[0]
+
+    reservation_length = str(reservation_length*60)
+    sql = 'INSERT INTO Customers \
+           (member_id, reservation_length, customer_name) VALUES \
+           (:member_id, :reservation_length, :customer_name)'
+    db.session.execute(sql, {'member_id': member_id,
+                             'reservation_length': reservation_length,
+                             'customer_name': customer_name})
+    initialize_poll_member_times(member_id, poll_id, 0)
+
+    return member_id
+
+def process_access(url_id):
+    member_id = get_member_id(url_id)
+    if member_id is None:
+        return "No member id corresponding to url was found"
+
+    user_id = session['user_id']
+    error = give_access_to_member(user_id, member_id)
+    if error is not None:
+        return error
+
+    db.session.commit()
     return None
 
-#assumes that the url_id is valid
-def apply_resource_invitation(url_id):
-    details = resource_details_by_url_id(url_id)
-    print('invitation details: ', details)
-    user_id = session['user_id']
-    member_id = details[3]
-    return give_access_to_member(user_id, member_id)
+
+def get_member_id(url_id):
+    sql = 'SELECT member_id FROM MemberAccessLinks WHERE url_id=:url_id'
+    member_id = db.session.execute(sql, {'url_id': url_id}).fetchone()
+    if member_id is None:
+        return None
+    return member_id[0]
 
 
 ### Member related functions ###
@@ -576,6 +597,7 @@ def user_has_access(user_id, member_id):
     if count[0] == 0:
         return False
 
+#NOTE fails if user_id is not in users!
 def give_access_to_member(user_id, member_id):
     if user_has_access(user_id, member_id):
         return 'User already has access to the poll member'
@@ -583,7 +605,6 @@ def give_access_to_member(user_id, member_id):
     sql = 'INSERT INTO UsersPollMembers (user_id, member_id) \
            VALUES (:user_id, :member_id)'
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id})
-    db.session.commit()
     return None
 
 def get_resource_name(member_id):
@@ -651,7 +672,7 @@ def process_modify_customer(member_id, reservation_length):
         db.session.commit()
     return error
 
-#reservation_length should be minutes
+#reservation_length should is in minutes
 def update_reservation_length(member_id, reservation_length):
     #to seconds
     length_str = str(reservation_length*60)

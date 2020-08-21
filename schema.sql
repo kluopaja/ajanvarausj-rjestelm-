@@ -32,7 +32,8 @@ CREATE TABLE MemberTimeGrades
 CREATE TABLE Customers
 (
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
-    reservation_length interval
+    reservation_length interval,
+    customer_name TEXT
 );
 CREATE TABLE Resources
 (
@@ -48,10 +49,9 @@ CREATE TABLE UsersPollMembers
 CREATE TABLE NewCustomerLinks
 (
     poll_id INTEGER REFERENCES Polls (id) ON DELETE CASCADE,
-    url_id TEXT,
-    reservation_length interval
+    url_id TEXT
 );
-CREATE TABLE ResourceMembershipLinks
+CREATE TABLE MemberAccessLinks
 (
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
     url_id TEXT

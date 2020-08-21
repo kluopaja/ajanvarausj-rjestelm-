@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sinut on kutsuttu hallinnoimaan roolia kyselyssä:</h2>
+<p>Kyselyn nimi: {{ details[0] }}</p>
+<p>Kyselyn kuvaus: {{ details[1] }}</p>
+<p>Roolin tyyppi:
+{% if details[5] == 'customer' %}
+varaaja
+{% else %}
+resurssi
+{% endif %}
+</p>
+<p>Roolin nimi: {{ details[2] }}</p>
+<form action="/access/{{ url_id }}" method="POST">
+    <input type="submit" value="Hyväksy kutsu">
+    <input type="hidden" name="poll_id" value={{ details[4] }}>
+    <input type="hidden" name="member_id" value={{ details[3] }}>
+</form>
+{% endblock %}
