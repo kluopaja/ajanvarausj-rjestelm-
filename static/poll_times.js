@@ -276,7 +276,6 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         self.selection.y = self.y_to_min(self.mouse.y);
         self.update();
     }
-    
     this.handle_mousedown = function(e) {
         console.log('mousedown');
         self.mouse.update_pos(e);
@@ -296,6 +295,25 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         self.mouse.mouseout();
         self.selection.selectionout();
         self.update();
+    }
+    this.handle_touchstart = function(e) {
+        console.log('touchstart');
+        e.preventDefault();
+        self.handle_mousedown(e);
+    }
+    this.handle_touchmove = function(e) {
+        console.log('touchmove');
+        e.preventDefault();
+        self.handle_mousemove(e);
+    }
+    this.handle_touchend = function(e) {
+        console.log('touchend');
+        e.preventDefault();
+        self.handle_mouseup(e);
+    }
+    //does this need to be handled?
+    this.handle_touchcancel = function(e) {
+        console.log('touchcancel');
     }
 
     //draws and also updates the childs if the state of interface changes
@@ -465,6 +483,11 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
     self.canvas.addEventListener('mousedown', self.handle_mousedown);
     self.canvas.addEventListener('mouseup', self.handle_mouseup);
     self.canvas.addEventListener('mouseout', self.handle_mouseout);
+
+    self.canvas.addEventListener('touchstart', self.handle_touchstart);
+    self.canvas.addEventListener('touchmove', self.handle_touchmove);
+    self.canvas.addEventListener('touchend', self.handle_touchend);
+    self.canvas.addEventListener('touchcancer', self.handle_touchcancel);
 
     self.block_size = block_size;
 }
