@@ -250,9 +250,25 @@ def new_customer(url_id):
         if error is None:
             flash('Uusi asiakas luotu onnistuneesti')
             poll_id = request.form.get('poll_id')
-
             return redirect('/poll/'+poll_id)
+
         return render_template('error.html', message=error)
+
+#cannot user /new_customer for this
+@app.route('/add_customer', methods=['POST'])
+def add_customer():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = process_add_customer(request.form.get('poll_id'),
+                                 request.form.get('reservation_length'),
+                                 request.form.get('customer_name'))
+    if error is None:
+        flash('Uusi asiakas luotu onnistuneesti')
+        poll_id = request.form.get('poll_id')
+        return redirect('/poll/'+poll_id+'/owner')
+
+    return render_template('error.html', message=error)
 
 @app.route('/access/<url_id>', methods=['POST', 'GET'])
 def access(url_id):

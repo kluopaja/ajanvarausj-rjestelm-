@@ -455,7 +455,9 @@ def process_new_customer_url(url_id, reservation_length, customer_name):
     poll_id = get_new_customer_link_poll_id(url_id)
     if poll_id is None:
         return "No poll corresponding to the link found"
+    return process_add_customer(poll_id, reservation_length, customer_name)
 
+def process_add_customer(poll_id, reservation_length, customer_name):
     try:
         reservation_length = int(reservation_length)
     except ValueError:
@@ -478,7 +480,7 @@ def process_new_customer_url(url_id, reservation_length, customer_name):
     print('process_new_customer_url ', member_id)
     give_access_to_member(user_id, member_id)
     db.session.commit()
-
+    return None
 
 #returns member_id
 #assumes that parameters are correct

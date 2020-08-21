@@ -56,7 +56,19 @@
 </tr>
 {% endfor %}
 </table>
-
+<h2>Luo uusi varausrooli</h2>
+<form action="/add_customer" method="POST">
+    <label for="reservation_length">Varattavan ajan pituus:</label>
+    <input type="number" id="reservation_length"
+           name="reservation_length" min=5 value=60 step=5>
+    <label for="customer_name">
+        Varaajaroolin nimi
+    </label>
+    <input type="text" id="customer_name" name="customer_name">
+    <br>
+    <input type="submit" value="Luo varaajarooli">
+    <input type="hidden" name="poll_id" value={{ poll.poll_id}}>
+</form>
 <h2>Linkit uusien vastaajien kutsumiseksi:</h2>
 <p>Nämä antavat käyttäjälle oikeuden luoda kyselyyn uusia vastaajarooleja</p>
 <ul>
