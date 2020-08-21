@@ -322,7 +322,6 @@ def modity_customer():
     else:
         return render_template('error.html', message=error)
 
-
 @app.route('/new_resource', methods=['POST'])
 def new_resource():
     if 'user_id' not in session:
@@ -350,6 +349,32 @@ def delete_member():
     if error is None:
         flash('Jäsenen poisto onnistui')
         return redirect('/poll/'+request.form.get('poll_id', 0)+'/owner')
+    else:
+        return render_template('error.html', message=error)
+
+@app.route('/delete_new_customer_link', methods=['POST'])
+def delete_new_customer_link():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = process_delete_new_customer_link(request.form.get('url_id'))
+
+    if error is None:
+        flash('Linkin poisto onnistui')
+        return redirect('/poll/'+request.form.get('poll_id', 0) + '/owner')
+    else:
+        return render_template('error.html', message=error)
+
+@app.route('/delete_member_access_link', methods=['POST'])
+def delete_member_access_link():
+    if 'user_id' not in session:
+        return render_template('login.html', need_login_redirect=True)
+
+    error = process_delete_member_access_link(request.form.get('url_id'))
+
+    if error is None:
+        flash('Linkin poisto onnistui')
+        return redirect('/poll/'+request.form.get('poll_id', 0) + '/owner')
     else:
         return render_template('error.html', message=error)
 

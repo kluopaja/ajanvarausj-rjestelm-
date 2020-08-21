@@ -511,13 +511,55 @@ def process_access(url_id):
     db.session.commit()
     return None
 
-
 def get_member_id(url_id):
     sql = 'SELECT member_id FROM MemberAccessLinks WHERE url_id=:url_id'
     member_id = db.session.execute(sql, {'url_id': url_id}).fetchone()
     if member_id is None:
         return None
     return member_id[0]
+
+def process_delete_new_customer_link(url_id):
+    user_id = session.get('user_id')
+    error = delete_new_customer_link(url_id, user_id)
+    if error is not None:
+        return error
+    db.session.commit()
+    return None
+
+def delete_new_customer_link(url_id, owner_user_id):
+    sql = 'DELETE FROM NewCustomerLinks L USING Polls P \
+            WHERE P.id=L.poll_ID AND P.owner_user_id=:owner_user_id AND \
+            L.url_id=:url_id RETURNING 1'
+    deleted = db.session.execute(sql, {'url_id': url_id,
+                                     'owner_user_id': owner_user_id})
+    deleted = deleted.fetchone()
+
+    if deleted is None:
+        return "User does not own the link or the link doesn't exist"
+
+    return None
+
+def process_delete_member_access_link(url_id):
+    user_id = session.get('user_id')
+    error = delete_member_access_link(url_id, user_id)
+    if error is not None:
+        return error
+    db.session.commit()
+    return None
+
+def delete_member_access_link(url_id, owner_user_id):
+    sql = 'DELETE FROM MemberAccessLinks L USING Polls P, PollMembers M \
+           WHERE P.id=M.poll_id AND M.id=L.member_id \
+           AND P.owner_user_id=:owner_user_id AND \
+           L.url_id=:url_id RETURNING 1'
+    deleted = db.session.execute(sql, {'url_id': url_id,
+                                     'owner_user_id': owner_user_id})
+    deleted = deleted.fetchone()
+
+    if deleted is None:
+        return "User does not own the link or the link doesn't exist"
+
+    return None
 
 
 ### Member related functions ###

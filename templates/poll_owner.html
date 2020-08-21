@@ -46,6 +46,13 @@
     <td>{{ url_for('access', url_id=link[0], _external=True) }}</td>
     <td>{{ link[1] }}</td>
     <td>{{ link[2] }}</td>
+    <td>
+    <form action="/delete_member_access_link" method="POST">
+        <input type="submit" value="Poista linkki">
+        <input type="hidden" name="url_id" value={{ link[0] }}>
+        <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    </form>
+    </td>
 </tr>
 {% endfor %}
 </table>
@@ -56,7 +63,16 @@
 <table>
 <tr><th>Url</th></tr>
 {% for link in new_customer_links %}
-<tr><td>{{ url_for('new_customer', url_id=link[0], _external=True) }}</td></tr>
+<tr>
+    <td>{{ url_for('new_customer', url_id=link[0], _external=True) }}</td>
+    <td>
+    <form action="/delete_new_customer_link" method="POST">
+        <input type="submit" value="Poista linkki">
+        <input type="hidden" name="url_id" value={{ link[0] }}>
+        <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    </form>
+    </td>
+</tr>
 {% endfor %}
 </table>
 
@@ -108,6 +124,13 @@
     <td>{{ url_for('access', url_id=link[0], _external=True) }}</td>
     <td>{{ link[1] }}</td>
     <td>{{ link[2] }}</td>
+    <td>
+    <form action="/delete_member_access_link" method="POST">
+        <input type="submit" value="Poista linkki">
+        <input type="hidden" name="url_id" value={{ link[0] }}>
+        <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    </form>
+    </td>
 </tr>
 {% endfor %}
 </table>
