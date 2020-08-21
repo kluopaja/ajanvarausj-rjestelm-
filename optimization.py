@@ -53,9 +53,9 @@ def optimize_poll(poll_id):
     if len(customers) == 0:
         return ([], 0)
     customer_times, customer_ids, reservation_lengths = zip(*customers)
-    
 
-    
+
+
     #TODO use get poll range
     print(customer_times)
     print('customer times', customer_times[0])
@@ -102,7 +102,7 @@ def intervals_to_array(time_intervals, start, end):
             arr[i] = x.grade
             i += 1
     return arr
-    
+
 
 #returns an array v
 #v[i] is the satisfaction of user if the booking start
@@ -123,7 +123,7 @@ def calculate_satisfaction_sum(arr, res_length):
         else:
             v[i] = mean_satisfaction
     return v
-    
+
 #simple greedy algoritm
 #goes through the customers one by one and assigns them to
 # 1. best time for that customer
@@ -163,7 +163,7 @@ def greedy_1(resources, customers):
     #print(customer_m_ids, reservation_lengths, customer_times)
 
 
-    customer_sums = [calculate_satisfaction_sum(x, y) 
+    customer_sums = [calculate_satisfaction_sum(x, y)
                     for x, y in zip(customer_times, reservation_lengths)]
 
     #print(customer_sums)
@@ -182,7 +182,7 @@ def greedy_1(resources, customers):
         #print('best ', best)
         if best == (0, 0, 0):
             continue
-        
+
         for j in range(best[1], best[1]+length):
             resource_times[best[2]][j] = 0
 
@@ -226,11 +226,13 @@ def save_optimization(assignments, poll_id):
     db.session.commit()
 
 
-OptimizationResult = namedtuple('OptimizationResult', ['username', 
-                                                      'resource_description',
-                                                      'time'])
-#return customer_member_id, customer_member_name, resource_member_id, 
-#       resource_member_name, time_start
+OptimizationResult = namedtuple('OptimizationResult',
+                                ['customer_member_id',
+                                 'customer_member_name',
+                                 'resource_member_id',
+                                 'resource_member_name',
+                                 'time'])
+
 def get_optimization_results(poll_id):
     sql = 'SELECT P1.id, P1.name, P2.id, P2.name, O.time_start \
            FROM PollMembers P1, PollMembers P2, OptimizationResults O \
@@ -242,4 +244,3 @@ def get_optimization_results(poll_id):
         return []
 
     return [OptimizationResult(*x) for x in results]
-           

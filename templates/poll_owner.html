@@ -165,10 +165,18 @@
 <h2>Optimoinnin tulokset:</h2>
 {% if optimization_results|length > 0 %}
 <table>
-    <tr><th>Käyttäjänimi</th><th>Resurssin kuvaus</th><th>Aika</th></tr>
+    <tr><th>Käyttäjänimi</th>
+        <th>Käyttäjän id</th>
+        <th>Resurssin kuvaus</th>
+        <th>Resurssin id</th>
+        <th>Varauksen alkuaika</th>
+    </tr>
 {% for result in optimization_results %}
     <tr>
-        <td>{{ result.username }}</td><td>{{ result.resource_name }}</td>
+        <td>{{ result.customer_member_name }}</td>
+        <td>{{ result.customer_member_id }}</td>
+        <td>{{ result.resource_member_name }}</td>
+        <td>{{ result.resource_member_id }}</td>
         <td>{{ result.time }}</td>
     </tr>
 {% endfor %}
@@ -176,5 +184,4 @@
 {% else %}
 <p>Ei tuloksia tai optimointia ei ole suoritettu</p>
 {% endif %}
-
 {% endblock %}
