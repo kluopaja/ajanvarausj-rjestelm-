@@ -19,7 +19,8 @@ CREATE TABLE Polls
 CREATE TABLE PollMembers
 (
     id SERIAL PRIMARY KEY,
-    poll_id INTEGER REFERENCES Polls (id) ON DELETE CASCADE
+    poll_id INTEGER REFERENCES Polls (id) ON DELETE CASCADE,
+    name TEXT
 );
 CREATE TABLE MemberTimeGrades
 (
@@ -32,13 +33,10 @@ CREATE TABLE MemberTimeGrades
 CREATE TABLE Customers
 (
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
-    reservation_length interval,
-    customer_name TEXT
+    reservation_length interval
 );
 CREATE TABLE Resources
 (
-    --Note this cannot be UNIQUE because same names can be used in many polls
-    resource_name TEXT,
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE 
 );
 CREATE TABLE UsersPollMembers

@@ -119,10 +119,9 @@ def poll_times(poll_id, member_id):
 
     member_type = get_member_type(member_id)
     member_times = times.get_minute_grades(member_id, poll_id)
-    member_name = ''
+    member_name = get_member_name(member_id)
     reservation_length = 0
     if member_type == 'resource':
-        member_name = get_resource_name(member_id)
         grade_descriptions = ['Ei käytettävissä', 'Käytettävissä']
 
     if member_type == 'customer':

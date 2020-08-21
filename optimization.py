@@ -229,13 +229,13 @@ def save_optimization(assignments, poll_id):
 OptimizationResult = namedtuple('OptimizationResult', ['username', 
                                                       'resource_description',
                                                       'time'])
+#return customer_member_id, customer_member_name, resource_member_id, 
+#       resource_member_name, time_start
 def get_optimization_results(poll_id):
-    sql = 'SELECT U.username, R.resource_name, O.time_start \
-           FROM PollMembers P1, PollMembers P2, UsersPollMembers M, Users U, \
-           Resources R, OptimizationResults O \
+    sql = 'SELECT P1.id, P1.name, P2.id, P2.name, O.time_start \
+           FROM PollMembers P1, PollMembers P2, OptimizationResults O \
            WHERE P1.id=O.customer_member_id AND P2.id=O.resource_member_id \
-           AND P1.id=M.member_id AND M.user_id=U.id \
-           AND P2.id=R.member_id AND P1.poll_id=:poll_id'
+           AND P1.poll_id=:poll_id'
 
     results = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     if results is None:

@@ -270,7 +270,7 @@ def get_user_poll_customer_member_ids(user_id, poll_id):
 #Now they just return some random things... Maybe only member_ids?
 #TODO look at user.get_user_poll_member_ids and similar to these
 def get_user_poll_resources(user_id, poll_id):
-    sql = 'SELECT R.resource_name, M.id FROM \
+    sql = 'SELECT M.name, M.id FROM \
            PollMembers M, UsersPollMembers U, Resources R WHERE \
            M.id=R.member_id AND M.id=U.member_id \
            AND M.poll_id=:poll_id AND U.user_id=:user_id'
@@ -283,7 +283,7 @@ def get_user_poll_resources(user_id, poll_id):
     return resources
 
 def get_poll_resources(poll_id):
-    sql = 'SELECT R.resource_name, M.id FROM \
+    sql = 'SELECT M.name, M.id FROM \
            PollMembers M, Resources R WHERE \
            M.id=R.member_id AND M.poll_id=:poll_id'
 
@@ -308,7 +308,7 @@ def get_user_poll_customers(user_id, poll_id):
     return customers
 
 def get_poll_customers(poll_id):
-    sql = 'SELECT P.id, C.reservation_length, C.customer_name \
+    sql = 'SELECT P.id, C.reservation_length, P.name \
            FROM PollMembers P, Customers C \
            WHERE P.id=C.member_id AND P.poll_id=:poll_id'
 
@@ -319,20 +319,18 @@ def get_poll_customers(poll_id):
 
     return customers
 
-def resource_name_in_poll(poll_id, resource_name):
+def resource_name_in_poll(poll_id, resource_member_name):
     sql = 'SELECT COUNT(*) FROM PollMembers M, Resources R \
            WHERE M.id=R.member_id AND M.poll_id=:poll_id \
-           AND R.resource_name=:resource_name'
+           AND M.name=:resource_member_name'
 
     tmp = db.session.execute(sql,
                             {'poll_id': poll_id,
-                             'resource_name': resource_name})
+                             'resource_member_name': resource_member_name})
     count = tmp.fetchone()
     if count[0] == 1:
         return True
-
     return False
-
 
 def get_new_customer_links(poll_id):
     sql = 'SELECT url_id FROM NewCustomerLinks\
@@ -345,7 +343,7 @@ def get_new_customer_links(poll_id):
     return invitations
 
 def get_customer_access_links(poll_id):
-    sql = 'SELECT L.url_id, C.customer_name, P.id, C.reservation_length \
+    sql = 'SELECT L.url_id, P.name, P.id, C.reservation_length \
            FROM PollMembers P, Customers C, MemberAccessLinks L \
            WHERE P.poll_id=:poll_id AND P.id=C.member_id \
            AND P.id=L.member_id'
@@ -354,7 +352,7 @@ def get_customer_access_links(poll_id):
     return access_links
 
 def get_resource_access_links(poll_id):
-    sql = 'SELECT L.url_id, R.resource_name, P.id \
+    sql = 'SELECT L.url_id, P.name, P.id \
            FROM PollMembers P, Resources R, MemberAccessLinks L \
            WHERE P.poll_id=:poll_id AND P.id=R.member_id \
            AND P.id=L.member_id'
@@ -434,8 +432,7 @@ def customer_type_details_by_url_id(url_id):
 #TODO it's horrible, change after modifying the database more
 def member_details_by_url_id(url_id):
     sql = 'SELECT P.poll_name, P.poll_description, \
-           COALESCE(C.customer_name, R.resource_name), \
-           M.id, P.id, \
+           M.name, M.id, P.id, \
            CASE \
            WHEN C.member_id IS NULL THEN \'resource\' \
            ELSE \'customer\' END \
@@ -485,19 +482,19 @@ def process_add_customer(poll_id, reservation_length, customer_name):
 #returns member_id
 #assumes that parameters are correct
 #reservation_length is in minutes
-def add_new_customer(poll_id, reservation_length, customer_name):
-    sql = 'INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id'
-    member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()[0]
+def add_new_customer(poll_id, reservation_length, name):
+    sql = 'INSERT INTO PollMembers (poll_id, name) \
+           VALUES (:poll_id, :name) RETURNING id'
+    member_id = db.session.execute(sql, {'poll_id': poll_id,
+                                         'name': name}).fetchone()[0]
 
     reservation_length = str(reservation_length*60)
     sql = 'INSERT INTO Customers \
-           (member_id, reservation_length, customer_name) VALUES \
-           (:member_id, :reservation_length, :customer_name)'
+           (member_id, reservation_length) VALUES \
+           (:member_id, :reservation_length)'
     db.session.execute(sql, {'member_id': member_id,
-                             'reservation_length': reservation_length,
-                             'customer_name': customer_name})
+                             'reservation_length': reservation_length})
     initialize_poll_member_times(member_id, poll_id, 0)
-
     return member_id
 
 def process_access(url_id):
@@ -651,9 +648,8 @@ def give_access_to_member(user_id, member_id):
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id})
     return None
 
-def get_resource_name(member_id):
-    sql = 'SELECT R.resource_name FROM PollMembers P, Resources R \
-           WHERE P.id=R.member_id AND P.id=:member_id'
+def get_member_name(member_id):
+    sql = 'SELECT name FROM PollMembers WHERE id=:member_id'
 
     result = db.session.execute(sql, {'member_id': member_id}).fetchone()
     if result is None:
@@ -678,14 +674,16 @@ def process_new_resource(poll_id, resource_name):
         return 'Resource with an identical resource name already \
                 exists in the poll'
 
-    sql = 'INSERT INTO PollMembers (poll_id) VALUES (:poll_id) RETURNING id'
-    member_id = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
+    sql = 'INSERT INTO PollMembers (poll_id, name) VALUES \
+           (:poll_id, :resource_name) RETURNING id'
+    result = db.session.execute(sql, {'poll_id': poll_id,
+                                         'resource_name': resource_name})
+    member_id = result.fetchone()
 
-    sql = 'INSERT INTO Resources (resource_name, member_id) \
-            VALUES (:resource_name, :member_id)'
+    sql = 'INSERT INTO Resources (member_id) \
+            VALUES (:member_id)'
 
-    db.session.execute(sql, {'resource_name': resource_name,
-                             'member_id': member_id[0]})
+    db.session.execute(sql, {'member_id': member_id[0]})
 
     initialize_poll_member_times(member_id[0], poll_id, 0)
     db.session.commit()
