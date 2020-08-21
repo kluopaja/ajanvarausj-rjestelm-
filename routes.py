@@ -27,6 +27,8 @@ def poll(poll_id):
         current_poll = current_poll[0]
 
     is_owner = user_owns_poll(poll_id)
+    if is_owner:
+        return redirect('/poll/'+str(poll_id)+'/owner')
 
     user_id = session.get('user_id')
     user_customers = get_user_poll_customers(user_id, poll_id)
