@@ -260,11 +260,6 @@ def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
         return 'Incorrect time format'
 
 
-    try:
-        time_grade = int(time_grade);
-    except:
-        return "Time grade not an integer"
-    print("fallback ", member_id, start, end, time_grade);
 
     error = process_new_grading(member_id, start, end, date, time_grade);
     if error is None:
