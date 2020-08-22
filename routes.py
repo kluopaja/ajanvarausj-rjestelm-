@@ -51,17 +51,12 @@ def poll_owner(poll_id):
     #list of (resource_description, resource_id)
     resources = None
 
-    current_poll = get_polls_by_ids([poll_id])
-    if len(current_poll) == 0:
-        current_poll = None
-    else:
-        current_poll = current_poll[0]
-
     is_owner = user_owns_poll(poll_id)
-
     if not is_owner:
         error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
         return render_template('error.html', message=error)
+
+    current_poll = get_polls_by_ids([poll_id])[0]
 
     #note that we already know that poll_id is an integer
     new_customer_links = get_new_customer_links(poll_id)
