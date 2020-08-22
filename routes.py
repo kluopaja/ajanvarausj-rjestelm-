@@ -18,13 +18,10 @@ def poll(poll_id):
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
-    #TODO
-    #some check that user has any rights to see this poll
-    current_poll = get_polls_by_ids([poll_id])
-    if len(current_poll) == 0:
-        current_poll = None
-    else:
-        current_poll = current_poll[0]
+    current_poll = process_get_poll(poll_id)
+    if current_poll is None:
+        message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
+        return render_template('error.html', message=message)
 
     is_owner = user_owns_poll(poll_id)
     if is_owner:
@@ -89,14 +86,14 @@ def poll_results(poll_id):
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
-    current_poll = get_polls_by_ids([poll_id])
-    if len(current_poll) == 0:
-        current_poll = None
-    else:
-        current_poll = current_poll[0]
+    current_poll = process_get_poll(poll_id)
+    if current_poll is None:
+        message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
+        return render_template('error.html', message=message)
 
     return render_template('poll_results.html',
                            poll=current_poll);
+
 @app.route('/poll/<int:poll_id>/<int:member_id>/times')
 def poll_times(poll_id, member_id):
     if 'user_id' not in session:

@@ -183,6 +183,20 @@ def get_poll_customer_members(poll_id):
 #TODO think about which of these following 4 should take user id as a parameter
 #should this take some parameter?
 
+#assumes that poll_id is an integer
+def process_get_poll(poll_id):
+    user_id = session.get('user_id', 0)
+    sql = 'SELECT P.* FROM Polls P, PollMembers M, UsersPollMembers U \
+           WHERE P.id=M.poll_id AND M.id=U.member_id AND \
+           (P.owner_user_id=:user_id OR U.user_id=:user_id) AND \
+           P.id=:poll_id LIMIT 1'
+    result = db.session.execute(sql, {'poll_id': poll_id, 'user_id': user_id})
+    poll = result.fetchone()
+    print(poll)
+    if poll is None:
+        return None
+    return db_tuple_to_poll(poll)
+
 def get_user_polls():
     tmp = get_user_poll_ids()
     return get_polls_by_ids(tmp)
