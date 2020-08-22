@@ -128,6 +128,9 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
         return 'Poll end should not be in the past'
 
+    if last_date - first_date > datetime.timedelta(days=31):
+        return 'Poll date range cannot be longer than 31 days'
+
     #TODO be more descriptivie
     if name is None or len(name) < 1 or len(name) > 30:
         return 'Not valid poll name'
@@ -165,7 +168,6 @@ def get_poll_resource_members(poll_id):
 
     return [x[0] for x in member_ids]
 
-
 #returns list of member_ids
 def get_poll_customer_members(poll_id):
     sql = 'SELECT M.id FROM PollMembers M, Customers C \
@@ -175,7 +177,6 @@ def get_poll_customer_members(poll_id):
         return []
 
     return [x[0] for x in member_ids]
-
 
 #returns ids of all polls that user somehow part of
 #(either owner, participant or owner of a resource)
@@ -453,7 +454,6 @@ def customer_type_details_by_url_id(url_id):
 
     return result[0]
 
-
 #we need poll name, poll description, name, member_id, poll_id, member type
 #TODO it's horrible, change after modifying the database more
 def member_details_by_url_id(url_id):
@@ -586,8 +586,8 @@ def delete_member_access_link(url_id, owner_user_id):
 
     return None
 
-
 ### Member related functions ###
+
 def get_customer_reservation_length(member_id):
     sql = 'SELECT reservation_length FROM Customers WHERE member_id=:member_id'
     length = db.session.execute(sql, {'member_id': member_id}).fetchone()
