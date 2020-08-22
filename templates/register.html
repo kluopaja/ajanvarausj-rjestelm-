@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="register">
 <h3>Uusi käyttäjä</h3>
 <form action="/register" method="post">
 <ul>
     <li>
-        <label for="username">Käyttäjätunnus. 
-        Käyttäjätunnuksen tulee sisältää 1-20 merkkiä. 
-        Käyttäjätunnus saa sisältää isoja ja pieniä kirjaimia, sekä numeroita.
-        </label>
+        <label for="username">Käyttäjätunnus</label>
+            <p>Käyttäjätunnuksen tulee olla 1-20 merkkiä pitkä.
+            Se saa sisältää isoja ja
+            pieniä kirjaimia sekä numeroita.</p>
         <input type="text" name="username" id="username" autofocus>
         <span id="username_error" aria-live="polite"></span>
     </li>
@@ -27,5 +28,6 @@
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </ul>
 </form>
+</div>
 <script type="text/javascript" src="/static/register.js"></script>
 {% endblock %}
