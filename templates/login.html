@@ -7,12 +7,13 @@
 {% if message  %}
 <p>{{ message }}</p>
 {% endif %}
+<div class="login">
 <h3>Kirjaudu sisään</h3>
 <form action="/login" method="post">
 <ul>
     <li>
         <label for="username">Käyttäjätunnus:</label>
-        <input type="text" name="username" id="username">
+        <input type="text" name="username" id="username" autofocus>
     </li>
     <li>
     <label for="password">Salasana:</label>
@@ -23,5 +24,6 @@
     </li>
 </ul>
 </form>
+</div>
 
 {% endblock %}

@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="index">
 <h2>Tervetuloa ajanvaraussivulle!</h2>
 <p>Täällä voit perustaa ajanvarauskyselyitä ja jakaa niitä
 muille käyttäjille.
 </p>
-<table>
+<h3>Omat kyselyt:</h3>
+{% if polls|length > 0 %}
+<table class="frontpage_table">
+
     <tr>
         <th>Nimi</th><th>id</th><th>Kuvaus</th>
     </tr>
@@ -24,4 +28,8 @@ muille käyttäjille.
 </tr>
 {% endfor %}
 </table>
+{% else %}
+<p>Ei kyselyitä</p>
+{% endif %}
+</div>
 {% endblock %}

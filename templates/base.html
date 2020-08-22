@@ -2,28 +2,53 @@
 <html>
     <head>
         <title>Ajanvarausjärjestelmä</title>
-        <link href="/static/style.css" rel="stylesheet">
+        <link href="/static/style.css" rel="stylesheet"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-        <a href="/">Etusivu</a>
-        {% if session['user_id'] %}
-        <a href="/new_poll">Luo uusi kysely</a>
-        Käyttäjä: {{ session['username'] }}
-        <a href="/logout">Kirjaudu ulos</a>
-        {% else %}
-        <a href="/login">Kirjaudu sisään</a> 
-        <a href="/register">Uusi käyttäjä</a>
-        {% endif %}
-        <hr>
-        {% with messages = get_flashed_messages() %}
+        <nav class="menu">
+            <div class="main_menu">
             <ul>
+            <li><a href="/">Etusivu</a></li>
+            {% if session.get('user_id') %}
+                <li>
+                <a href="/new_poll">Luo uusi kysely</a>
+                </li>
+            {% endif %}
+            </ul>
+            </div>
+
+            <div class="login_menu">
+                <ul>
+                {% if session.get('user_id') %}
+                    <li>
+                        Käyttäjä: <b>{{ session['username'] }}</b></li>
+                    <li>
+                    <a href="/logout">Kirjaudu ulos</a>
+                    </li>
+                {% else %}
+                    <li>
+                    <a href="/login">Kirjaudu sisään</a>
+                    </li>
+                    <li>
+                    <a href="/register">Uusi käyttäjä</a>
+                    </li>
+                {% endif %}
+                </ul>
+            </div>
+            <div class="clearer"></div>
+        </nav>
+        <div class="flash">
+        {% with messages = get_flashed_messages() %}
             {% if messages %}
+                <ul>
                 {% for message in messages %}
                     <li>{{ message }}</li>
                 {% endfor %}
+                </ul>
             {% endif %}
-            </ul>
         {% endwith %}
+        </div>
         {% block content %}{% endblock %}
 
     </body>

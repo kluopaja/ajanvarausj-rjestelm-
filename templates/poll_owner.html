@@ -2,8 +2,10 @@
 {% block content %}
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
+<div class="poll_owner">
 {% if customers|length > 0 %}
 <h1>Kyselyn varausroolit</h1>
+<div class="section">
 <table>
     <tr><th>Varausroolin nimi</th><th>id</th><th>Varauksen kesto</th>
 {% for customer in customers %}
@@ -34,10 +36,37 @@
 </tr>
 {% endfor %}
 </table>
+</div>
 {% endif %}
-</table>
+
+
+<h2>Luo uusi varausrooli</h2>
+<div class="section">
+<form class="add_customer_form" action="/add_customer" method="POST">
+    <ul>
+    <li>
+    <label for="reservation_length">Varattavan ajan pituus:</label>
+    <input type="number" id="reservation_length"
+           name="reservation_length" min=5 value=60 step=5>
+    </li>
+    </i>
+    <label for="customer_name">
+        Varaajaroolin nimi
+    </label>
+    <input type="text" id="customer_name" name="customer_name">
+    </li>
+    <br>
+    <li>
+    <input type="submit" value="Luo varaajarooli">
+    </li>
+    <input type="hidden" name="poll_id" value={{ poll.poll_id}}>
+    </ul>
+</form>
+</div>
+
 
 <h2>Varauksenmuokkauslinkit</h2>
+<div class="section">
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn varausroolin aikoja</p>
 <table>
     <tr><th>Url</th><th>Varausroolin nimi</th><th>id</th></tr>
@@ -55,23 +84,14 @@
     </td>
 </tr>
 {% endfor %}
+<br>
 </table>
-<h2>Luo uusi varausrooli</h2>
-<form action="/add_customer" method="POST">
-    <label for="reservation_length">Varattavan ajan pituus:</label>
-    <input type="number" id="reservation_length"
-           name="reservation_length" min=5 value=60 step=5>
-    <label for="customer_name">
-        Varaajaroolin nimi
-    </label>
-    <input type="text" id="customer_name" name="customer_name">
-    <br>
-    <input type="submit" value="Luo varaajarooli">
-    <input type="hidden" name="poll_id" value={{ poll.poll_id}}>
-</form>
+</div>
+
+
 <h2>Linkit uusien vastaajien kutsumiseksi:</h2>
+<div class="section">
 <p>Nämä antavat käyttäjälle oikeuden luoda kyselyyn uusia vastaajarooleja</p>
-<ul>
 <table>
 <tr><th>Url</th></tr>
 {% for link in new_customer_links %}
@@ -87,15 +107,18 @@
 </tr>
 {% endfor %}
 </table>
+</div>
 
-<form action="/new_new_customer_link" method="post">
 <h2>Luo vastaajaroolien luomiseen oikeuttava linkki</h2>
-<ul>
+<div class="section">
+<form action="/new_new_customer_link" method="post">
     <input type="submit" value="Luo linkki">
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
-</ul>
 </form>
+</div>
+<hr>
 <h1>Resurssit</h1>
+<div class="section">
 <table>
 <tr>
     <th>Resurssin id</th><th>Resurssin kuvaus</th>
@@ -127,7 +150,28 @@
 </tr>
 {% endfor %}
 </table>
+</div>
+
+
+<h2>Luo uusi resurssi:</h2>
+<div class="section">
+<form action="/new_resource" method="post">
+<ul>
+    <li>
+    <label for="resource_name">Resurssin nimi:</label>
+    <input type="text" name="resource_name" id="resource_name">
+    </li>
+    <li>
+    <input type="submit" value="Luo resurssi">
+    </li>
+    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+</ul>
+</form>
+</div>
+
+
 <h2>Resurssimuokkauslinkit</h2>
+<div class="section">
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn resurssin aikoja</p>
 <table>
     <tr><th>Url</th><th>Resurssin nimi</th><th>id</th></tr>
@@ -146,23 +190,20 @@
 </tr>
 {% endfor %}
 </table>
-
-<h2>Luo uusi resurssi:</h2>
-<form action="/new_resource" method="post">
-    <label for="resource_name">Resurssin nimi:</label>
-    <input type="text" name="resource_name" id="resource_name">
-    <input type="submit" value="Luo resurssi">
-    <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
-</form>
+</div>
 
 
 
+<hr>
 <h1>Optimointi</h1>
+<div class="section">
 <form action="/optimize_poll" method="post">
     <input type="submit" value="Optimoi ajanvaraukset">
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
 </form>
+</div>
 <h2>Optimoinnin tulokset:</h2>
+<div class="section">
 {% if optimization_results|length > 0 %}
 <table>
     <tr><th>Käyttäjänimi</th>
@@ -184,4 +225,6 @@
 {% else %}
 <p>Ei tuloksia tai optimointia ei ole suoritettu</p>
 {% endif %}
+</div>
+</div>
 {% endblock %}

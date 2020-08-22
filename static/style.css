@@ -1,9 +1,143 @@
+body {
+    background: whitesmoke;
+    font-family: "Courier New";
+    color: black;
+    margin: auto;
+    max-width: 60em;
+}
+button {
+    font-family: "Courier New";
+}
+input, textarea {
+    font-family: "Courier New";
+    background: whitesmoke;
+    color: black;
+    border-style: solid;
+    border-color: silver;
+    font-size: 1em;
+}
+input:focus {
+    outline: none;
+}
+input[type=submit]{
+    background: whitesmoke;
+    color: black;
+    font-size: 1em;
+}
+input:focus, textarea:focus {
+    background: gainsboro;
+    border-color: black;
+}
+/*
+textarea::selection, input::selection  {
+    background: black;
+    color: whitesmoke;
+}
+*/
+input[type=submit]:hover{
+    background: gainsboro;
+    border-color: black;
+}
+.clearer {
+    clear: both;
+}
+.menu {
+    background: silver;
+    color: #000000;
+}
+.menu ul {
+    margin: 0 0.1em 0 0em;
+    padding: 0;
+    list-style: none;
+    display: inline;
+}
+.menu li {
+    display: inline;
+    float: left;
+}
+.menu li:after {
+    content: "|";
+
+}
+.menu li:last-child:after {
+    content: "";
+}
+.menu li a {
+    text-decoration: none;
+    color: black;
+}
+.menu li a:hover {
+    color: whitesmoke;
+    background: black;
+}
+.main_menu {
+    float: left;
+}
+.login_menu {
+    float: right;
+}
+.menu_line {
+    clear: both;
+}
+.index p {
+    padding: 0 0 0 1em;
+
+}
+.frontpage_table {
+    padding: 0 0 0 1em;
+}
+.flash li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.flash ul {
+    margin: 0.2em 0 0 0;
+    padding: 0 0 0 0em;
+    background: gainsboro;
+    font-weight: bold;
+}
+
+.new_poll ul {
+    padding: 0 0 0 1em;
+    margin: 0;
+}
+.new_poll li {
+    list-style: none;
+    padding: 0 0 1em 0;
+}
+.new_poll label {
+    display: block;
+    font-weight: bold;
+}
+.new_poll input[type=submit] {
+}
+.login ul {
+    padding: 0 0 0 1em;
+    margin 0;
+}
+.login li {
+    list-style: none;
+    padding: 0 0 1em 0;
+}
+.login label {
+    display: block;
+}
+.poll_owner .section {
+    padding: 0 0 3em 1em;
+}
+.poll_owner .section ul, li{
+    display: block;
+    padding: 0 0 0 0;
+}
+
 form {
     padding: 0 0 0 0;
     /*border: 1px solid #CCC;
     border-radius:1em;
     */
 }
+/*
 ul {
     list-style: none;
     padding: 0;
@@ -17,3 +151,4 @@ label {
     margin-bottom: 0.2em;
 }
 
+*/
