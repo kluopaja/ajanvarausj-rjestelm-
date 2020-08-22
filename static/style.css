@@ -14,13 +14,14 @@ input, textarea {
     color: black;
     border-style: solid;
     border-color: silver;
+    border-width: 2px;
     font-size: 1em;
-}
-input:focus {
+
     outline: none;
 }
 input[type=submit]{
     background: whitesmoke;
+    border-width: 3px;
     color: black;
     font-size: 1em;
 }
