@@ -295,7 +295,7 @@ def get_poll_resources(poll_id):
 
 #need member_id, reservation_length, (customer_name, TODO)
 def get_user_poll_customers(user_id, poll_id):
-    sql = 'SELECT P.id, C.reservation_length FROM PollMembers P, UsersPollMembers U, \
+    sql = 'SELECT P.id, C.reservation_length, P.name FROM PollMembers P, UsersPollMembers U, \
            Customers C \
            WHERE P.id=U.member_id AND P.id=C.member_id AND \
            P.poll_id=:poll_id AND U.user_id=:user_id'
