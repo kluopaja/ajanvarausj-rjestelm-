@@ -1,12 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-{% if need_login_redirect %}
-<h3>Virhe!</h3>
-<p>Kirjaudu ensin sisään</p>
-{% endif %}
-{% if message  %}
-<p>{{ message }}</p>
-{% endif %}
 <div class="login">
 <h3>Kirjaudu sisään</h3>
 <form action="/login" method="post">

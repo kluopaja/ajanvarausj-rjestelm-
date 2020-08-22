@@ -16,7 +16,8 @@ def index():
 @app.route('/poll/<int:poll_id>')
 def poll(poll_id):
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     current_poll = process_get_poll(poll_id)
     if current_poll is None:
@@ -42,7 +43,8 @@ def poll(poll_id):
 @app.route('/poll/<int:poll_id>/owner')
 def poll_owner(poll_id):
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     #list of (url_id, reservation_length)
     customer_invitations = None
@@ -79,7 +81,8 @@ def poll_owner(poll_id):
 @app.route('/poll/<int:poll_id>/results')
 def poll_results(poll_id):
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     current_poll = process_get_poll(poll_id)
     if current_poll is None:
@@ -92,7 +95,8 @@ def poll_results(poll_id):
 @app.route('/poll/<int:poll_id>/<int:member_id>/times')
 def poll_times(poll_id, member_id):
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     user_id = session.get('user_id')
     is_owner = user_owns_parent_poll(member_id)
@@ -138,7 +142,8 @@ def poll_times(poll_id, member_id):
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     if request.method == 'GET':
         return render_template('new_poll.html')
@@ -233,9 +238,10 @@ def register():
 #create a new customer with a link
 @app.route('/new_customer/<url_id>', methods=['POST', 'GET'])
 def new_customer(url_id):
-    if not session.get('user_id', 0):
+    if 'user_id' not in session:
+        flash("Virhe! Kirjaudu ensin sisään")
         session['login_redirect'] = '/invite/' + url_id
-        return render_template('login.html', need_login_redirect=True)
+        return redirect('/login')
 
     if request.method == 'GET':
         #TODO think if the url_id should be in 'details'
@@ -259,7 +265,8 @@ def new_customer(url_id):
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
     check_csrf_token(request.form.get('csrf_token'))
 
     error = process_add_customer(request.form.get('poll_id'),
@@ -274,10 +281,10 @@ def add_customer():
 
 @app.route('/access/<url_id>', methods=['POST', 'GET'])
 def access(url_id):
-    if not session.get('user_id', 0):
+    if 'user_id' not in session:
+        flash("Virhe! Kirjaudu ensin sisään")
         session['login_redirect'] = '/invite/' + url_id
-        #TODO rename 'need_login_redirect' to 'login_needed_error'
-        return render_template('login.html', need_login_redirect=True)
+        return redirect('/login')
 
     if request.method == 'GET':
         return render_template('confirm_member_access_link.html',
@@ -298,7 +305,8 @@ def access(url_id):
 @app.route('/new_new_customer_link', methods=['POST'])
 def new_new_customer_link():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -316,7 +324,8 @@ def new_new_customer_link():
 @app.route('/new_member_access_link', methods=['POST'])
 def new_member_access_link():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -332,7 +341,8 @@ def new_member_access_link():
 @app.route('/modify_customer', methods=['POST'])
 def modity_customer():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -350,7 +360,8 @@ def modity_customer():
 @app.route('/new_resource', methods=['POST'])
 def new_resource():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
     print('new resource, post: ', request.form)
@@ -368,7 +379,8 @@ def new_resource():
 @app.route('/delete_member', methods=['POST'])
 def delete_member():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -383,7 +395,8 @@ def delete_member():
 @app.route('/delete_new_customer_link', methods=['POST'])
 def delete_new_customer_link():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -398,7 +411,8 @@ def delete_new_customer_link():
 @app.route('/delete_member_access_link', methods=['POST'])
 def delete_member_access_link():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -413,7 +427,8 @@ def delete_member_access_link():
 @app.route('/new_time_preference', methods=['POST'])
 def new_time_preference():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
@@ -446,7 +461,8 @@ def new_time_preference():
 @app.route('/optimize_poll', methods=['POST'])
 def optimize_poll():
     if 'user_id' not in session:
-        return render_template('login.html', need_login_redirect=True)
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect('/login')
 
     check_csrf_token(request.form.get('csrf_token'))
 
