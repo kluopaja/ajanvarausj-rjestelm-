@@ -13,6 +13,7 @@
     <input type="submit" value="Muuta">
     <input type="hidden" name="poll_id" value = {{ poll.poll_id }}>
     <input type="hidden" name="member_id" value={{ member_id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 {% endif %}
 <p>Lisää uusi toive. Uusi toive ylikirjoittaa
