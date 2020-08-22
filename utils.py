@@ -186,9 +186,10 @@ def get_poll_customer_members(poll_id):
 #assumes that poll_id is an integer
 def process_get_poll(poll_id):
     user_id = session.get('user_id', 0)
-    sql = 'SELECT P.* FROM Polls P, PollMembers M, UsersPollMembers U \
-           WHERE P.id=M.poll_id AND M.id=U.member_id AND \
-           (P.owner_user_id=:user_id OR U.user_id=:user_id) AND \
+    sql = 'SELECT P.* FROM Polls P \
+           LEFT JOIN PollMembers M ON P.id=M.poll_id \
+           LEFT JOIN UsersPollMembers U ON M.id=U.member_id \
+           WHERE (P.owner_user_id=:user_id OR U.user_id=:user_id) AND \
            P.id=:poll_id LIMIT 1'
     result = db.session.execute(sql, {'poll_id': poll_id, 'user_id': user_id})
     poll = result.fetchone()
