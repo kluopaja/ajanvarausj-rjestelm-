@@ -109,7 +109,6 @@ class Poll():
                    has_final_results)
         return tmp
 
-
 def process_new_poll(user_id, name, description, first_date, last_date,
                      end_date, end_time):
     try:

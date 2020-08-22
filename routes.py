@@ -169,8 +169,6 @@ def new_poll():
 #then they will be redirected to the link site
 #how to login and then return to the same page?
 
-#TODO give the message as a GET parameter?
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     def redirect_to_next(default='/'):
