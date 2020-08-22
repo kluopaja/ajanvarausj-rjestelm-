@@ -352,7 +352,7 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         console.log('selected grade', grade);
         self.ctx.save();
         self.ctx.fillStyle = color;
-        self.ctx.globalAlpha = 0.7;
+        self.ctx.globalAlpha = 0.9;
         self.ctx.fillRect(0, start_y, this.canvas.width, end_y-start_y);
         self.ctx.restore();
     }
@@ -364,14 +364,14 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         let y = self.mouse.y;
         //draw snap time line as bold
         self.ctx.beginPath();
-        self.ctx.stokeStyle = 'orange';
+        self.ctx.strokeStyle = 'black';
         self.ctx.lineWidth=4;
         self.ctx.moveTo(0, self.snap_to_blocks(y));
         self.ctx.lineTo(self.canvas.width, self.snap_to_blocks(y));
         self.ctx.stroke();
 
         //draw background box for the time
-        self.ctx.fillStyle = 'rgb(255, 255, 255, 0.8)';
+        self.ctx.fillStyle = 'rgb(245, 245, 245, 0.8)';
         self.ctx.fillRect(x, y-30, 90, 35)
         //draw current time
         let time = self.y_to_time(y);
@@ -381,7 +381,7 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         let time_str = hour_str + ':' + min_str;
 
         self.ctx.textBaseline = 'alphabetic';
-        self.ctx.font = '30px serif';
+        self.ctx.font = '30px Courier New';
         self.ctx.fillStyle = 'rgb(0, 0, 0)';
         self.ctx.fillText(time_str, x, y);
     }
@@ -401,7 +401,7 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         }
 
         //clear left side of the canvas for the labels
-        self.ctx.fillStyle = 'rgb(255, 255, 255, 1)';
+        self.ctx.fillStyle = 'whitesmoke';
         self.ctx.fillRect(0, 0, 40, self.canvas.height);
         //major grid
         for(let i = 0; i < 24; i++) {
@@ -416,7 +416,7 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         for(let i = 0; i < 24; i++) {
             self.ctx.fillStyle = 'black';
             self.ctx.textBaseline = 'top';
-            self.ctx.font = '30px serif';
+            self.ctx.font = '30px Courier New';
             hour_str = ('0' + i.toString()).slice(-2);
             self.ctx.fillText(hour_str, 0, self.hour_to_y(i))
         }
@@ -444,13 +444,13 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
 
     //TODO just arrays
     self.grade_colors = new Map();
-    self.grade_colors.set(0, 'rgb(120, 120, 120)');
-    self.grade_colors.set(1, 'rgb(60, 60, 255)');
-    self.grade_colors.set(2, 'rgb(70, 255, 70)');
+    self.grade_colors.set(2, 'rgb(60, 60, 60');
+    self.grade_colors.set(1, 'silver');
+    self.grade_colors.set(0, 'whitesmoke');
     self.active_colors = new Map();
-    self.active_colors.set(0, 'rgb(50, 50, 70)');
-    self.active_colors.set(1, 'rgb(0, 0, 200)');
-    self.active_colors.set(2, 'rgb(0, 200, 0)');
+    self.active_colors.set(2, 'rgb(60, 60, 60)');
+    self.active_colors.set(1, 'silver');
+    self.active_colors.set(0, 'whitesmoke');
 
 
     self.canvas = document.createElement('canvas');
