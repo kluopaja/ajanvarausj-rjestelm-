@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <h3>Uusi käyttäjä</h3>
-{% if message  %}
-<p>{{ message }}</p>
-{% endif %}
 <form action="/register" method="post">
 <ul>
     <li>
