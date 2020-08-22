@@ -58,10 +58,12 @@ input[type=submit]:hover{
 }
 .menu li:after {
     content: "|";
+    padding: 0 1em 0 1em;
 
 }
 .menu li:last-child:after {
     content: "";
+    padding: 0 0 0 0;
 }
 .menu li a {
     text-decoration: none;
@@ -127,9 +129,13 @@ input[type=submit]:hover{
 .poll_owner .section {
     padding: 0 0 3em 1em;
 }
-.poll_owner .section ul, li{
+.poll_owner .section ul {
     display: block;
     padding: 0 0 0 0;
+}
+.poll_owner .section li {
+    display: block;
+    padding: 0 0 0.2em 0;
 }
 
 form {
