@@ -1,11 +1,12 @@
 //TODO functions to arrow functions
-function make_day_editor_dom(time_grades, grade_descriptions, block_size) {
+function make_day_editor_dom(time_grades, grade_descriptions, block_size,
+                             member_id, poll_id, csrf_token) {
     let editor = new DayEditor(time_grades, grade_descriptions, block_size,
-                               member_id, poll_id);
+                               member_id, poll_id, csrf_token);
     return editor.dom;
 }
 function DayEditor(time_grades, grade_descriptions, block_size, member_id,
-                  poll_id) {
+                  poll_id, csrf_token) {
     let self = this;
     this.handle_save = function() {
         let form = document.createElement('form');
@@ -31,9 +32,15 @@ function DayEditor(time_grades, grade_descriptions, block_size, member_id,
         p_id.value = poll_id;
         form.appendChild(p_id)
 
+        let csrf_t = document.createElement('input');
+        csrf_t.name = 'csrf_token';
+        csrf_t.value = csrf_token;
+        form.appendChild(csrf_t)
+
         let submit = document.createElement('input');
         submit.type = 'submit';
         form.appendChild(submit);
+
 
         console.log(form.submit);
         //we need to attach the form somewhere to submit it 

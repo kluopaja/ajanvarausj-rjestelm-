@@ -27,6 +27,7 @@
     <li>
         <input type="submit" value="Luo tunnus">
     </li>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </ul>
 </form>
 <script type="text/javascript" src="/static/register.js"></script>

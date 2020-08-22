@@ -21,6 +21,7 @@
     </li>
     <li>
     <input type="submit" value="Kirjaudu">
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </li>
 </ul>
 </form>

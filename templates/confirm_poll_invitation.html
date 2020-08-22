@@ -18,5 +18,6 @@ muita varaajarooleja.</p>
     <br>
     <input type="submit" value="Luo varaajarooli">
     <input type="hidden" name="poll_id" value={{ details[2] }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 {% endblock %}

@@ -29,6 +29,7 @@
     <li>
         <input type="submit" value="Lisää kysely">
     </li>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </ul>
 </form>
 </div>

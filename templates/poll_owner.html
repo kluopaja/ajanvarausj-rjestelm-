@@ -31,6 +31,7 @@
     <input type="hidden" name="member_id" id={{ customer[0] }}
            value={{ customer[0] }}>
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 </tr>
@@ -60,6 +61,7 @@
     <input type="submit" value="Luo varaajarooli">
     </li>
     <input type="hidden" name="poll_id" value={{ poll.poll_id}}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </ul>
 </form>
 </div>
@@ -80,6 +82,7 @@
         <input type="submit" value="Poista linkki">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 </tr>
@@ -102,6 +105,7 @@
         <input type="submit" value="Poista linkki">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 </tr>
@@ -114,6 +118,7 @@
 <form action="/new_new_customer_link" method="post">
     <input type="submit" value="Luo linkki">
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 </div>
 <hr>
@@ -136,6 +141,7 @@
         <input type="submit" value="Poista resurssi">
         <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
         <input type="hidden" name="member_id" value={{ resource[1] }}>
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
     <td>
@@ -144,6 +150,7 @@
     <input type="hidden" name="member_id" id={{ resource[1] }}
            value={{ resource[1] }}>
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 
@@ -165,6 +172,7 @@
     <input type="submit" value="Luo resurssi">
     </li>
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </ul>
 </form>
 </div>
@@ -185,6 +193,7 @@
         <input type="submit" value="Poista linkki">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 </tr>
@@ -200,6 +209,7 @@
 <form action="/optimize_poll" method="post">
     <input type="submit" value="Optimoi ajanvaraukset">
     <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 </div>
 <h2>Optimoinnin tulokset:</h2>

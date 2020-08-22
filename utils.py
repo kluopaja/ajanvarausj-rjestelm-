@@ -1,7 +1,8 @@
 from db import db
-from flask import session
+from flask import session, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from os import urandom
+
 import datetime
 from collections import namedtuple
 import times
@@ -28,6 +29,15 @@ def process_login(username, password):
         return None
 
     return 'Incorrect password'
+def set_csrf_token():
+    session['csrf_token'] = urandom(16).hex()
+
+def check_csrf_token(csrf_token):
+    if 'csrf_token' not in session:
+        abort(403)
+    print(session['csrf_token'], csrf_token)
+    if session['csrf_token'] != csrf_token:
+        abort(403)
 
 def process_registration(username, password):
     if username is None or not check_alphanum_string(username, 1, 20):
@@ -69,6 +79,8 @@ def process_logout():
         del session['user_id']
     if 'username' in session:
         del session['username']
+    if 'csrf_token' in session:
+        del session['csrf_token']
 
 ### Poll related functions ###
 

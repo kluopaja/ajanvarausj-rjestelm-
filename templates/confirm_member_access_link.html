@@ -15,5 +15,6 @@ resurssi
     <input type="submit" value="Hyväksy kutsu">
     <input type="hidden" name="poll_id" value={{ details[4] }}>
     <input type="hidden" name="member_id" value={{ details[3] }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 {% endblock %}

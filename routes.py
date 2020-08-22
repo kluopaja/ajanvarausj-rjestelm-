@@ -151,6 +151,7 @@ def new_poll():
     if request.method == 'GET':
         return render_template('new_poll.html')
     if request.method == 'POST':
+        check_csrf_token(request.form.get('csrf_token'))
         error = process_new_poll(session['user_id'],
                                  request.form.get('poll_name'),
                                  request.form.get('poll_description'),
@@ -172,6 +173,7 @@ def new_poll():
 #how to login and then return to the same page?
 
 #TODO give the message as a GET parameter?
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     def redirect_to_next(default='/'):
@@ -192,9 +194,12 @@ def login():
         return redirect_to_next(default='/');
 
     if request.method == 'GET':
+        set_csrf_token()
         return render_template('login.html')
 
     elif request.method == 'POST':
+        check_csrf_token(request.form.get('csrf_token'))
+
         print('post request', request.form)
         error = process_login(request.form.get('username'),
                               request.form.get('password'))
@@ -213,8 +218,10 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
+        set_csrf_token()
         return render_template('register.html')
     if request.method == 'POST':
+        check_csrf_token(request.form.get('csrf_token'))
         print('register: ', request.form)
         error = process_registration(request.form.get('username'),
                                       request.form.get('password'))
@@ -244,6 +251,7 @@ def new_customer(url_id):
                                details=customer_type_details_by_url_id(url_id),
                                url_id=url_id)
     if request.method == 'POST':
+        check_csrf_token(request.form.get('csrf_token'))
         #TODO this should return the member id of the new customer
         error = process_new_customer_url(url_id,
                                          request.form.get('reservation_length'),
@@ -260,6 +268,7 @@ def new_customer(url_id):
 def add_customer():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
+    check_csrf_token(request.form.get('csrf_token'))
 
     error = process_add_customer(request.form.get('poll_id'),
                                  request.form.get('reservation_length'),
@@ -283,6 +292,7 @@ def access(url_id):
                                details=member_details_by_url_id(url_id),
                                url_id=url_id)
     if request.method == 'POST':
+        check_csrf_token(request.form.get('csrf_token'))
         error = process_access(url_id)
         if error is not None:
             message = 'Kutsumisen hyväksyminen epäonnistui: ' + error
@@ -293,10 +303,12 @@ def access(url_id):
         member_id = request.form.get('member_id', 0)
         return redirect('/poll/' + poll_id + '/' + member_id + '/times')
 
-@app.route('/new_new_customer_link', methods=['POST', 'GET'])
+@app.route('/new_new_customer_link', methods=['POST'])
 def new_new_customer_link():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
+
+    check_csrf_token(request.form.get('csrf_token'))
 
     error = process_new_new_customer_link(request.form.get('poll_id'))
 
@@ -314,6 +326,8 @@ def new_member_access_link():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
+    check_csrf_token(request.form.get('csrf_token'))
+
     error = process_new_member_access_link(request.form.get('member_id'))
 
     if error is None:
@@ -327,6 +341,8 @@ def new_member_access_link():
 def modity_customer():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
+
+    check_csrf_token(request.form.get('csrf_token'))
 
     error = process_modify_customer(request.form.get('member_id'),
                                     request.form.get('reservation_length'));
@@ -344,6 +360,7 @@ def new_resource():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
+    check_csrf_token(request.form.get('csrf_token'))
     print('new resource, post: ', request.form)
     error = process_new_resource(request.form.get('poll_id'),
                               request.form.get('resource_name'))
@@ -361,6 +378,8 @@ def delete_member():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
+    check_csrf_token(request.form.get('csrf_token'))
+
     error = process_delete_member(request.form.get('member_id'))
 
     if error is None:
@@ -373,6 +392,8 @@ def delete_member():
 def delete_new_customer_link():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
+
+    check_csrf_token(request.form.get('csrf_token'))
 
     error = process_delete_new_customer_link(request.form.get('url_id'))
 
@@ -387,6 +408,8 @@ def delete_member_access_link():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
 
+    check_csrf_token(request.form.get('csrf_token'))
+
     error = process_delete_member_access_link(request.form.get('url_id'))
 
     if error is None:
@@ -399,6 +422,8 @@ def delete_member_access_link():
 def new_time_preference():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
+
+    check_csrf_token(request.form.get('csrf_token'))
 
     #if the post request was generated by javascript
     #this if this could be done in a better way
@@ -430,6 +455,8 @@ def new_time_preference():
 def optimize_poll():
     if 'user_id' not in session:
         return render_template('login.html', need_login_redirect=True)
+
+    check_csrf_token(request.form.get('csrf_token'))
 
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
