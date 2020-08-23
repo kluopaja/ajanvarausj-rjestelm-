@@ -346,8 +346,8 @@ def process_new_resource(poll_id, resource_name):
         return 'No poll id was provided'
     if resource_name is None or len(resource_name) == 0:
         return 'No resource name was provided'
-    if len(resource_name) > 10000:
-        return 'Resource name too long (> 10000 characters)'
+    if len(resource_name) > 30:
+        return 'Resource name too long (> 30 characters)'
 
     if not user_owns_poll(poll_id):
         return 'User does not own the poll'
