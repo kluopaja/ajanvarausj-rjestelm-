@@ -263,7 +263,7 @@ def new_customer(url_id):
 
         return render_template('error.html', message=error)
 
-#cannot user /new_customer for this
+#cannot use /new_customer for this
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     if 'user_id' not in session:
