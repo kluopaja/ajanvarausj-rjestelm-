@@ -202,8 +202,8 @@ def login():
             flash('Kirjautuminen onnistui')
             return redirect_to_next(default='/')
 
-    return render_template('login.html',
-                            message='Kirjautuminen epäonnistui: ' + error)
+    flash("Kirjautuminen epäonnistui")
+    return redirecti('login');
 
 @app.route('/logout')
 def logout():
@@ -229,9 +229,8 @@ def register():
             flash('Rekisteröityminen onnistui')
             return redirect('/login')
 
-    message = 'Käyttäjätunnuksen luonti epäonnistui: ' + error
-    return render_template('register.html',
-                           message=message)
+    flash('Käyttäjätunnuksen luonti epäonnistui: ' + error)
+    return redirect('/register')
 
 #create a new customer with a link
 @app.route('/new_customer/<url_id>', methods=['POST', 'GET'])
