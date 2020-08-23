@@ -25,7 +25,7 @@ function DayEditor(time_grades, grade_descriptions, block_size, member_id,
         m_id.value = member_id;
         form.appendChild(m_id)
 
-        
+
         let p_id = document.createElement('input');
         p_id.name = 'poll_id';
         console.log(poll_id)
@@ -43,7 +43,7 @@ function DayEditor(time_grades, grade_descriptions, block_size, member_id,
 
 
         console.log(form.submit);
-        //we need to attach the form somewhere to submit it 
+        //we need to attach the form somewhere to submit it
         self.dom.appendChild(form);
 
         form.submit();
@@ -298,7 +298,7 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
         self.selection.y = self.y_to_min(self.mouse.y);
         self.update();
     }
-    
+
     this.handle_mousedown = function(e) {
         console.log('mousedown');
         self.mouse.update_pos(e);
@@ -367,7 +367,7 @@ function Interface(width, height, block_size, add_selection, draw_editor) {
     this.draw_active_selection = function(start, end, grade, colors) {
         start_y = self.min_to_y(start);
         end_y = self.min_to_y(end);
-        
+
         start_y = self.snap_to_blocks(start_y);
         end_y = self.snap_to_blocks(end_y);
         color = colors.get(grade);
