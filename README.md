@@ -18,16 +18,16 @@ Asiakastyyppistä jäsentä hallinnoiva käyttäjä voi asettaa asiakkaalle
 aikatoiveita (time grades). Aikatoive kuvaa jäsenen mielipidettä siitä, kuinka
 mielellään hän milläkin ajanhetkellä haluaisi käyttää kyselyn resursseja.
 Aikatoiveiden tyypit ovat tällä hetkellä:
-    *Ei sovi
-    *Sopii tarvittaessa
-    *Sopii hyvin
+* Ei sovi
+* Sopii tarvittaessa
+* Sopii hyvin
 
-Resurssityyppistä jäsentä hallinnoiva käyttäjä voi myös asettaa resurssille
+Resurssityyppistä jäsentä hallinnoiva käyttäjä voi asettaa resurssille
 saatavuustietoja (koodissa myös nämä time grades). Resurssin saatavuustiedot
 kertovat sen, milloin resurssi on asiakkaiden käytettävissä. Saatavuustietojen
 tyypit ovat tällä hetkellä:
-    *Ei käytettävissä
-    *Käytettävissä
+* Ei käytettävissä
+* Käytettävissä
 
 Kyselyn omistaja voi suorittaa aikatoiveiden optimoinnin (optimization), jolloin
 sivusto pyrkii jakamaan resurssit niiden saatavuuden rajoissa asiakkaille siten,
@@ -100,6 +100,7 @@ tuloksia.
     "sallittujen yhtäaikaisten asiakkaiden määrä" (resurssille) ja
     "haluttujen varausaikojen määrä" (asiakkaalle). Mielestäni tämä puoltaa 
     nykyisen tietokantarakenteen säilyttämistä.
+* Omistajalta ei kysytä vahvistusta ennen asioiden poistamista.
 
 ## Sovelluksen testaaminen
 Sovellusta voi testata osoitteessa https://boiling-falls-99919.herokuapp.com/
