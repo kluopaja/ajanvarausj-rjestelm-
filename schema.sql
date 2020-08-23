@@ -1,7 +1,7 @@
 CREATE TABLE Users
 (
     id SERIAL PRIMARY KEY,
-    username TEXT,
+    username TEXT UNIQUE,
     password_hash TEXT
 );
 CREATE TABLE Polls
