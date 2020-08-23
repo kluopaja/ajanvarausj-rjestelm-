@@ -242,7 +242,7 @@ def register():
 def new_customer(url_id):
     if 'user_id' not in session:
         flash("Virhe! Kirjaudu ensin sisään")
-        session['login_redirect'] = '/invite/' + url_id
+        session['login_redirect'] = '/new_customer/' + url_id
         return redirect('/login')
 
     if request.method == 'GET':
@@ -285,7 +285,7 @@ def add_customer():
 def access(url_id):
     if 'user_id' not in session:
         flash("Virhe! Kirjaudu ensin sisään")
-        session['login_redirect'] = '/invite/' + url_id
+        session['login_redirect'] = '/access/' + url_id
         return redirect('/login')
 
     if request.method == 'GET':
