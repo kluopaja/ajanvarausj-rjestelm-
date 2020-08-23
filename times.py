@@ -2,9 +2,12 @@ import datetime
 from collections import namedtuple
 from db import db
 from flask import session
-import utils
 import optimization
 import json
+
+import poll
+import member
+
 
 ### Time preference related functions ###
 
@@ -61,7 +64,7 @@ def get_minute_grades_for_days_range(member_id, first_date, last_date):
 #time intervals are minutes from the beginning of the day
 #dates in isoformat
 def get_minute_grades(member_id, poll_id):
-    first_date, last_date = utils.get_poll_date_range(poll_id)
+    first_date, last_date = poll.get_poll_date_range(poll_id)
     return get_minute_grades_for_days_range(member_id, first_date, last_date)
 
 
@@ -86,16 +89,16 @@ def get_members_times(member_ids):
 #return list x of (times, member_id)
 #one element for each member_id
 def get_resource_times(poll_id):
-    member_ids = utils.get_poll_resource_members(poll_id)
+    member_ids = poll.get_poll_resource_members(poll_id)
     times = get_members_times(member_ids)
     return list(zip(times, member_ids))
 
 #return list x of (times, member_id, reservation_length)
 #one element for each member_id
 def get_customer_times(poll_id):
-    member_ids = utils.get_poll_customer_members(poll_id)
+    member_ids = poll.get_poll_customer_members(poll_id)
     times = get_members_times(member_ids)
-    lengths = [utils.get_customer_reservation_length(x) for x in member_ids]
+    lengths = [member.get_customer_reservation_length(x) for x in member_ids]
 
     return list(zip(times, member_ids, lengths))
 
@@ -202,14 +205,14 @@ def process_new_grading(member_id, start, end, date, time_grade):
 
     user_id = session.get('user_id')
     #check user rights
-    print('user owns ... ', utils.user_owns_parent_poll(member_id))
-    if not utils.user_owns_parent_poll(member_id) and \
-       not utils.user_has_access(user_id, member_id):
+    print('user owns ... ', member.user_owns_parent_poll(member_id))
+    if not member.user_owns_parent_poll(member_id) and \
+       not member.user_has_access(user_id, member_id):
         return 'User has no rights to add new time grades'
 
     print('member_id ', member_id)
     print('time grade', time_grade)
-    member_type = utils.get_member_type(member_id)
+    member_type = member.get_member_type(member_id)
     if member_type == 'customer':
         if time_grade not in [0, 1, 2]:
             return 'Invalid time grade value'
@@ -234,7 +237,6 @@ def process_grading_list(member_id, data):
         data = json.loads(data)
     except:
         return 'Invalid data json string'
-
     try:
         error = None
         for day in data:
@@ -258,8 +260,6 @@ def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
         end = int(end_time.hour*60 + end_time.second/60)
     except:
         return 'Incorrect time format'
-
-
 
     error = process_new_grading(member_id, start, end, date, time_grade);
     if error is None:

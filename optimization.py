@@ -1,5 +1,5 @@
 from collections import namedtuple
-import utils
+import poll
 import datetime
 import copy
 import numpy as np
@@ -24,7 +24,7 @@ class TimelimitError(Exception):
 def process_optimize_poll(poll_id):
     if poll_id is None:
         return 'No poll_id was given'
-    if not utils.user_owns_poll(poll_id):
+    if not poll.user_owns_poll(poll_id):
         return 'Current user does not own the poll'
     optimize_poll(poll_id)
     '''
