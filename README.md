@@ -100,6 +100,7 @@ tuloksia.
     "sallittujen yhtäaikaisten asiakkaiden määrä" (resurssille) ja
     "haluttujen varausaikojen määrä" (asiakkaalle). Mielestäni tämä puoltaa 
     nykyisen tietokantarakenteen säilyttämistä.
+* Omistajalta ei kysytä vahvistusta ennen asioiden poistamista.
 
 ## Sovelluksen testaaminen
 Sovellusta voi testata osoitteessa https://boiling-falls-99919.herokuapp.com/
