@@ -123,12 +123,12 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     if end.minute%5 != 0:
         return 'End time should be divisible by 5 minutes'
     if first_date > last_date:
-        return 'The last available date must be after the first one!'
+        return 'The last available date cannot be before the first one!'
 
     if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
         return 'Poll end should not be in the past'
 
-    if last_date - first_date > datetime.timedelta(days=31):
+    if last_date - first_date > datetime.timedelta(days=30):
         return 'Poll date range cannot be longer than 31 days'
 
     #TODO be more descriptivie
