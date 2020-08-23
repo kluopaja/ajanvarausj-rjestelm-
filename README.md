@@ -2,27 +2,104 @@
 
 Aineopintojen harjoitustyö: Tietokantasovellus
 
-Ajanvarausjärjestelmä, joka pyrkii maksimoimoimaan onnistuneiden varauksien ja käyttäjien tyytyväisyyden määrän. 
+Ajanvarausjärjestelmä, joka pyrkii maksimoimoimaan onnistuneiden varauksien ja 
+käyttäjien tyytyväisyyden määrän. 
 
-Tämänhetkinen tilanne:
+Sivu on jaoteltu käyttäjien (user) luomiin kyselyihin (poll). Kyselyn luoneesta
+käyttäjästä tulee samalla kyselyn omistaja (owner). Jokaisella
+kyselyllä on jäseniä (member). Jäsenet voivat olla joko tyyppiä varaaja/asiakas 
+(customer) tai tyyppiä resurssi (resource). 
 
-Käyttäjät pystyvät rekisteröitymään ja kirjautumaan sovellukseen.
+Kyselyn luomisen lisäksi käyttäjät voivat hallinnoida kyselyiden jäseniä. 
+Jokaista jäsentä voi hallinnoida samaan aikaan usea eri käyttäjä.
+Oletuksena kyselyn omistajalla on oikeudet hallinnoida kaikkia jäseniä.
 
-Kirjautuneet käyttäjät voivat luoda kyselyitä. Kyselyn luoneesta käyttäjästä tulee kyselyn omistaja, jolla on muita laajemmat valtuudet hallinnoida kyselyä.
+Asiakastyyppistä jäsentä hallinnoiva käyttäjä voi asettaa asiakkaalle 
+aikatoiveita (time grades). Aikatoive kuvaa jäsenen mielipidettä siitä, kuinka
+mielellään hän milläkin ajanhetkellä haluaisi käyttää kyselyn resursseja.
+Aikatoiveiden tyypit ovat tällä hetkellä:
+    *Ei sovi
+    *Sopii tarvittaessa
+    *Sopii hyvin
 
-Omistaja pystyy luomaan kyselyihin varattavia resursseja. Resurssit ovat tällä hetkellä kaikki identtisiä (esim. voisi vastata montaa identtistä huonetta). 
+Resurssityyppistä jäsentä hallinnoiva käyttäjä voi myös asettaa resurssille
+saatavuustietoja (koodissa myös nämä time grades). Resurssin saatavuustiedot
+kertovat sen, milloin resurssi on asiakkaiden käytettävissä. Saatavuustietojen
+tyypit ovat tällä hetkellä:
+    *Ei käytettävissä
+    *Käytettävissä
 
-Omistaja voi myös luoda kyselyyn linkkejä, joilla pystyy kutsumaan muita kirjautuneita käyttäjiä varaamaan halutun pituisia aikoja kyselystä. Linkeillä voi kutsua myös muita käyttäjiä hallinnoimaan kyselyn resurssien saatavuutta. Tällä hetkellä kyselyn omistajankin pitää vierailla kyselylinkeissä lisätäkseen itsensä näihin toimintoihin.
+Kyselyn omistaja voi suorittaa aikatoiveiden optimoinnin (optimization), jolloin
+sivusto pyrkii jakamaan resurssit niiden saatavuuden rajoissa asiakkaille siten,
+että mahdollisimman moni asiakas pystyisi käyttämään resurssia toivomaansa
+aikaan. (Tietyllä ajanhetkellä jokainen resurssi voi olla vain yhden asiakkaan
+käytössä.)
 
-Kyselyyn vastaajaksi kutsuttu käyttäjä voi määritellä itselleen sopivat ajat ja näillä arvot "sopii tarvittaessa" ja "sopii hyvin".
+Kyselyn omistaja voi luoda kyselyyn uusia asiakkaita ja resursseja. Uuden 
+asiakkaan luomisen yhteydessä kyselyn omistaja määrittää, kuinka pitkän ajan
+kyseinen asiakas haluaa varata.
 
-Tällä hetkellä aikatoiveiden katselemisen ja päivittämisen käytettävyys on hyin heikko, mutta tätä olisi tarkoitus parantaa seuraavaa välipalautusta varten.
+Uuden asiakkaan tai resurssin luomisen jälkeen kyselyn omistaja voi generoida
+muokkauslinkkejä (member access link). Muokkauslinkkejä voidaan käyttää
+kutsumaan muita käyttäjiä
+kyselyyn hallinnoimaan tietyn asiakkaan tai resurssin aikoja.
 
-Kyselyn omistaja voi myös optimoida ajanvaraukset, jolloin sovellus pyrkii jakamaan kyselyn resursseja kyselyyn vastanneiden käyttäjille käyttäjiden toiveet huomioiden.
+Tämän lisäksi omistaja voi luoda uuden asiakkaan luomieen oikeuttavia linkkejä
+(new customer link).
+Näitä linkkejä painamalla käyttäjä voi luoda uusia asiakkaita ja määrittää
+samalla asiakkaan varausajan pituuden.
 
-Sovellusta voi testata osoitteessa http://boiling-falls-99919.herokuapp.com/
-Jo luotuja käyttäjiä ovat (Käyttäjä, salasana):
-(tiina, kissa2)
-(uolevi, kissa2)
-(maija, kissa2)
-(kaaleppi, kissa2)
+## Lisää muokkauslinkeistä ja käyttäjäluontilinkeistä:
+
+Tällä hetkellä kyselyn oikeuksien hallinta perustuu kahdenlaiseen
+käyttäjäskenaarioon.
+
+
+### Epäluotettavat käyttäjät
+Kyselyn omistaja ei luota kyselyyn vastaaviin käyttäjiin. Tällöin käyttäjille
+ei haluta antaa liikaa oikeuksia kuten mahdollisuutta luoda mielivaltainen 
+määrä uusia asiakkaita.
+
+Nyt kyselyn omistaja luo kyselyyn asiakkaita halutuilla varauspituuksilla.
+Tämän jälkeen omistaja luo muokkauslinkit asiakkaille ja jakaa muokkauslinkit
+turvallista väylää pitkin käyttäjille.
+
+Jos nyt yksi käyttäjistä osoittautuu epäluotettavaksi tai ei esimerkiksi osaa
+käyttää sivua oikein, rajoittuu vahinko vain yhden asiakkaan aikoihin.
+
+### Luotettavat käyttäjät
+
+Kyselyn omistaja luottaa kyselyyn vastaaviin käyttäjiin. Tällöin omistaja voi 
+luoda kyselyyn käyttäjäluontilinkin. Omistaja voi sitten helposti jakaa tämän
+käyttäjäluontilinkin esimerkiksi yksityisessä keskusteluryhmässä.
+
+Linkissä vierailevat käyttäjä voivat sitten luoda asiakkaita kyselyyn valiten
+itse luomiensa asiakkaiden varausaikojen pituudet.
+
+## Tunnettuja ongelmia ja vielä työn alla olevia asioita
+
+* Tällä hetkellä vain kyselyn omistaja voi katsoa kyselyn aikojen optimoinnin
+tuloksia.
+  * Tarkoitus olisi, että jokainen käyttäjä voisi tarkastella omille
+    kyselyjäsenillensä optimoituja aikoja.
+* Edelliseen liittyen kyselyn loppumisajankohta ei tee tällä hetkellä mitään.
+  * Tarkoitus olisi, että loppumisajankohdan jälkeen ajanvarauksia voisi
+    muokata pelkästään kyselyn omistaja
+* Optimoinnin tulosten formaattia tulisi vielä parantaa helppolukuisemmaksi.
+* Kapealla näytöllä (esim. mobiililaitteet) osa sivuston sisällöstä jää näytön 
+  ulkopuolelle
+* Aikatoiveiden ja resurssien saatavuuden valiseminen toimii huonosti
+  kosketusnäytöllä.
+* Käyttäjän aikavyöhykettä ei oteta sovelluksessa mitenkään huomioon
+* Tietokannan rakenne vaatii vielä miettimistä
+  * Resources-taulussa oli aiemmin sarake "resource_name", joka siirrettiin
+    PollMembers-tauluun. Tällä hetkellä olisi varmaankin järkevämpää poistaa
+    Resources-taulu (ja mahdollisesti Customers) taulu kokonaan ja siirtää
+    tieto PollMembers-tauluun. Toisaalta tulevaisuudessa resursseille ja
+    asiakkaille olisi mukava pystyä asettamaan ominaisuuksia, kuten
+    "sallittujen yhtäaikaisten asiakkaiden määrä" (resurssille) ja
+    "haluttujen varausaikojen määrä" (asiakkaalle). Mielestäni tämä puoltaa 
+    nykyisen tietokantarakenteen säilyttämistä.
+
+## Sovelluksen testaaminen
+Sovellusta voi testata osoitteessa https://boiling-falls-99919.herokuapp.com/
