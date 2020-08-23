@@ -2,6 +2,16 @@
 {% block content %}
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
+<h1>Kyselyn tiedot</h1>
+<div class="section">
+<ul>
+    <li>Kuvaus: {{ poll.description }}</li>
+    <li>Ensimmäinen varauspäivä: {{ poll.first_date }}</li>
+    <li>Viimeinen varauspäivä: {{ poll.last_date }}</li>
+    <li>Kysely päättyy: {{ poll.end }}</li>
+</ul>
+</div>
+
 <div class="poll_owner">
 {% if customers|length > 0 %}
 <h1>Asiakkaat</h1>
