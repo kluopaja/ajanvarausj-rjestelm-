@@ -2,7 +2,7 @@
 {% block content %}
 {% include "poll_navi.html" %}
 {% if member_type == 'customer' %}
-<h2>Katso ja muokkaa varaustoivetta</h2>
+<h2>Asiakkaan varaustoiveet</h2>
 <p>Varauksen pituus: {{ reservation_length }}</p>
 {% if is_owner %}
 <form action="/modify_customer" method="POST">
@@ -16,8 +16,6 @@
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 {% endif %}
-<p>Lisää uusi toive. Uusi toive ylikirjoittaa
-vanhat alle jäävät toiveet.</p>
 <h3>Esimerkki:</h3>
 <p>Jos aikatoiveenasi on väli [10:00, 11:00) "Sopii hyvin" ja muut ajat
 "Ei sovi", niin 30 min aika voi silloin alkaa milloin tahansa välillä
