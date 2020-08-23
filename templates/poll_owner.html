@@ -23,6 +23,7 @@
         <input type="submit" value="Poista varaus">
         <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
         <input type="hidden" name="member_id" value={{ customer[0] }}>
+        <input type="hidden" name="csrf_token" value= {{ session.get('csrf_token') }}>
     </form>
     </td>
     <td>
