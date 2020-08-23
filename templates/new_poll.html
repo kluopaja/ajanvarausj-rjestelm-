@@ -8,24 +8,33 @@
     <li>
         <label for="poll_name">Kyselyn nimi</label>
         <input type="text" name="poll_name" id="poll_name" autofocus>
+        <span id="name_error" aria-live="polite"></span>
     </li>
     <li>
         <label for="poll_description">Kyselyn vapaamuotoinen kuvaus</label>
         <textarea name="poll_description" id="poll_description" rows=3 cols=40></textarea>
+        <span id="description_error" aria-live="polite"></span>
     </li>
     <li>
         <label for="first_appointment_date">Ensimmäinen mahdollinen päivä varauksille</label>
         <input type="date" name="first_appointment_date" id="first_appointment_date">
+        <span id="first_date_error" aria-live="polite"></span>
     </li>
     <li>
         <label for="last_appointment_date">Viimeinen mahdollinen päivä varauksille</label>
         <input type="date" name="last_appointment_date" id="last_appointment_date">
+        <span id="last_date_error" aria-live="polite"></span>
     </li>
     <li>
         <label for="poll_end_date">Kyselyn päättymispäivämäärä ja -aika</label>
         <input type="date" name="poll_end_date" id="poll_end_date">
-        <input type="time" name="poll_end_time" id="poll_end_time" value="23:55" step=300>
+        <input type="text" name="poll_end_time" id="poll_end_time" value="23:55" size=5>
+        <ul>
+        <li id="end_date_error" aria-live="polite"></li>
+        <li id="end_time_error" aria-live="polite"></li>
+        </ul>
     </li>
+    <li id="date_relations_error" aria-live="polite"></li>
     <li>
         <input type="submit" value="Lisää kysely">
     </li>
@@ -33,4 +42,5 @@
 </ul>
 </form>
 </div>
+<script type="text/javascript" src="static/new_poll.js"></script>
 {% endblock %}
