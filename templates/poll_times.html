@@ -39,7 +39,7 @@ dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
                           poll_id, csrf_token);
     document.querySelector("div[id=day_editors").appendChild(dom);
 </script>
-
+<noscript>
 {% if time_grades|length > 0 %}
     {% for day in time_grades %}
             <h3>{{ day.date }}</h3>
@@ -70,4 +70,5 @@ dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
             </form>
     {% endfor %}
 {% endif %}
+</noscript>
 {% endblock %}

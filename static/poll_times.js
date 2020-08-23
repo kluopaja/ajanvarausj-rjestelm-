@@ -113,30 +113,35 @@ function DayEditor(time_grades, grade_descriptions, block_size, member_id,
     self.selected_day = 0;
     self.selected_grade = grade_descriptions.length-1;
 
-    //initialize radio buttons 
+    self.interface = new Interface(400, 1200, self.block_size,
+                                   self.add_selection, self.draw);
+    //initialize radio buttons
     let day_selection = make_day_selection_dom(self.time_grades,
                                                self.handle_day_selection);
     let grade_selection = make_grade_selection_dom(self.grade_descriptions,
-                                                   self.handle_grade_selection); 
+                                                   self.interface.grade_colors,
+                                                   self.handle_grade_selection);
 
     let save_reset = make_save_reset(self.handle_save, self.handle_reset);
 
-    self.interface = new Interface(400, 1200, self.block_size,
-                                   self.add_selection, self.draw);
 
     //create a parent dom and add the children
     self.dom = document.createElement('div');
     self.dom.appendChild(day_selection);
     self.dom.appendChild(document.createElement('br'));
     self.dom.appendChild(grade_selection);
-    self.dom.appendChild(self.interface.canvas);
     self.dom.appendChild(save_reset);
+    self.dom.appendChild(self.interface.canvas);
 
     self.draw();
 }
 function make_day_selection_dom(time_grades, change) {
     let day_radios = document.createElement('div');
     day_radios.id = 'day_radios';
+
+    let header = document.createElement('h3');
+    header.innerHTML = "Valitse muokattava päivä";
+    day_radios.appendChild(header)
     for (let i = 0; i < time_grades.length; i++) {
         let label = document.createElement('label');
         label.htmlFor = time_grades[i][0];
@@ -157,14 +162,23 @@ function make_day_selection_dom(time_grades, change) {
     }
     return day_radios;
 }
-function make_grade_selection_dom(grade_descriptions, change) {
+function make_grade_selection_dom(grade_descriptions, grade_colors, change) {
     let grade_radios = document.createElement('div')
     grade_radios.id = 'grade_radios'
+    let header = document.createElement('h3');
+    header.innerHTML = "Valitse lisättävän toiveen tyyppi";
+    grade_radios.appendChild(header)
     for(let i = 0; i < grade_descriptions.length; i++) {
         let label = document.createElement('label');
         label.htmlFor = i.toString();
         label.innerHTML = grade_descriptions[i];
+
         grade_radios.appendChild(label);
+        let color_span = document.createElement('span');
+        color_span.innerHTML = "";
+        color_span.style.background = grade_colors.get(i);
+        label.appendChild(color_span);
+
 
         let radio = document.createElement('input');
         radio.type = 'radio';
@@ -176,6 +190,7 @@ function make_grade_selection_dom(grade_descriptions, change) {
         }
         radio.addEventListener('change', change);
         grade_radios.appendChild(radio)
+        grade_radios.appendChild(document.createElement('br'));
     }
     return grade_radios;
 }
@@ -184,13 +199,13 @@ function make_save_reset(save, reset) {
     div.id = 'save_reset';
     let button = document.createElement('input');
     button.type = 'button';
-    button.value = 'save';
+    button.value = 'Tallenna muutokset';
     button.name = 'save';
     button.addEventListener('click', save);
     div.appendChild(button);
     button = document.createElement('input');
     button.type = 'button';
-    button.value = 'reset';
+    button.value = 'Peruuta muutokset';
     button.name = 'reset';
     button.addEventListener('click', reset);
     div.appendChild(button);

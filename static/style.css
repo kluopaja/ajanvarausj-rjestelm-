@@ -19,7 +19,7 @@ input, textarea {
 
     outline: none;
 }
-input[type=submit]{
+input[type=submit], button {
     background: whitesmoke;
     border-width: 3px;
     color: black;
@@ -35,7 +35,7 @@ textarea::selection, input::selection  {
     color: whitesmoke;
 }
 */
-input[type=submit]:hover{
+input[type=submit]:hover, input[type=button]:hover {
     background: gainsboro;
     border-color: black;
 }
@@ -152,12 +152,26 @@ input[type=submit]:hover{
     display: block;
     padding: 0 0 0.2em 0;
 }
-
 form {
     padding: 0 0 0 0;
     /*border: 1px solid #CCC;
     border-radius:1em;
     */
+}
+#grade_radios label {
+    display: inline-block;
+    margin: 5px 0 0 0;
+    width: 23.8em;
+}
+#grade_radios span {
+    float: right;
+    border: solid;
+    display: inline-block;
+    width: 12em;
+    height: 1em;
+}
+#save_reset {
+    padding: 1em 0 1em 0;
 }
 /*
 ul {
