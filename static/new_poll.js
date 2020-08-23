@@ -22,15 +22,27 @@ first_appointment_date.addEventListener("input", () => {
     check_first();
     check_date_relations();
 });
+first_appointment_date.addEventListener("keyup", () => {
+    check_first();
+    check_date_relations();
+});
 last_appointment_date.addEventListener("input", () => {
     check_last();
     check_date_relations();
 });
-poll_end_date.addEventListener("input", () => {
-    check_end_datetime();
+last_appointment_date.addEventListener("keyup", () => {
+    check_last();
     check_date_relations();
 });
-poll_end_time.addEventListener("input", check_end_datetime);
+poll_end_date.addEventListener("input", () => {
+    check_end_date();
+    check_date_relations();
+});
+poll_end_date.addEventListener("keyup", () => {
+    check_end_date();
+    check_date_relations();
+});
+poll_end_time.addEventListener("input", check_end_time);
 
 form.addEventListener("submit", function (event) {
     if(!(check_name() && check_description() && check_first() && check_last() &&
@@ -72,28 +84,21 @@ function check_description() {
 }
 function check_first() {
     let date = first_appointment_date.value;
-    if(check_date(date, first_date_error)) {
+    if(!check_date(date, first_date_error)) {
         return false;
     }
     return true;
 }
 function check_last() {
     let date = last_appointment_date.value;
-    if(check_date(date, last_date_error)) {
+    if(!check_date(date, last_date_error)) {
         return false;
     }
-    return true;
-}
-function check_end_datetime() {
-    if(!(check_end_date() && check_end_time())) {
-        return false;
-    }
-    //TODO checki if datetime is in the past
     return true;
 }
 function check_end_date() {
     let date = poll_end_date.value;
-    if(check_date(date, end_date_error)) {
+    if(!check_date(date, end_date_error)) {
         return false;
     }
     return true;
