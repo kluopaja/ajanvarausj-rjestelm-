@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 {% include "poll_navi.html" %}
-<p>Kuvaus: {{ poll.description }}</h2>
-<p>Kyselyn päättymisaika: {{ poll.end }}</p>
-<h2>Hallinnoitavat varaukset</h2>
+<h2>Kyselyn tiedot</h2>
+<ul>
+    <li>Kuvaus: {{ poll.description }}</li>
+    <li>Ensimmäinen varauspäivä: {{ poll.first_date }}</li>
+    <li>Viimeinen varauspäivä: {{ poll.last_date }}</li>
+    <li>Kysely päättyy: {{ poll.end }}</li>
+</ul>
+<h2>Hallinnoitavat asiakkaat</h2>
 <table>
-    <tr><th>Varauksen nimi</th><th>id</th><th>Varauksen kesto</th>
+    <tr><th>Asiakkaan nimi</th><th>id</th><th>Varauksen kesto</th>
 {% for customer in user_customers %}
 <tr>
     <td>{{ customer[2] }}</td>
