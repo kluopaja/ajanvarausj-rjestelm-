@@ -203,7 +203,7 @@ def login():
             return redirect_to_next(default='/')
 
     flash("Kirjautuminen epäonnistui")
-    return redirecti('login');
+    return redirect('login');
 
 @app.route('/logout')
 def logout():
