@@ -2,6 +2,9 @@
 {% block content %}
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
+<script type="text/javascript" src="/static/poll_owner.js"></script>
+
+
 <h1>Kyselyn tiedot</h1>
 <div class="section">
 <ul>
@@ -82,12 +85,17 @@
 <div class="section">
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn asiakkaan aikatoiveita</p>
 <table>
-    <tr><th>Url</th><th>Asiakkaan nimi</th><th>id</th></tr>
+<tr><th>Asiakkaan nimi</th><th>id</th><th>Url</th></tr>
 {% for link in customer_access_links %}
 <tr>
-    <td>{{ url_for('access', url_id=link[0], _external=True) }}</td>
     <td>{{ link[1] }}</td>
     <td>{{ link[2] }}</td>
+    <td>
+    <input type='text' size=30 id={{ link[0] }}
+           value={{ url_for('access', url_id=link[0], _external=True) }}
+           readonly>
+    </td>
+    <td><button class="copy_button" id={{ link[0] }}>Kopioi linkki</button></td>
     <td>
     <form action="/delete_member_access_link" method="POST">
         <input type="submit" value="Poista">
@@ -111,7 +119,12 @@ haluamallaan varauksen kestolla</p>
 <tr><th>Url</th></tr>
 {% for link in new_customer_links %}
 <tr>
-    <td>{{ url_for('new_customer', url_id=link[0], _external=True) }}</td>
+    <td>
+    <input type='text' size=30 id={{ link[0] }} 
+           value={{ url_for('new_customer', url_id=link[0], _external=True) }}
+           readonly>
+    </td>
+    <td><button class="copy_button" id={{ link[0] }}>Kopioi linkki</button></td>
     <td>
     <form action="/delete_new_customer_link" method="POST">
         <input type="submit" value="Poista">
@@ -194,15 +207,20 @@ haluamallaan varauksen kestolla</p>
 <div class="section">
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn resurssin aikoja</p>
 <table>
-    <tr><th>Url</th><th>Resurssin nimi</th><th>id</th></tr>
+    <tr><th>Resurssin nimi</th><th>id</th><th>Url</th></tr>
 {% for link in resource_access_links %}
 <tr>
-    <td>{{ url_for('access', url_id=link[0], _external=True) }}</td>
     <td>{{ link[1] }}</td>
     <td>{{ link[2] }}</td>
     <td>
+    <input type='text' size=30 id={{ link[0] }} 
+           value={{ url_for('new_customer', url_id=link[0], _external=True) }}
+           readonly>
+    </td>
+    <td><button class="copy_button" id={{ link[0] }}>Kopioi linkki</button></td>
+    <td>
     <form action="/delete_member_access_link" method="POST">
-        <input type="submit" value="Poista linkki">
+        <input type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>

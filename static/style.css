@@ -8,7 +8,7 @@ body {
 button {
     font-family: "Courier New";
 }
-input, textarea {
+input, textarea, button {
     font-family: "Courier New";
     background: whitesmoke;
     color: black;
@@ -35,7 +35,7 @@ textarea::selection, input::selection  {
     color: whitesmoke;
 }
 */
-input[type=submit]:hover, input[type=button]:hover {
+input[type=submit]:hover, input[type=button]:hover, button:hover {
     background: gainsboro;
     border-color: black;
 }
