@@ -11,7 +11,7 @@
     <input type="number" id="reservation_length" name="reservation_length"
            min=5 value={{ reservation_length }} step=5>
     <input type="submit" value="Muuta">
-    <input type="hidden" name="poll_id" value = {{ poll.poll_id }}>
+    <input type="hidden" name="poll_id" value = {{ poll.id }}>
     <input type="hidden" name="member_id" value={{ member_id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
@@ -31,7 +31,7 @@
     let time_grades = {{ time_grades|tojson }};
     let grade_descriptions = {{ grade_descriptions|tojson }};
     let member_id = {{ member_id }};
-    let poll_id = {{ poll.poll_id }};
+    let poll_id = {{ poll.id }};
     let csrf_token = '{{ session.get('csrf_token') }}';
 dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
                           poll_id, csrf_token);
@@ -63,7 +63,7 @@ dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
                 <input type="hidden" name="date" value={{ day.date }}>
                 <input type="hidden" name="member_id"
                        value={{ member_id }}>
-                <input type="hidden" name="poll_id" value={{ poll.poll_id }}>
+                <input type="hidden" name="poll_id" value={{ poll.id }}>
                 <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
             </form>
     {% endfor %}

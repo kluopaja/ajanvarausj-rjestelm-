@@ -16,10 +16,10 @@ muille käyttäjille.
 {% for poll in polls %}
 <tr>
     <td>
-        <a href="/poll/{{ poll.poll_id }}">{{ poll.name }}</a>
+        <a href="/poll/{{ poll.id }}">{{ poll.name }}</a>
     </td>
     <td>
-        {{ poll.poll_id }}
+        {{ poll.id }}
     </td>
     <td>
         {{ poll.description }}

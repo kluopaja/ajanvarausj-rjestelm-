@@ -10,31 +10,9 @@ import member
 
 
 ### Poll related functions ###
-
-class Poll():
-    #times are stored as python datetime.date or datetime.datetime
-    def __init__(self, owner, name, description, first_date, last_date,
-            end, has_final_results, poll_id=None):
-        self.owner = owner
-        self.name = name
-        self.description = description
-        self.first_date = first_date
-        self.last_date = last_date
-        self.end = end
-        self.has_final_results = has_final_results
-        self.poll_id=poll_id
-
-    @classmethod
-    def from_form(self, owner, name, description, first_date, last_date,
-            end_date, end_time, has_final_results):
-        first_date = datetime.date.fromisoformat(first_date)
-        last_date = datetime.date.fromisoformat(last_date)
-        end_date = datetime.date.fromisoformat(end_date)
-        end_time = datetime.time.fromisoformat(end_time)
-        end = datetime.datetime.combine(end_date, end_time)
-        tmp = Poll(owner, name, description, first_date, last_date, end,
-                   has_final_results)
-        return tmp
+Poll = namedtuple('Poll', ['id', 'owner_user_id', 'name', 'description',
+                           'first_appointment_date', 'last_appointment_date',
+                           'end_time', 'has_final_results'])
 
 def process_new_poll(user_id, name, description, first_date, last_date,
                      end_date, end_time):
@@ -110,7 +88,8 @@ def process_get_poll(poll_id):
                                          'user_id': user_id}).fetchone()
     if poll_data is None:
         return None
-    return db_tuple_to_poll(poll_data)
+
+    return Poll(*poll_data)
 
 def get_user_polls():
     tmp = get_user_poll_ids()
@@ -141,7 +120,7 @@ def get_polls_by_ids(poll_ids):
 
     sql = 'SELECT * FROM Polls WHERE id in :poll_ids'
     polls = db.session.execute(sql, {'poll_ids':tuple(poll_ids)}).fetchall()
-    return [db_tuple_to_poll(x) for x in polls]
+    return [Poll(*x) for x in polls]
 
 def user_owns_poll(poll_id):
     user_id = session.get('user_id', 0)
@@ -166,9 +145,6 @@ def get_poll_date_range(poll_id):
            Polls WHERE id=:poll_id'
     poll = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
     return poll
-
-def db_tuple_to_poll(t):
-    return Poll(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[0])
 
 def get_user_poll_customer_member_ids(user_id, poll_id):
     sql = 'SELECT P.id FROM PollMembers P, UsersPollMembers U, \

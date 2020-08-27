@@ -4,9 +4,9 @@
 <h2>Kyselyn tiedot</h2>
 <ul>
     <li>Kuvaus: {{ poll.description }}</li>
-    <li>Ensimmäinen varauspäivä: {{ poll.first_date }}</li>
-    <li>Viimeinen varauspäivä: {{ poll.last_date }}</li>
-    <li>Kysely päättyy: {{ poll.end }}</li>
+    <li>Ensimmäinen varauspäivä: {{ poll.first_appointment_date }}</li>
+    <li>Viimeinen varauspäivä: {{ poll.last_appointment_date }}</li>
+    <li>Kysely päättyy: {{ poll.end_time }}</li>
 </ul>
 <h2>Hallinnoitavat asiakkaat</h2>
 <table>
@@ -17,7 +17,7 @@
     <td>{{ customer[0] }}</td>
     <td>{{ customer[1] }}</td>
     <td>
-    <a href="/poll/{{ poll.poll_id }}/{{ customer[0] }}/times">
+    <a href="/poll/{{ poll.id }}/{{ customer[0] }}/times">
     Siirry varaukseen
     </a>
     </td>
@@ -31,7 +31,7 @@
 <tr>
     <td>{{ resource[0] }}</td>
     <td>
-    <a href="/poll/{{ poll.poll_id }}/{{ resource[1] }}/times">
+    <a href="/poll/{{ poll.id }}/{{ resource[1] }}/times">
     Siirry resurssiin
     </a>
     </td>
