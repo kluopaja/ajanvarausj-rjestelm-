@@ -138,8 +138,6 @@ def poll_times(poll_id, member_id):
                             member_name=member_name,
                             reservation_length=reservation_length);
 
-
-
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
     if 'user_id' not in session:

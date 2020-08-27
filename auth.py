@@ -56,7 +56,6 @@ def process_registration(username, password):
     db.session.commit()
     return None
 
-#TODO put checks inside try except
 def check_alphanum_string(s, min_length, max_length):
     if len(s) < min_length or len(s) > max_length:
         return False
