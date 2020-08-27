@@ -115,6 +115,11 @@
 <div class="section">
 <p>Nämä antavat käyttäjälle oikeuden luoda kyselyyn uusia asiakkaita
 haluamallaan varauksen kestolla</p>
+<form action="/new_new_customer_link" method="post">
+    <input type="submit" value="Luo uusi linkki">
+    <input type="hidden" name="poll_id" value={{ poll.id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+</form>
 <table>
 <tr><th>Url</th></tr>
 {% for link in new_customer_links %}
@@ -138,14 +143,6 @@ haluamallaan varauksen kestolla</p>
 </table>
 </div>
 
-<h2>Luo uusi asiakkaanluontilinkki</h2>
-<div class="section">
-<form action="/new_new_customer_link" method="post">
-    <input type="submit" value="Luo linkki">
-    <input type="hidden" name="poll_id" value={{ poll.id }}>
-    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
-</form>
-</div>
 <hr>
 <h1>Resurssit</h1>
 <div class="section">
