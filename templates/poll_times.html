@@ -28,13 +28,13 @@
 <div id="day_editors"></div>
 <script type="text/javascript" src="/static/poll_times.js"></script>
 <script nonce={{ csp_nonce() }}>
-    let time_grades = {{ time_grades|tojson }};
-    let grade_descriptions = {{ grade_descriptions|tojson }};
-    let member_id = {{ member_id }};
-    let poll_id = {{ poll.id }};
-    let csrf_token = '{{ session.get('csrf_token') }}';
-dom = make_day_editor_dom(time_grades, grade_descriptions, 15, member_id,
-                          poll_id, csrf_token);
+    let timeGrades = {{ time_grades|tojson }};
+    let gradeDescriptions = {{ grade_descriptions|tojson }};
+    let memberId = {{ member_id }};
+    let pollId = {{ poll.id }};
+    let csrfToken = '{{ session.get('csrf_token') }}';
+dom = makeDayEditorDom(timeGrades, gradeDescriptions, 15, memberId,
+                          pollId, csrfToken);
     document.querySelector("div[id=day_editors").appendChild(dom);
 </script>
 <noscript>
