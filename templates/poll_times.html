@@ -3,6 +3,7 @@
 {% include "poll_navi.html" %}
 {% if member_type == 'customer' %}
 <h2>Asiakkaan varaustoiveet</h2>
+<p>Asiakkaan nimi: {{ member_name }}</p>
 <p>Varauksen pituus: {{ reservation_length }}</p>
 {% if is_owner %}
 <form action="/modify_customer" method="POST">
@@ -21,10 +22,12 @@
 "Ei sovi", niin 30 min aika voi silloin alkaa milloin tahansa välillä
 [10:00, 10:30)</p>
 {% endif %}
+
 {% if member_type == 'resource' %}
 <h2>Resurssin saatavuus</h2>
 <p>Resurssin nimi: {{ member_name }}</p>
 {% endif %}
+
 <div id="day_editors"></div>
 <script type="text/javascript" src="/static/poll_times.js"></script>
 <script nonce={{ csp_nonce() }}>
