@@ -2,6 +2,7 @@ from db import db
 from flask import session, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from os import urandom
+import base64
 
 import datetime
 from collections import namedtuple
@@ -11,13 +12,16 @@ import member
 
 ### Invitation related functions ###
 
+def create_new_url_key():
+    return base64.urlsafe_b64encode(urandom(15)).decode('ascii')
+
 def process_new_new_customer_link(poll_id):
     if poll_id is None:
         return 'No poll id was provided'
     if not poll.user_owns_poll(poll_id):
         return 'User does not own the poll'
 
-    url_id = urandom(16).hex()
+    url_id = create_new_url_key()
     sql = 'INSERT INTO NewCustomerLinks \
            (poll_id, url_id) \
            VALUES (:poll_id, :url_id)'
@@ -32,7 +36,7 @@ def process_new_member_access_link(member_id):
     if not member.user_owns_parent_poll(member_id):
         return 'User does not own the parent poll'
 
-    url_id = urandom(16).hex()
+    url_id = create_new_url_key()
     sql = 'INSERT INTO MemberAccessLinks \
            (member_id, url_id) VALUES (:member_id, :url_id)'
     db.session.execute(sql, {'member_id': member_id, 'url_id': url_id})
