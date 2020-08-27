@@ -377,6 +377,24 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         self.ctx.globalAlpha = 0.9;
         self.ctx.fillRect(0, startY, this.canvas.width, endY-startY);
         self.ctx.restore();
+        self.drawDotRect(30, startY, this.canvas.width-30, endY-startY, 4, 8);
+        self.drawBoldLine(startY);
+        self.drawBoldLine(endY);
+    }
+    this.drawDotRect = function(x, y, width, height, dotSize, dotNumber) {
+        for(let i = 0; i <= dotNumber; i += 1) {
+            for(let j = 1; j < dotNumber; j += 1) {
+                if((i+j)%2 == 0) {
+                    self.ctx.fillStyle = 'black';
+                }
+                else {
+                    self.ctx.fillStyle = 'whitesmoke';
+                }
+                let currX = parseInt(x+(j/dotNumber)*width-dotSize/2)
+                let currY = parseInt(y+(i/dotNumber)*height-dotSize/2)
+                self.ctx.fillRect(currX, currY, dotSize, dotSize);
+            }
+        }
     }
     this.drawMouse = function() {
         if(!self.mouse.isActive) {
@@ -385,13 +403,7 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         let x = self.mouse.x;
         let y = self.mouse.y;
         //draw snap time line as bold
-        self.ctx.beginPath();
-        self.ctx.strokeStyle = 'black';
-        self.ctx.lineWidth=4;
-        self.ctx.moveTo(0, self.snapToBlocks(y));
-        self.ctx.lineTo(self.canvas.width, self.snapToBlocks(y));
-        self.ctx.stroke();
-
+        self.drawBoldLine(y);
         //draw background box for the time
         self.ctx.fillStyle = 'rgb(245, 245, 245, 0.8)';
         self.ctx.fillRect(x, y-30, 90, 35)
@@ -406,6 +418,14 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         self.ctx.font = '30px Courier New';
         self.ctx.fillStyle = 'rgb(0, 0, 0)';
         self.ctx.fillText(timeStr, x, y);
+    }
+    this.drawBoldLine = function(y) {
+        self.ctx.beginPath();
+        self.ctx.strokeStyle = 'black';
+        self.ctx.lineWidth=4;
+        self.ctx.moveTo(0, self.snapToBlocks(y));
+        self.ctx.lineTo(self.canvas.width, self.snapToBlocks(y));
+        self.ctx.stroke();
     }
     this.drawTimeGrid = function() {
         //minor grid
