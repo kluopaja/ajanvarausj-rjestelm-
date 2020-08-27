@@ -60,10 +60,7 @@ def process_registration(username, password):
 def check_alphanum_string(s, min_length, max_length):
     if len(s) < min_length or len(s) > max_length:
         return False
-    try:
-        return s.isalnum()
-    except:
-        return False
+    return s.isalnum()
 
 def process_logout():
     if 'user_id' in session:
