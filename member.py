@@ -16,7 +16,6 @@ def get_customer_reservation_length(member_id):
 
     if length is None:
         return None
-
     return length[0]
 
 #TODO remove poll_id from the parameters!
@@ -37,10 +36,9 @@ def get_member_type(member_id):
            END \
            FROM Customers C FULL JOIN Resources R ON FALSE WHERE \
            C.member_id=:member_id OR R.member_id=:member_id'
-
     member_type = db.session.execute(sql, {'member_id': member_id}).fetchone()
-    print('member_type[0] ', member_type[0])
-    if member_type[0] is None:
+
+    if member_type is None:
         return None
     return member_type[0]
 
@@ -48,17 +46,10 @@ def user_owns_parent_poll(member_id):
     sql = 'SELECT COUNT(*) FROM Polls P, PollMembers M \
            WHERE P.id=M.poll_id AND M.id=:member_id \
            AND P.owner_user_id=:user_id'
-
     user_id = session.get('user_id')
     count = db.session.execute(sql, {'user_id': user_id,
                                      'member_id': member_id}).fetchone()
-    if count[0] == 1:
-        return True
-    if count[0] > 1:
-        print('ERROR! count should not be > 1')
-        return False
-
-    return False
+    return count[0] > 0
 
 #TODO how should this be named? should be separate from having
 #an access through poll ownership
@@ -68,10 +59,7 @@ def user_has_access(user_id, member_id):
 
     count = db.session.execute(sql, {'user_id': user_id,
                                      'member_id': member_id}).fetchone()
-    if count[0] == 1:
-        return True
-    if count[0] == 0:
-        return False
+    return count[0] > 0
 
 #NOTE fails if user_id is not in users!
 def give_user_access_to_member(user_id, member_id):
@@ -83,29 +71,26 @@ def give_user_access_to_member(user_id, member_id):
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id})
     return None
 
+#TODO should this return '' or None?
 def get_member_name(member_id):
     sql = 'SELECT name FROM PollMembers WHERE id=:member_id'
 
-    result = db.session.execute(sql, {'member_id': member_id}).fetchone()
-    if result is None:
-        return ''
+    name = db.session.execute(sql, {'member_id': member_id}).fetchone()
 
-    return result[0]
+    if name is None:
+        return ''
+    return name[0]
 
 def process_modify_customer(member_id, reservation_length):
-    print(member_id, reservation_length)
     try:
         member_id = int(member_id)
         reservation_length = int(reservation_length)
     except:
         return 'Inputs were not integers'
-
     if reservation_length <= 0:
         return 'Reservation length has to be positive'
-
     if reservation_length % 5 != 0:
         return 'Reservation length has to be divisible by 5 min'
-
     #TODO this should probably be done elsewhere so we could easily allow
     #also other users than the admin to modify the customer
     if not user_owns_parent_poll(member_id):
@@ -122,9 +107,7 @@ def update_reservation_length(member_id, reservation_length):
     length_str = str(reservation_length*60)
     sql = 'UPDATE Customers SET reservation_length=:length_str \
            WHERE member_id=:member_id'
-
-    db.session.execute(sql, {'member_id': member_id,
-                             'length_str': length_str})
+    db.session.execute(sql, {'member_id': member_id, 'length_str': length_str})
     return None
 
 def process_delete_member(member_id):
@@ -132,12 +115,9 @@ def process_delete_member(member_id):
         member_id = int(member_id)
     except:
         return "Member id not an interger"
-
     if not user_owns_parent_poll(member_id):
         return "User has no rights to delete the member"
-
     #TODO check if the poll has final results. In that case, don't proceed
-
     delete_member(member_id)
     db.session.commit()
 

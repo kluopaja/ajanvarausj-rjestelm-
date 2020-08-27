@@ -240,7 +240,4 @@ def get_optimization_results(poll_id):
            AND P1.poll_id=:poll_id'
 
     results = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
-    if results is None:
-        return []
-
     return [OptimizationResult(*x) for x in results]

@@ -33,10 +33,6 @@ def get_minute_grades_for_day(member_id, day):
 
     result = db.session.execute(sql, {'member_id': member_id,
                                       'day':day}).fetchall()
-    #print('result: ', result)
-    if result is None:
-        return []
-
     out = []
     for x in result:
         mins_0 = to_minutes(x[0])
@@ -76,9 +72,6 @@ def get_member_times(member_id):
            ORDER BY time_beginning'
 
     result = db.session.execute(sql, {'member_id': member_id}).fetchall()
-    if result is None:
-        return []
-
     return [TimeInterval(*x) for x in result]
 
 
@@ -99,7 +92,6 @@ def get_customer_times(poll_id):
     member_ids = poll.get_poll_customer_members(poll_id)
     times = get_members_times(member_ids)
     lengths = [member.get_customer_reservation_length(x) for x in member_ids]
-
     return list(zip(times, member_ids, lengths))
 
 
@@ -198,20 +190,15 @@ def process_new_grading(member_id, start, end, date, time_grade):
 
     if start_datetime > end_datetime:
         return 'The length of the time segment was negative'
-
     if start_datetime.minute%5 != 0 or end_datetime.minute%5 != 0:
         return 'All times should be divisible by 5 minutes'
-    print('fallback ', member_id, start, end, time_grade);
 
     user_id = session.get('user_id')
     #check user rights
-    print('user owns ... ', member.user_owns_parent_poll(member_id))
     if not member.user_owns_parent_poll(member_id) and \
        not member.user_has_access(user_id, member_id):
         return 'User has no rights to add new time grades'
 
-    print('member_id ', member_id)
-    print('time grade', time_grade)
     member_type = member.get_member_type(member_id)
     if member_type == 'customer':
         if time_grade not in [0, 1, 2]:
@@ -240,16 +227,13 @@ def process_grading_list(member_id, data):
     try:
         error = None
         for day in data:
-            print(day);
             for interval in day[1]:
-                print(interval)
                 error = process_new_grading(member_id, interval[0], interval[1],
                                             day[0], interval[2]);
         if error is not None:
             return error
         db.session.commit()
     except Exception as e:
-        print(e);
         return 'Error when parsing the the grading json' + str(data);
 
 def process_grading_fallback(member_id, start_time, end_time, date, time_grade):

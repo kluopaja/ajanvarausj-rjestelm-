@@ -14,7 +14,6 @@ import member
 def process_new_new_customer_link(poll_id):
     if poll_id is None:
         return 'No poll id was provided'
-
     if not poll.user_owns_poll(poll_id):
         return 'User does not own the poll'
 
@@ -22,7 +21,6 @@ def process_new_new_customer_link(poll_id):
     sql = 'INSERT INTO NewCustomerLinks \
            (poll_id, url_id) \
            VALUES (:poll_id, :url_id)'
-
     db.session.execute(sql, {'poll_id': poll_id, 'url_id': url_id})
     db.session.commit()
     return None
@@ -43,23 +41,24 @@ def process_new_member_access_link(member_id):
 
 def get_invitation_type(url_id):
     sql = 'SELECT COUNT(*) FROM NewCustomerLinks WHERE url_id=:url_id'
-    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
-    if result[0] == 1:
+    count = db.session.execute(sql, {'url_id': url_id}).fetchone()
+
+    if count[0] > 0:
         return 'poll_customer'
 
     sql = 'SELECT COUNT(*) FROM MemberAccessLinks WHERE url_id=:url_id'
-    result = db.session.execute(sql, {'url_id': url_id}).fetchone()
-    if result[0] == 1:
-        return 'member_access'
+    count = db.session.execute(sql, {'url_id': url_id}).fetchone()
 
+    if count[0] > 0:
+        return 'member_access'
     return None
 
 def get_new_customer_link_poll_id(url_id):
     sql = 'SELECT poll_id FROM NewCustomerLinks WHERE url_id=:url_id'
     poll_id = db.session.execute(sql, {'url_id': url_id}).fetchone()
+
     if poll_id is None:
         return None
-
     return poll_id[0]
 
 #TODO return named tuple after we know what field are necessary for it
@@ -68,12 +67,7 @@ def customer_type_details_by_url_id(url_id):
     sql = 'SELECT P.poll_name, poll_description, P.id \
            FROM Polls P, NewCustomerLinks L \
            WHERE P.id=L.poll_id AND L.url_id=:url_id'
-
-    result = db.session.execute(sql, {'url_id': url_id}).fetchall()
-    if result is None:
-        return None
-
-    return result[0]
+    return db.session.execute(sql, {'url_id': url_id}).fetchone()
 
 #we need poll name, poll description, name, member_id, poll_id, member type
 #TODO it's horrible, change after modifying the database more
@@ -89,11 +83,7 @@ def member_details_by_url_id(url_id):
            (M.id=R.member_id or M.id=C.member_id)\
            AND M.id=L.member_id AND L.url_id=:url_id'
 
-    result = db.session.execute(sql, {'url_id': url_id}).fetchall()
-    if result is None:
-        return None
-
-    return result[0]
+    return db.session.execute(sql, {'url_id': url_id}).fetchone()
 
 def process_new_customer_url(url_id, reservation_length, customer_name):
     poll_id = get_new_customer_link_poll_id(url_id)
@@ -134,9 +124,7 @@ def delete_new_customer_link(url_id, owner_user_id):
             WHERE P.id=L.poll_ID AND P.owner_user_id=:owner_user_id AND \
             L.url_id=:url_id RETURNING 1'
     deleted = db.session.execute(sql, {'url_id': url_id,
-                                     'owner_user_id': owner_user_id})
-    deleted = deleted.fetchone()
-
+                                     'owner_user_id': owner_user_id}).fetchone()
     if deleted is None:
         return "User does not own the link or the link doesn't exist"
 
@@ -156,10 +144,8 @@ def delete_member_access_link(url_id, owner_user_id):
            AND P.owner_user_id=:owner_user_id AND \
            L.url_id=:url_id RETURNING 1'
     deleted = db.session.execute(sql, {'url_id': url_id,
-                                     'owner_user_id': owner_user_id})
-    deleted = deleted.fetchone()
+                                     'owner_user_id': owner_user_id}).fetchone()
 
     if deleted is None:
         return "User does not own the link or the link doesn't exist"
-
     return None
