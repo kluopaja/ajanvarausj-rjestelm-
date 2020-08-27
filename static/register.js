@@ -16,7 +16,6 @@ password.addEventListener("keyup", function (event) {
 confirmPassword.addEventListener("keyup", function (event) {
     checkPassword();
 })
-
 form.addEventListener("submit", function (event) {
     if(!(checkUsername() && checkPassword())) {
         event.preventDefault();
@@ -24,11 +23,9 @@ form.addEventListener("submit", function (event) {
     } 
 });
 
-
 function checkUsername() {
     let username = document.getElementById("username")
     regex = RegExp("^[a-zA-Z0-9]+$")
-
     usernameError.textContent = "";
     if(!regex.test(username.value)) {
         usernameError.textContent = "Käyttäjänimi ei kelpaa.";
@@ -37,7 +34,6 @@ function checkUsername() {
     return true;
 }
 function checkPassword() {
-
     passwordOk = true;
     passwordError.textContent = "";
     confirmError.textContent = "";

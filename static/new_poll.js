@@ -43,7 +43,6 @@ pollEndDate.addEventListener("keyup", () => {
     checkDateRelations();
 });
 pollEndTime.addEventListener("input", checkEndTime);
-
 form.addEventListener("submit", function (event) {
     if(!(checkName() && checkDescription() && checkFirst() && checkLast() &&
          checkEndDate() && checkEndTime())) {
@@ -51,7 +50,6 @@ form.addEventListener("submit", function (event) {
         alert("Virhe! Tarkista syötteiden oikeellisuus.");
     }
 });
-
 
 function checkName() {
     let name = pollName.value
@@ -71,7 +69,6 @@ function checkDescription() {
     let description = pollDescription.value;
     let descOk = true;
     descriptionError.textContent = "";
-    console.log(description.length);
     if(description.length == 0) {
         descriptionError.textContent = "Kyselyn kuvaus ei voi olla tyhjä"
         return false;
@@ -150,7 +147,6 @@ function checkDateRelations() {
     firstDate = firstDate.getTime();
     lastDate = lastDate.getTime();
     endDate = endDate.getTime();
-    console.log(firstDate, lastDate, endDate);
     if(firstDate > lastDate) {
         let tmp = "Ensimmäisen varauspäivän tulee olla ennen viimeistä varauspäivää";
         dateRelationsError.textContent = tmp;

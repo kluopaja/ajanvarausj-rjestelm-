@@ -1,6 +1,6 @@
 //TODO functions to arrow functions
 function makeDayEditorDom(timeGrades, gradeDescriptions, blockSize,
-                             memberId, pollId, csrfToken) {
+                          memberId, pollId, csrfToken) {
     let editor = new DayEditor(timeGrades, gradeDescriptions, blockSize,
                                memberId, pollId, csrfToken);
     return editor.dom;
@@ -17,7 +17,6 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         let data = document.createElement('input');
         data.name = 'data';
         data.value = JSON.stringify(self.newGrades);
-        console.log(data.value);
         form.appendChild(data);
 
         let mId = document.createElement('input')
@@ -25,10 +24,8 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         mId.value = memberId;
         form.appendChild(mId)
 
-
         let pId = document.createElement('input');
         pId.name = 'poll_id';
-        console.log(pollId)
         pId.value = pollId;
         form.appendChild(pId)
 
@@ -41,11 +38,8 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         submit.type = 'submit';
         form.appendChild(submit);
 
-
-        console.log(form.submit);
         //we need to attach the form somewhere to submit it
         self.dom.appendChild(form);
-
         form.submit();
     }
     this.handleReset = function() {
@@ -57,9 +51,6 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         }
     }
     this.handleDaySelection = function(e) {
-        console.log('day selection change');
-        console.log(self.timeGrades);
-        console.log('self ', self);
         let date = e.target.value;
         let dateIdx = -1;
         for(let i = 0; i < self.timeGrades.length; i++) {
@@ -77,14 +68,12 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         self.draw();
     }
     this.handleGradeSelection = function(e) {
-        console.log('grade_selection');
         self.selectedGrade = parseInt(e.target.value);
         self.interface.reset();
         self.draw();
     }
     this.addSelection = function(start, end) {
         let grade = self.selectedGrade;
-        console.log('add selection ', start, end);
         self.newGrades[self.selectedDay][1].push([start, end, grade]);
         self.draw();
     }
@@ -98,7 +87,6 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         for(let i = 0; i < self.timeGrades.length; i++) {
             self.newGrades.push([self.timeGrades[i][0], []]);
         }
-
     }
     self.timeGrades = timeGrades;
     self.newGrades = []
@@ -109,7 +97,6 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
     //resolution in minutes
     self.blockSize = blockSize;
 
-
     self.selectedDay = 0;
     self.selectedGrade = gradeDescriptions.length-1;
 
@@ -117,13 +104,12 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
                                    self.addSelection, self.draw);
     //initialize radio buttons
     let daySelection = makeDaySelectionDom(self.timeGrades,
-                                               self.handleDaySelection);
+                                           self.handleDaySelection);
     let gradeSelection = makeGradeSelectionDom(self.gradeDescriptions,
-                                                   self.interface.gradeColors,
-                                                   self.handleGradeSelection);
+                                               self.interface.gradeColors,
+                                               self.handleGradeSelection);
 
     let saveReset = makeSaveReset(self.handleSave, self.handleReset);
-
 
     //create a parent dom and add the children
     self.dom = document.createElement('div');
@@ -178,7 +164,6 @@ function makeGradeSelectionDom(gradeDescriptions, gradeColors, change) {
         colorSpan.innerHTML = "";
         colorSpan.style.background = gradeColors.get(i);
         label.appendChild(colorSpan);
-
 
         let radio = document.createElement('input');
         radio.type = 'radio';
@@ -249,12 +234,10 @@ function Selection() {
     }
     this.selectionup = function() {
         if(self.isActive) {
-
             //TODO add some check that mouse has actually moved more than
             //some small amount
             //now might not behave well!
             if(self.y != self.startY) {
-
                 self.isDone = true;
                 self.isActive = false;
             }
@@ -291,35 +274,28 @@ function Time24(hour, min) {
 //and then the selectiosn can be processed in DayEditor
 function Interface(width, height, blockSize, addSelection, drawEditor) {
     let self = this;
-
     this.handleMousemove = function(e) {
-        console.log('mousemove');
         self.mouse.updatePos(e);
         self.selection.y = self.yToMin(self.mouse.y);
         self.update();
     }
-
     this.handleMousedown = function(e) {
-        console.log('mousedown');
         self.mouse.updatePos(e);
         self.selection.y = self.yToMin(self.mouse.y);
         self.selection.selectiondown();
         self.update();
     }
     this.handleMouseup = function(e) {
-        console.log('mouseup');
         self.mouse.updatePos(e);
         self.selection.y = self.yToMin(self.mouse.y);
         self.selection.selectionup();
         self.update();
     }
     this.handleMouseout = function(e) {
-        console.log('mouseout');
         self.mouse.mouseout();
         self.selection.selectionout();
         self.update();
     }
-
     //draws and also updates the childs if the state of interface changes
     //(i.e. width, height, blockSize)
     this.update = function() {
@@ -330,7 +306,6 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         }
         drawEditor();
     }
-
     this.hourToY = function(h) {
         return Math.floor(h/24*self.canvas.height);
     }
@@ -347,7 +322,6 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         let roundMins = self.yToMin(y);
         let hours = Math.floor(roundMins/60)
         let result = new Time24(hours, roundMins%60);
-        console.log('round_mins', roundMins);
         return result;
     }
     this.snapToBlocks = function(y) {
@@ -371,7 +345,6 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         startY = self.snapToBlocks(startY);
         endY = self.snapToBlocks(endY);
         color = colors.get(grade);
-        console.log('selected grade', grade);
         self.ctx.save();
         self.ctx.fillStyle = color;
         self.ctx.globalAlpha = 0.9;
@@ -409,11 +382,9 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         self.ctx.fillRect(x, y-30, 90, 35)
         //draw current time
         let time = self.yToTime(y);
-        console.log('time', time);
         let hourStr = ('0' + time.hour).slice(-2);
         let minStr = ('0' + time.min).slice(-2);
         let timeStr = hourStr + ':' + minStr;
-
         self.ctx.textBaseline = 'alphabetic';
         self.ctx.font = '30px Courier New';
         self.ctx.fillStyle = 'rgb(0, 0, 0)';
@@ -441,7 +412,6 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
             }
             self.ctx.stroke()
         }
-
         //clear left side of the canvas for the labels
         self.ctx.fillStyle = 'whitesmoke';
         self.ctx.fillRect(0, 0, 40, self.canvas.height);
@@ -464,17 +434,14 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
         }
     }
     this.draw = function(oldGrades, newGrades, selectedGrade) {
-        self.drawTimeGrid();
-        console.log('draw ', newGrades);
         self.drawIntervals(oldGrades, self.gradeColors);
-
         self.drawIntervals(newGrades, self.gradeColors);
 
         if(self.selection.isActive) {
             self.drawActiveSelection(self.selection.minY(),
-                                                self.selection.maxY(),
-                                                selectedGrade,
-                                                self.activeColors);
+                                     self.selection.maxY(),
+                                     selectedGrade,
+                                     self.activeColors);
         }
         self.drawTimeGrid();
         self.drawMouse();
@@ -493,7 +460,6 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
     self.activeColors.set(2, 'rgb(60, 60, 60)');
     self.activeColors.set(1, 'silver');
     self.activeColors.set(0, 'whitesmoke');
-
 
     self.canvas = document.createElement('canvas');
     self.ctx = self.canvas.getContext('2d');
