@@ -1,12 +1,12 @@
 //TODO functions to arrow functions
 function makeDayEditorDom(timeGrades, gradeDescriptions, blockSize,
-                          memberId, pollId, csrfToken) {
+                          memberId, pollId, csrfToken, selectedDay) {
     let editor = new DayEditor(timeGrades, gradeDescriptions, blockSize,
-                               memberId, pollId, csrfToken);
+                               memberId, pollId, csrfToken, selectedDay);
     return editor.dom;
 }
 function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
-                  pollId, csrfToken) {
+                  pollId, csrfToken, selectedDay) {
     let self = this;
     this.handleSave = function() {
         let form = document.createElement('form');
@@ -33,6 +33,11 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         csrfT.name = 'csrf_token';
         csrfT.value = csrfToken;
         form.appendChild(csrfT)
+
+        let selectedD = document.createElement('input');
+        selectedD.name = 'selected_day';
+        selectedD.value = self.selectedDay;
+        form.appendChild(selectedD);
 
         let submit = document.createElement('input');
         submit.type = 'submit';
@@ -67,6 +72,12 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         self.interface.reset();
         self.draw();
     }
+    this.setSelectedDay = function(day) {
+        day = parseInt(selectedDay)
+        if(day >= 0 && day < self.timeGrades.length) {
+            self.selectedDay = day;
+        }
+    }
     this.handleGradeSelection = function(e) {
         self.selectedGrade = parseInt(e.target.value);
         self.interface.reset();
@@ -98,13 +109,15 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
     self.blockSize = blockSize;
 
     self.selectedDay = 0;
+    self.setSelectedDay(selectedDay)
     self.selectedGrade = gradeDescriptions.length-1;
 
     self.interface = new Interface(400, 1200, self.blockSize,
                                    self.addSelection, self.draw);
     //initialize radio buttons
     let daySelection = makeDaySelectionDom(self.timeGrades,
-                                           self.handleDaySelection);
+                                           self.handleDaySelection,
+                                           self.selectedDay);
     let gradeSelection = makeGradeSelectionDom(self.gradeDescriptions,
                                                self.interface.gradeColors,
                                                self.handleGradeSelection);
@@ -121,7 +134,7 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
 
     self.draw();
 }
-function makeDaySelectionDom(timeGrades, change) {
+function makeDaySelectionDom(timeGrades, change, selectedDay) {
     let dayRadios = document.createElement('div');
     dayRadios.id = 'day_radios';
 
@@ -139,7 +152,7 @@ function makeDaySelectionDom(timeGrades, change) {
         radio.name = 'day';
         radio.id = timeGrades[i][0];
         radio.value = timeGrades[i][0];
-        if (i == 0) {
+        if (i == selectedDay) {
             radio.checked = true;
         }
         radio.addEventListener('change', change);

@@ -36,8 +36,9 @@
     let memberId = {{ member_id }};
     let pollId = {{ poll.id }};
     let csrfToken = '{{ session.get('csrf_token') }}';
+    let selectedDay = '{{ selected_day }}'
 dom = makeDayEditorDom(timeGrades, gradeDescriptions, 15, memberId,
-                          pollId, csrfToken);
+                          pollId, csrfToken, selectedDay);
     document.querySelector("div[id=day_editors").appendChild(dom);
 </script>
 <noscript>

@@ -136,7 +136,8 @@ def poll_times(poll_id, member_id):
                             grade_descriptions=grade_descriptions,
                             member_type=member_type,
                             member_name=member_name,
-                            reservation_length=reservation_length);
+                            reservation_length=reservation_length,
+                            selected_day=request.args.get('selected_day', 0));
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
@@ -437,7 +438,8 @@ def new_time_preference():
             return render_template('error.html', message=message)
 
         return redirect(url_for('poll_times', poll_id=poll_id,
-                                member_id=member_id))
+                                member_id=member_id,
+                                selected_day=request.form.get('selected_day', 0)))
     else:
         return render_template('error.html', message=error)
 
