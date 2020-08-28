@@ -159,6 +159,15 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
 .register label {
     display: block;
 }
+.poll_menu ul {
+    padding-left: 0;
+}
+.poll_menu li {
+    display: inline-block;
+}
+.poll_menu a {
+    display: inline-block;
+}
 .poll .section {
     margin: 0 0 3em 1em;
 }

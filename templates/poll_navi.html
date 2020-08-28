@@ -1,10 +1,13 @@
-<h1><a href={{ url_for('route_poll', poll_id=poll.id) }}>Kysely: {{ poll.name }}</a></h1>
+<div class="poll_title">
+<h1><a class="button" href={{ url_for('route_poll', poll_id=poll.id) }}>Kysely: {{ poll.name }}</a></h1>
+</div>
+<div class="poll_menu">
 <ul>
 {% if is_owner %}
-    <li><a href={{ url_for('poll_customers', poll_id=poll.id) }}>Asiakkaat</a></li>
-    <li><a href={{ url_for('poll_resources', poll_id=poll.id) }}>Resurssit</a></li>
-    <li><a href={{ url_for('poll_optimization', poll_id=poll.id) }}>Optimointi</a></li>
+    <li><a class="button" href={{ url_for('poll_customers', poll_id=poll.id) }}>Asiakkaat</a></li>
+    <li><a class="button" href={{ url_for('poll_resources', poll_id=poll.id) }}>Resurssit</a></li>
+    <li><a class="button" href={{ url_for('poll_optimization', poll_id=poll.id) }}>Optimointi</a></li>
 {% endif %}
-    <li><a href={{ url_for('poll_results', poll_id=poll.id) }}>Tulokset</a></li>
+    <li><a class="button" href={{ url_for('poll_results', poll_id=poll.id) }}>Tulokset</a></li>
 </ul>
 </div>
