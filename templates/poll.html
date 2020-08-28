@@ -32,7 +32,7 @@
 <tr>
     <td>{{ resource[0] }}</td>
     <td>
-        <a href={{ url_for('poll_times', poll_id=poll_id,
+        <a href={{ url_for('poll_times', poll_id=poll.id,
                            member_id=resource[1]) }}>
     Siirry resurssiin
     </a>
