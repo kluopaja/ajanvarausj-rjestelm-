@@ -21,12 +21,11 @@
 <div class="section">
 <table>
 <thead>
-    <tr><th>Asiakkaan nimi</th><th>id</th><th>Varauksen kesto</th><th></th><th></th></tr>
+    <tr><th>Asiakas</th><th>Varauksen kesto</th><th></th><th></th></tr>
 </thead>
 {% for customer in customers %}
 <tr>
-    <td data-label="Asiakkaan nimi">{{ customer[2] }}</td>
-    <td data-label="Id">{{ customer[0] }}</td>
+    <td data-label="Asiakas">{{ customer[2] }}</td>
     <td data-label="Varauksen kesto">{{ customer[1] }}</td>
     <td class="control_buttons" data-label="">
     <a class="button" href="/poll/{{ poll.id }}/{{ customer[0] }}/times">
@@ -81,12 +80,11 @@
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn asiakkaan aikatoiveita</p>
 <table>
     <thead>
-    <tr><th>Asiakkaan nimi</th><th>id</th><th>Url</th></tr>
+    <tr><th>Asiakas</th><th>Url</th></tr>
     </thead>
 {% for link in customer_access_links %}
 <tr>
-    <td data-label="Asiakkaan nimi">{{ link[1] }}</td>
-    <td data-label="Id">{{ link[2] }}</td>
+    <td data-label="Asiakas">{{ link[1] }}</td>
     <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
            value={{ url_for('access', url_id=link[0], _external=True) }}
            readonly>
@@ -143,15 +141,12 @@ haluamallaan varauksen kestolla</p>
 <table>
 <thead>
     <tr>
-    <th>Resurssin nimi</th>
-    <th>Resurssin id</th>
+    <th>Resurssi</th>
     <tr>
 </thead>
 {% for resource in resources %}
 <tr>
-    <td data-label="Resurssin nimi">{{ resource[0] }}</td>
-    <td data-label="Resurssin id">{{ resource[1] }}</td>
-    <td data-label="Resurssin nimi">
+    <td data-label="Resurssi">{{ resource[0] }}</td>
     <td class="control_buttons" data-label="">
     <a class="button" href="/poll/{{ poll.id }}/{{ resource[1] }}/times">
     Muokkaa</a><form action="/new_member_access_link" method="post"><input class="button" type="submit" value="Luo muokkauslinkki"><input type="hidden" name="member_id" id={{ resource[1] }}
@@ -195,12 +190,11 @@ haluamallaan varauksen kestolla</p>
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn resurssin aikoja</p>
 <table>
     <thead>
-    <tr><th>Asiakkaan nimi</th><th>id</th><th>Url</th></tr>
+    <tr><th>Asiakas</th><th>Url</th></tr>
     </thead>
 {% for link in resource_access_links %}
 <tr>
-    <td data-label="Resurssin nimi" >{{ link[1] }}</td>
-    <td data-label="Id">{{ link[2] }}</td>
+    <td data-label="Resurssi" >{{ link[1] }}</td>
     <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
            value={{ url_for('new_customer', url_id=link[0], _external=True) }}
            readonly>
@@ -233,19 +227,15 @@ haluamallaan varauksen kestolla</p>
 {% if optimization_results|length > 0 %}
 <table>
     <thead>
-    <tr><th>Asiakkaan nimi</th>
-        <th>Asiakkaan id</th>
-        <th>Resurssin nimi</th>
-        <th>Resurssin id</th>
+    <tr><th>Asiakas</th>
+        <th>Resurssi</th>
         <th>Varauksen alkuaika</th>
     </tr>
     </thead>
 {% for result in optimization_results %}
     <tr>
-        <td data-label="Asiakkaan nimi">{{ result.customer_member_name }}</td>
-        <td data-label="Asiakkaan id">{{ result.customer_member_id }}</td>
-        <td data-label="Resurssin nimi">{{ result.resource_member_name }}</td>
-        <td data-label="Resurssin id">{{ result.resource_member_id }}</td>
+        <td data-label="Asiakas">{{ result.customer_member_name }}</td>
+        <td data-label="Resurssi">{{ result.resource_member_name }}</td>
         <td data-label="Varauksen alkuaika">{{ result.time }}</td>
     </tr>
 {% endfor %}
