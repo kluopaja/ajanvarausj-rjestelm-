@@ -326,7 +326,7 @@ def new_member_access_link():
     return redirect('/poll/'+request.form.get('poll_id')+'/owner')
 
 @app.route('/modify_customer', methods=['POST'])
-def modity_customer():
+def modify_customer():
     if 'user_id' not in session:
         flash("Virhe! Kirjaudu ensin sisään")
         return redirect('/login')
