@@ -2,6 +2,7 @@ from db import db
 from flask import session, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from os import urandom
+import base64
 
 import datetime
 from collections import namedtuple
@@ -200,6 +201,14 @@ def resource_name_in_poll(poll_id, resource_member_name):
                               'resource_member_name': resource_member_name}).fetchone()
     return count[0] > 0
 
+def customer_name_in_poll(poll_id, name):
+    sql = 'SELECT COUNT(*) FROM PollMembers M, Customers C \
+           WHERE M.id=C.member_id AND M.poll_id=:poll_id \
+           AND M.name=:name'
+    count = db.session.execute(sql,
+                             {'poll_id': poll_id, 'name': name}).fetchone()
+    return count[0] > 0
+
 #TODO should this return a list of string, not a list of tuples?
 def get_new_customer_links(poll_id):
     sql = 'SELECT url_id FROM NewCustomerLinks\
@@ -241,10 +250,44 @@ def process_add_customer(poll_id, reservation_length, customer_name):
         return 'Customer name too long (over 30 characters)'
 
     user_id = session.get('user_id')
-    member_id = add_new_customer(poll_id, reservation_length, customer_name)
+    unique_name = create_unique_customer_name(poll_id, customer_name)
+    if unique_name is None:
+        return "Failed to create a unique customer name"
+
+    member_id = add_new_customer(poll_id, reservation_length, unique_name)
     member.give_user_access_to_member(user_id, member_id)
     db.session.commit()
     return None
+
+def create_unique_customer_name(poll_id, name):
+    name_candidate = name
+    for i in range(5):
+        print(name_candidate)
+        if not customer_name_in_poll(poll_id, name_candidate):
+            return name_candidate
+        name_candidate = name + "-" + create_random_name_suffix()
+
+    return None
+
+def create_unique_resource_name(poll_id, name):
+    name_candidate = name
+    for i in range(5):
+        print(name_candidate)
+        if not resource_name_in_poll(poll_id, name_candidate):
+            return name_candidate
+        name_candidate = name + "-" + create_random_name_suffix()
+
+    return None
+
+def create_random_name_suffix():
+    return base64.urlsafe_b64encode(urandom(3)).decode('ascii')
+
+def name_is_unique(poll_id, name):
+    sql = "SELECT COUNT(*) FROM PollMembers WHERE poll_id=:poll_id \
+           AND name=:name"
+    count = db.session.execute(sql, {'poll_id': poll_id,
+                                     'name': name}).fetchone()
+    return count[0] == 0
 
 def process_new_resource(poll_id, resource_name):
     if poll_id is None:
@@ -255,15 +298,16 @@ def process_new_resource(poll_id, resource_name):
         return 'Resource name too long (> 30 characters)'
     if not user_owns_poll(poll_id):
         return 'User does not own the poll'
-    if resource_name_in_poll(poll_id, resource_name):
-        return 'Resource with an identical resource name already \
-                exists in the poll'
+
+    unique_name = create_unique_resource_name(poll_id, resource_name)
+    if unique_name is None:
+        return "Failed to create a unique resource name"
 
     sql = 'INSERT INTO PollMembers (poll_id, name) VALUES \
            (:poll_id, :resource_name) RETURNING id'
     member_id = db.session.execute(sql,
                                    {'poll_id': poll_id,
-                                    'resource_name': resource_name}).fetchone()
+                                    'resource_name': unique_name}).fetchone()
 
     sql = 'INSERT INTO Resources (member_id) VALUES (:member_id)'
     db.session.execute(sql, {'member_id': member_id[0]})
