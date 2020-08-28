@@ -142,15 +142,16 @@ function makeDaySelectionDom(timeGrades, change, selectedDay) {
     header.innerHTML = "Valitse muokattava päivä";
     dayRadios.appendChild(header)
     for (let i = 0; i < timeGrades.length; i++) {
+        let id = "day_radio_" + i.toString();
         let label = document.createElement('label');
-        label.htmlFor = timeGrades[i][0];
+        label.htmlFor = id;
         label.innerHTML = timeGrades[i][0];
         dayRadios.appendChild(label);
 
         let radio = document.createElement('input');
         radio.type = 'radio';
         radio.name = 'day';
-        radio.id = timeGrades[i][0];
+        radio.id = id;
         radio.value = timeGrades[i][0];
         if (i == selectedDay) {
             radio.checked = true;
@@ -168,8 +169,9 @@ function makeGradeSelectionDom(gradeDescriptions, gradeColors, change) {
     header.innerHTML = "Valitse lisättävän toiveen tyyppi";
     gradeRadios.appendChild(header)
     for(let i = 0; i < gradeDescriptions.length; i++) {
+        let id = "grade_radio_" + i.toString();
         let label = document.createElement('label');
-        label.htmlFor = i.toString();
+        label.htmlFor = id;
         label.innerHTML = gradeDescriptions[i];
 
         gradeRadios.appendChild(label);
@@ -181,7 +183,7 @@ function makeGradeSelectionDom(gradeDescriptions, gradeColors, change) {
         let radio = document.createElement('input');
         radio.type = 'radio';
         radio.name = 'grade';
-        radio.id = i.toString();
+        radio.id = id;
         radio.value = i;
         if(i+1 == gradeDescriptions.length) {
             radio.checked = true;
