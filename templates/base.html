@@ -11,7 +11,7 @@
             <ul>
             <li><a href="/">Etusivu</a></li>
             {% if session.get('user_id') %}
-                <li><a href="/new_poll">Luo uusi kysely</a></li>
+            <li><a href={{ url_for('new_poll') }}>Luo uusi kysely</a></li>
             {% endif %}
             </ul>
             </div>
@@ -22,11 +22,11 @@
                     <li>
                         Käyttäjä: <b>{{ session['username'] }}</b></li>
                     <li>
-                    <a href="/logout">Kirjaudu ulos</a>
+                    <a href={{ url_for('logout') }}>Kirjaudu ulos</a>
                     </li>
                 {% else %}
-                    <li><a href="/login">Kirjaudu sisään</a></li>
-                    <li><a href="/register">Uusi käyttäjä</a></li>
+                <li><a href={{ url_for('login') }}>Kirjaudu sisään</a></li>
+                <li><a href={{ url_for('register') }}>Uusi käyttäjä</a></li>
                 {% endif %}
                 </ul>
             </div>

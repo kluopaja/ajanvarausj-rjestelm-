@@ -6,7 +6,7 @@
 <p>Asiakkaan nimi: {{ member_name }}</p>
 <p>Varauksen pituus: {{ reservation_length }}</p>
 {% if is_owner %}
-<form action="/modify_customer" method="POST">
+<form action={{ url_for('modify_customer') }} method="POST">
     <label for="reservation_length">Varauksen pituus minuutteina (5 min tarkkuus)
     </label>
     <input type="number" id="reservation_length" name="reservation_length"
@@ -29,7 +29,7 @@
 {% endif %}
 
 <div id="day_editors"></div>
-<script type="text/javascript" src="/static/poll_times.js"></script>
+<script type="text/javascript" src={{ url_for('static', filename='poll_times.js') }}></script>
 <script nonce={{ csp_nonce() }}>
     let timeGrades = {{ time_grades|tojson }};
     let gradeDescriptions = {{ grade_descriptions|tojson }};
@@ -47,7 +47,7 @@ dom = makeDayEditorDom(timeGrades, gradeDescriptions, 15, memberId,
             {% for interval in day.intervals %}
             <p>{{ interval[0] }}&ndash;{{ interval[1]}}: {{ interval[2] }}</p>
             {% endfor %}
-            <form action="/new_time_preference" method="post">
+            <form action={{ url_for('new_time_preference') }} method="post">
                 {% if member_type == 'customer' %}
                 <label for=2>{{ grade_descriptions[2] }}</label>
                 <input type="radio" name="satisfaction" id=2 value=2 checked>

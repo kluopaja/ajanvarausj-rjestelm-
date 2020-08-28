@@ -3,5 +3,5 @@
 <h2>Virhe!</h2>
 <p>Kutsun luominen epäonnistui</p>
 <p>{{ error_message }}</p>
-<a href="/poll/{{ poll_id }}">Palaa kyselyyn</a>
+<a href={{ url_for('route_poll', poll_id=poll_id) }}>Palaa kyselyyn</a>
 {% endblock %}

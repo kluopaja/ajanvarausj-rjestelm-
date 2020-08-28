@@ -2,7 +2,7 @@
 {% block content %}
 <div class="login">
 <h3>Kirjaudu sisään</h3>
-<form action="/login" method="post">
+<form action={{ url_for('login') }} method="post">
 <ul>
     <li>
         <label for="username">Käyttäjätunnus:</label>

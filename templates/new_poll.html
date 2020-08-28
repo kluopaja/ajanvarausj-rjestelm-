@@ -3,7 +3,7 @@
 
 <div class="new_poll">
 <h2>Uuden kyselyn luonti</h2>
-<form action="/new_poll" method="post">
+<form action={{ url_for('new_poll') }} method="post">
 <ul>
     <li>
         <label for="poll_name">Kyselyn nimi</label>
@@ -42,5 +42,5 @@
 </ul>
 </form>
 </div>
-<script type="text/javascript" src="static/new_poll.js"></script>
+<script type="text/javascript" src={{ url_for('static', filename='new_poll.js') }}></script>
 {% endblock %}

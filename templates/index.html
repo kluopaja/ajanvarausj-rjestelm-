@@ -16,7 +16,7 @@ muille käyttäjille.
 {% for poll in polls %}
 <tr>
     <td>
-        <a href="/poll/{{ poll.id }}">{{ poll.name }}</a>
+        <a href={{ url_for('route_poll', poll_id=poll.id) }}>{{ poll.name }}</a>
     </td>
     <td>
         {{ poll.id }}

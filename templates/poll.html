@@ -17,7 +17,8 @@
     <td>{{ customer[0] }}</td>
     <td>{{ customer[1] }}</td>
     <td>
-    <a href="/poll/{{ poll.id }}/{{ customer[0] }}/times">
+        <a href={{ url_for('poll_times', poll_id=poll.id,
+                           member_id=customer[0]) }}>
     Siirry varaukseen
     </a>
     </td>
@@ -31,7 +32,8 @@
 <tr>
     <td>{{ resource[0] }}</td>
     <td>
-    <a href="/poll/{{ poll.id }}/{{ resource[1] }}/times">
+        <a href={{ url_for('poll_times', poll_id=poll_id,
+                           member_id=resource[1]) }}>
     Siirry resurssiin
     </a>
     </td>

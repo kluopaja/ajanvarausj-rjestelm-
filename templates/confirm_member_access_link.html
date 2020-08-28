@@ -11,7 +11,7 @@ resurssi
 {% endif %}
 </p>
 <p>Roolin nimi: {{ details[2] }}</p>
-<form action="/access/{{ url_id }}" method="POST">
+<form action={{ url_for('access', url_id=url_id) }} method="POST">
     <input type="submit" value="Hyväksy kutsu">
     <input type="hidden" name="poll_id" value={{ details[4] }}>
     <input type="hidden" name="member_id" value={{ details[3] }}>
