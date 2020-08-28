@@ -106,6 +106,9 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
 }
 .frontpage_table {
     padding: 0 0 0 1em;
+    border-spacing: 1em;
+    margin-left: -1em;
+
 }
 .flash li {
     list-style: none;

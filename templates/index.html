@@ -6,23 +6,21 @@
 <p>Täällä voit perustaa ajanvarauskyselyitä ja jakaa niitä
 muille käyttäjille.
 </p>
-<h3>Omat kyselyt:</h3>
+<h3>Omat kyselyt</h3>
 {% if polls|length > 0 %}
 <table class="frontpage_table">
 
     <tr>
-        <th>Nimi</th><th>id</th><th>Kuvaus</th>
+        <th>Nimi</th><th>Kuvaus</th>
     </tr>
 {% for poll in polls %}
 <tr>
-    <td>
-        <a href={{ url_for('route_poll', poll_id=poll.id) }}>{{ poll.name }}</a>
-    </td>
-    <td>
-        {{ poll.id }}
-    </td>
+    <td><label for="poll.id">{{ poll.name }}</label></td>
     <td>
         {{ poll.description }}
+    </td>
+    <td>
+    <a class="button" id="poll.id" href={{ url_for('route_poll', poll_id=poll.id) }}>Kyselyyn</a>
     </td>
             
 </tr>
