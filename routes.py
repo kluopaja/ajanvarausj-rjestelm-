@@ -28,8 +28,6 @@ def route_poll(poll_id):
         return render_template('error.html', message=message)
 
     is_owner = poll.user_owns_poll(poll_id)
-    if is_owner:
-        return redirect(url_for('poll_owner', poll_id=poll_id))
 
     user_id = session.get('user_id')
     user_customers = poll.get_user_poll_customers(user_id, poll_id)
@@ -43,14 +41,40 @@ def route_poll(poll_id):
                            user_resources=user_resources,
                            grade_descriptions=grade_descriptions)
 
-@app.route('/poll/<int:poll_id>/owner')
-def poll_owner(poll_id):
+
+@app.route('/poll/<int:poll_id>/customers')
+def poll_customers(poll_id):
     if 'user_id' not in session:
         flash("Virhe! Kirjaudu ensin sisään")
         return redirect(url_for('login'))
 
     # list of (url_id, reservation_length)
     customer_invitations = None
+
+    is_owner = poll.user_owns_poll(poll_id)
+    if not is_owner:
+        error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
+        return render_template('error.html', message=error)
+
+    current_poll = poll.get_polls_by_ids([poll_id])[0]
+
+    # note that we already know that poll_id is an integer
+    new_customer_links = poll.get_new_customer_links(poll_id)
+    customer_access_links = poll.get_customer_access_links(poll_id)
+    customers = poll.get_poll_customers(poll_id)
+    return render_template('poll_customers.html',
+                           is_owner=True,
+                           poll=current_poll,
+                           new_customer_links=new_customer_links,
+                           customer_access_links=customer_access_links,
+                           customers=customers)
+
+@app.route('/poll/<int:poll_id>/resources')
+def poll_resources(poll_id):
+    if 'user_id' not in session:
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect(url_for('login'))
+
     # list of (url_id, resource_description)
     resource_invitations = None
     # list of (resource_description, resource_id)
@@ -64,20 +88,34 @@ def poll_owner(poll_id):
     current_poll = poll.get_polls_by_ids([poll_id])[0]
 
     # note that we already know that poll_id is an integer
-    new_customer_links = poll.get_new_customer_links(poll_id)
-    customer_access_links = poll.get_customer_access_links(poll_id)
     resource_access_links = poll.get_resource_access_links(poll_id)
-    customers = poll.get_poll_customers(poll_id)
     resources = poll.get_poll_resources(poll_id)
     optimization_results = optimization.get_optimization_results(poll_id)
 
-    return render_template('poll_owner.html',
+    return render_template('poll_resources.html',
+                           is_owner=True,
                            poll=current_poll,
-                           new_customer_links=new_customer_links,
-                           customer_access_links=customer_access_links,
                            resource_access_links=resource_access_links,
-                           customers=customers,
-                           resources=resources,
+                           resources=resources);
+
+@app.route('/poll/<int:poll_id>/optimization')
+def poll_optimization(poll_id):
+    if 'user_id' not in session:
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect(url_for('login'))
+
+    is_owner = poll.user_owns_poll(poll_id)
+    if not is_owner:
+        error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
+        return render_template('error.html', message=error)
+
+    current_poll = poll.get_polls_by_ids([poll_id])[0]
+
+    optimization_results = optimization.get_optimization_results(poll_id)
+
+    return render_template('poll_optimization.html',
+                           is_owner=True,
+                           poll=current_poll,
                            optimization_results=optimization_results)
 
 @app.route('/poll/<int:poll_id>/results')
@@ -91,7 +129,9 @@ def poll_results(poll_id):
         message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
         return render_template('error.html', message=message)
 
+    is_owner = poll.user_owns_poll(poll_id)
     return render_template('poll_results.html',
+                           is_owner=is_owner,
                            poll=current_poll);
 
 @app.route('/poll/<int:poll_id>/<int:member_id>/times')
@@ -267,7 +307,7 @@ def add_customer():
     if error is None:
         flash('Uusi asiakas luotu onnistuneesti')
         poll_id = request.form.get('poll_id')
-        return redirect(url_for('poll_owner', poll_id=poll_id))
+        return redirect(url_for('poll_customers', poll_id=poll_id))
 
     return render_template('error.html', message=error)
 
@@ -305,7 +345,7 @@ def new_new_customer_link():
     error = link.process_new_new_customer_link(request.form.get('poll_id'))
     if error is None:
         flash('Uuden kutsun luonti onnistui')
-        return redirect(url_for('poll_owner',
+        return redirect(url_for('poll_customers',
                         poll_id=request.form.get('poll_id', 0)))
     else:
         # TODO REPLACE
@@ -326,7 +366,12 @@ def new_member_access_link():
     else:
         flash('Uuden oikeuslinkin luonti epäonnistui:\n' + error)
 
-    return redirect(url_for('poll_owner',
+    if request.form.get('member_type') == 'customer':
+        redirect_route = 'poll_customers'
+    else:
+        redirect_route = 'poll_resources'
+
+    return redirect(url_for(redirect_route,
                     poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/modify_customer', methods=['POST'])
@@ -358,7 +403,7 @@ def new_resource():
                                       request.form.get('resource_name'))
     if error is None:
         flash('Uuden resurssin luonti onnistui')
-        return redirect(url_for('poll_owner',
+        return redirect(url_for('poll_resources',
                         poll_id=request.form.get('poll_id', 0)))
     else:
         return render_template('new_resource_failed.html',
@@ -375,7 +420,12 @@ def delete_member():
     error = member.process_delete_member(request.form.get('member_id'))
     if error is None:
         flash('Jäsenen poisto onnistui')
-        return redirect(url_for('poll_owner',
+        if request.form.get('member_type') == 'customer':
+            redirect_route = 'poll_customers'
+        else:
+            redirect_route = 'poll_resources'
+
+        return redirect(url_for(redirect_route,
                                 poll_id=request.form.get('poll_id', 0)))
     else:
         return render_template('error.html', message=error)
@@ -390,7 +440,7 @@ def delete_new_customer_link():
     error = link.process_delete_new_customer_link(request.form.get('url_id'))
     if error is None:
         flash('Linkin poisto onnistui')
-        return redirect(url_for('poll_owner',
+        return redirect(url_for('poll_customers',
                         poll_id=request.form.get('poll_id', 0)))
     else:
         return render_template('error.html', message=error)
@@ -405,7 +455,12 @@ def delete_member_access_link():
     error = link.process_delete_member_access_link(request.form.get('url_id'))
     if error is None:
         flash('Linkin poisto onnistui')
-        return redirect(url_for('poll_owner',
+        if request.form.get('member_type') == 'customer':
+            redirect_route = 'poll_customers'
+        else:
+            redirect_route = 'poll_resources'
+
+        return redirect(url_for(redirect_route,
                                 poll_id=request.form.get('poll_id', 0)))
     else:
         return render_template('error.html', message=error)
@@ -453,7 +508,7 @@ def optimize_poll():
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
         flash('Ajanvarauksien optimointi onnistui');
-        return redirect(url_for('poll_owner',
+        return redirect(url_for('poll_optimization',
                                 poll_id=request.form.get('poll_id', 0)))
 
     return render_template('error.html', message=error)

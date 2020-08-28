@@ -3,6 +3,18 @@
 {% include "poll_navi.html" %}
 <div class="poll">
 
+<h2>Kyselyn tiedot</h2>
+<div class="poll">
+<div class="section">
+<ul>
+    <li><b>Kuvaus:</b> {{ poll.description }}</li>
+    <li><b>Ensimmäinen varauspäivä:</b> {{ poll.first_appointment_date }}</li>
+    <li><b>Viimeinen varauspäivä:</b> {{ poll.last_appointment_date }}</li>
+    <li><b>Kysely päättyy:</b> {{ poll.end_time }}</li>
+</ul>
+</div>
+
+{% if not is_owner %}
 <h2>Hallinnoitavat asiakkaat</h2>
 <div class="section">
 <table>
@@ -43,5 +55,6 @@
 {% endfor %}
 </table>
 </div>
+{% endif %}
 </div>
 {% endblock %}

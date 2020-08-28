@@ -1,15 +1,10 @@
 <h1><a href={{ url_for('route_poll', poll_id=poll.id) }}>Kysely: {{ poll.name }}</a></h1>
 <ul>
+{% if is_owner %}
+    <li><a href={{ url_for('poll_customers', poll_id=poll.id) }}>Asiakkaat</a></li>
+    <li><a href={{ url_for('poll_resources', poll_id=poll.id) }}>Resurssit</a></li>
+    <li><a href={{ url_for('poll_optimization', poll_id=poll.id) }}>Optimointi</a></li>
+{% endif %}
     <li><a href={{ url_for('poll_results', poll_id=poll.id) }}>Tulokset</a></li>
 </ul>
-<h2>Kyselyn tiedot</h2>
-<div class="poll">
-<div class="section">
-<ul>
-    <li><b>Kuvaus:</b> {{ poll.description }}</li>
-    <li><b>Ensimmäinen varauspäivä:</b> {{ poll.first_appointment_date }}</li>
-    <li><b>Viimeinen varauspäivä:</b> {{ poll.last_appointment_date }}</li>
-    <li><b>Kysely päättyy:</b> {{ poll.end_time }}</li>
-</ul>
-</div>
 </div>

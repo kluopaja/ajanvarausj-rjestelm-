@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+{% set active_page = "owner" %}
+{% include "poll_navi.html" %}
+<h1>Optimointi</h1>
+<div class="section">
+<form action={{ url_for('optimize_poll') }} method="post">
+    <input class="button" type="submit" value="Optimoi ajanvaraukset">
+    <input type="hidden" name="poll_id" value={{ poll.id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+</form>
+</div>
+<h2>Optimoinnin tulokset:</h2>
+<div class="section">
+{% if optimization_results|length > 0 %}
+<table>
+    <thead>
+    <tr><th>Asiakas</th>
+        <th>Resurssi</th>
+        <th>Varauksen alkuaika</th>
+    </tr>
+    </thead>
+{% for result in optimization_results %}
+    <tr>
+        <td data-label="Asiakas">{{ result.customer_member_name }}</td>
+        <td data-label="Resurssi">{{ result.resource_member_name }}</td>
+        <td data-label="Varauksen alkuaika">{{ result.time }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% else %}
+<p>Ei tuloksia tai optimointia ei ole suoritettu</p>
+{% endif %}
+</div>
+</div>
+{% endblock %}
