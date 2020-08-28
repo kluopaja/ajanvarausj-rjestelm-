@@ -11,15 +11,15 @@ import member
 
 ### Time preference related functions ###
 
-#TODO think if I should store both ends of the interval or just the beginning
-#TODO think if I need to modify the content of these
+# TODO think if I should store both ends of the interval or just the beginning
+# TODO think if I need to modify the content of these
 TimeInterval = namedtuple('TimeInterval', ['start', 'end', 'grade'])
 
-#time preferences for one day (date)
+# time preferences for one day (date)
 GradesInDate = namedtuple('GradesInDate', ['date', 'intervals'])
 
-#type(day) = datetime.date
-#get an ordered list of time intervals that overlap with 'day'
+# type(day) = datetime.date
+# get an ordered list of time intervals that overlap with 'day'
 def get_minute_grades_for_day(member_id, day):
     def to_minutes(t):
         return t.hour*60 + t.minute;
@@ -37,15 +37,15 @@ def get_minute_grades_for_day(member_id, day):
     for x in result:
         mins_0 = to_minutes(x[0])
         mins_1 = to_minutes(x[1])
-        #note that time period can never end at the beginning of the
-        #current day
+        # note that time period can never end at the beginning of the
+        # current day
         if mins_1 == 0:
             mins_1 = 24*60;
         out.append(TimeInterval(mins_0, mins_1, x[2]))
     return out
 
 
-#TODO think if this should return a named tuple
+# TODO think if this should return a named tuple
 def get_minute_grades_for_days_range(member_id, first_date, last_date):
     result = []
     i = first_date
@@ -56,16 +56,16 @@ def get_minute_grades_for_days_range(member_id, first_date, last_date):
 
     return result
 
-#returns a list of GradesInDate
-#time intervals are minutes from the beginning of the day
-#dates in isoformat
+# returns a list of GradesInDate
+# time intervals are minutes from the beginning of the day
+# dates in isoformat
 def get_minute_grades(member_id, poll_id):
     first_date, last_date = poll.get_poll_date_range(poll_id)
     return get_minute_grades_for_days_range(member_id, first_date, last_date)
 
 
 
-#return list of TimeIntervals
+# return list of TimeIntervals
 def get_member_times(member_id):
     sql = 'SELECT time_beginning, time_end, grade FROM \
            MemberTimeGrades WHERE member_id=:member_id \
@@ -75,19 +75,19 @@ def get_member_times(member_id):
     return [TimeInterval(*x) for x in result]
 
 
-#return list x of (times, member_id)
+# return list x of (times, member_id)
 def get_members_times(member_ids):
     return [get_member_times(x) for x in member_ids]
 
-#return list x of (times, member_id)
-#one element for each member_id
+# return list x of (times, member_id)
+# one element for each member_id
 def get_resource_times(poll_id):
     member_ids = poll.get_poll_resource_members(poll_id)
     times = get_members_times(member_ids)
     return list(zip(times, member_ids))
 
-#return list x of (times, member_id, reservation_length)
-#one element for each member_id
+# return list x of (times, member_id, reservation_length)
+# one element for each member_id
 def get_customer_times(poll_id):
     member_ids = poll.get_poll_customer_members(poll_id)
     times = get_members_times(member_ids)
@@ -95,15 +95,15 @@ def get_customer_times(poll_id):
     return list(zip(times, member_ids, lengths))
 
 
-#Modifies existing time preference intervals so that truncates
-#partially overlapping intervals and removes completely overlapping intervals
-#and then adds the new inteval
-#start and end are datetime.datetime
-#TODO concatenate subsequent time intervals with the same time grade value
+# Modifies existing time preference intervals so that truncates
+# partially overlapping intervals and removes completely overlapping intervals
+# and then adds the new inteval
+# start and end are datetime.datetime
+# TODO concatenate subsequent time intervals with the same time grade value
 def add_member_time_grading(member_id, start, end, time_grade):
-    #fetch a segment inside which the new segment is
-    #ooooooo
-    # nnnn
+    # fetch a segment inside which the new segment is
+    # ooooooo
+    #  nnnn
     sql = 'SELECT * FROM MemberTimeGrades WHERE member_id=:member_id \
            AND time_beginning < :start AND time_end > :end'
 
@@ -130,18 +130,18 @@ def add_member_time_grading(member_id, start, end, time_grade):
                                  'grade': result[3]})
 
 
-    #right side of the old segment is inside the new segment
-    # ooooo
-    #  nnnnnnn
+    # right side of the old segment is inside the new segment
+    #  ooooo
+    #   nnnnnnn
     sql = 'UPDATE MemberTimeGrades SET \
            time_end = :start \
            WHERE member_id=:member_id AND time_end >= :start \
            AND time_end <= :end'
     db.session.execute(sql, {'member_id': member_id, 'start': start,
                               'end': end})
-    #left side of the old segment is inside the new segment
-    #     ooooo
-    #  nnnnnnn
+    # left side of the old segment is inside the new segment
+    #      ooooo
+    #   nnnnnnn
     sql = 'UPDATE MemberTimeGrades SET \
            time_beginning = :end \
            WHERE member_id=:member_id AND time_beginning >= :start \
@@ -149,13 +149,13 @@ def add_member_time_grading(member_id, start, end, time_grade):
     db.session.execute(sql, {'member_id': member_id, 'start': start,
                               'end': end})
 
-    #remove non-positive length segments (in case these were generated by the
-    #previous operations)
+    # remove non-positive length segments (in case these were generated by the
+    # previous operations)
     sql = 'DELETE FROM MemberTimeGrades WHERE member_id=:member_id \
            AND time_end<=time_beginning'
     db.session.execute(sql, {'member_id': member_id})
 
-    #add new segment
+    # add new segment
     sql = 'INSERT INTO MemberTimeGrades \
            (member_id, time_beginning, time_end, grade) \
            VALUES \
@@ -165,7 +165,7 @@ def add_member_time_grading(member_id, start, end, time_grade):
                              'end': end, 'grade': time_grade})
 
 
-#start and end are minutes from the beginning of the day
+# start and end are minutes from the beginning of the day
 def process_new_grading(member_id, start, end, date, time_grade):
     try:
         date = datetime.datetime.fromisoformat(date)
@@ -194,7 +194,7 @@ def process_new_grading(member_id, start, end, date, time_grade):
         return 'All times should be divisible by 5 minutes'
 
     user_id = session.get('user_id')
-    #check user rights
+    # check user rights
     if not member.user_owns_parent_poll(member_id) and \
        not member.user_has_access(user_id, member_id):
         return 'User has no rights to add new time grades'
@@ -211,9 +211,9 @@ def process_new_grading(member_id, start, end, date, time_grade):
         return 'Invalid member_id'
 
     print('start_datetime, end_datetime: ', start_datetime, end_datetime)
-    #TODO check that user has rights to member_id
-    #TODO.fcheck that the start_datetime and end_datetime are within the
-    #allowed poll range!
+    # TODO check that user has rights to member_id
+    # TODO.fcheck that the start_datetime and end_datetime are within the
+    # allowed poll range!
     add_member_time_grading(member_id, start_datetime, end_datetime,
                          time_grade)
     db.session.commit()

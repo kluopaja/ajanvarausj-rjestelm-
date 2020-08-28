@@ -18,12 +18,12 @@ def get_customer_reservation_length(member_id):
         return None
     return length[0]
 
-#TODO remove poll_id from the parameters!
+# TODO remove poll_id from the parameters!
 def initialize_poll_member_times(member_id, poll_id, grade):
     start, end = poll.get_poll_date_range(poll_id)
     end += datetime.timedelta(days=1)
 
-    #convert to datetime.datetime
+    # convert to datetime.datetime
     start = datetime.datetime(start.year, start.month, start.day)
     end = datetime.datetime(end.year, end.month, end.day)
 
@@ -51,8 +51,8 @@ def user_owns_parent_poll(member_id):
                                      'member_id': member_id}).fetchone()
     return count[0] > 0
 
-#TODO how should this be named? should be separate from having
-#an access through poll ownership
+# TODO how should this be named? should be separate from having
+# an access through poll ownership
 def user_has_access(user_id, member_id):
     sql = 'SELECT COUNT(*) FROM UsersPollMembers WHERE \
            member_id=:member_id AND user_id=:user_id'
@@ -61,7 +61,7 @@ def user_has_access(user_id, member_id):
                                      'member_id': member_id}).fetchone()
     return count[0] > 0
 
-#NOTE fails if user_id is not in users!
+# NOTE fails if user_id is not in users!
 def give_user_access_to_member(user_id, member_id):
     if user_has_access(user_id, member_id):
         return 'User already has access to the poll member'
@@ -71,7 +71,7 @@ def give_user_access_to_member(user_id, member_id):
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id})
     return None
 
-#TODO should this return '' or None?
+# TODO should this return '' or None?
 def get_member_name(member_id):
     sql = 'SELECT name FROM PollMembers WHERE id=:member_id'
 
@@ -91,8 +91,8 @@ def process_modify_customer(member_id, reservation_length):
         return 'Reservation length has to be positive'
     if reservation_length % 5 != 0:
         return 'Reservation length has to be divisible by 5 min'
-    #TODO this should probably be done elsewhere so we could easily allow
-    #also other users than the admin to modify the customer
+    # TODO this should probably be done elsewhere so we could easily allow
+    # also other users than the admin to modify the customer
     if not user_owns_parent_poll(member_id):
         return 'User has no rights to modify the customer'
 
@@ -101,9 +101,9 @@ def process_modify_customer(member_id, reservation_length):
         db.session.commit()
     return error
 
-#reservation_length should is in minutes
+# reservation_length should is in minutes
 def update_reservation_length(member_id, reservation_length):
-    #to seconds
+    # to seconds
     length_str = str(reservation_length*60)
     sql = 'UPDATE Customers SET reservation_length=:length_str \
            WHERE member_id=:member_id'
@@ -117,12 +117,12 @@ def process_delete_member(member_id):
         return "Member id not an interger"
     if not user_owns_parent_poll(member_id):
         return "User has no rights to delete the member"
-    #TODO check if the poll has final results. In that case, don't proceed
+    # TODO check if the poll has final results. In that case, don't proceed
     delete_member(member_id)
     db.session.commit()
 
-#member id should be an integer
-#does not check any rights
+# member id should be an integer
+# does not check any rights
 def delete_member(member_id):
     sql = 'DELETE FROM PollMembers WHERE id=:member_id'
     db.session.execute(sql, {'member_id': member_id})

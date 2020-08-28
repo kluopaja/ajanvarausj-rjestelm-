@@ -7,10 +7,10 @@ import signal
 import times
 from db import db
 ### Optimization related functions ###
-#everything is handled as 5 minute intervals
+# everything is handled as 5 minute intervals
 
-#resources = [(member_id, time_preferences)]
-#customers = [(member_id, reservation_length, time_preferences)]
+# resources = [(member_id, time_preferences)]
+# customers = [(member_id, reservation_length, time_preferences)]
 
 Assignment = namedtuple('Assignment', ['customer_member_id',
                                        'resource_member_id',
@@ -56,12 +56,12 @@ def optimize_poll(poll_id):
 
 
 
-    #TODO use get poll range
+    # TODO use get poll range
     print(customer_times)
     print('customer times', customer_times[0])
     start = customer_times[0][0].start
     end = customer_times[0][-1].end
-    #convert time to discrete 5 min intervals
+    # convert time to discrete 5 min intervals
     resource_times = [intervals_to_array(x, start, end) for x in resource_times]
     customer_times = [intervals_to_array(x, start, end) for x in customer_times]
     reservation_lengths = [timedelta_to_index(x) for x in reservation_lengths]
@@ -70,7 +70,7 @@ def optimize_poll(poll_id):
 
     assignments, satisfaction = random_restarts(greedy_1, 100, resources,
                                                 customers)
-    #5min blocks --> datetime
+    # 5min blocks --> datetime
     assignments = [assignment_to_datetime(x, start) for x in assignments]
 
     save_optimization(assignments, poll_id)
@@ -87,28 +87,28 @@ def to_index(time, start):
     return timedelta_to_index(time-start)
 
 def intervals_to_array(time_intervals, start, end):
-    #print(start, end, end-start, (end-start).seconds)
+    # print(start, end, end-start, (end-start).seconds)
 
     length_minutes = (end-start).days*24*60 + (end-start).seconds//60
-    #print('length_minutes', length_minutes)
+    # print('length_minutes', length_minutes)
     arr = [0 for x in range(length_minutes//5)]
     for x in time_intervals:
         a = to_index(x.start, start)
         b = to_index(x.end, start)
-       # print('a, b', a, b)
+       #  print('a, b', a, b)
         i = a
         while i < b:
-            #     print(i)
+            #      print(i)
             arr[i] = x.grade
             i += 1
     return arr
 
 
-#returns an array v
-#v[i] is the satisfaction of user if the booking start
-#i*5 minutes after the beginning of the first poll day
+# returns an array v
+# v[i] is the satisfaction of user if the booking start
+# i*5 minutes after the beginning of the first poll day
 
-#v[i] is always 0 if there is zero in v[i...i+res_length-1]
+# v[i] is always 0 if there is zero in v[i...i+res_length-1]
 def calculate_satisfaction_sum(arr, res_length):
     v = [0 for i in range(len(arr))]
     for i in range(len(arr)-res_length+1):
@@ -124,17 +124,17 @@ def calculate_satisfaction_sum(arr, res_length):
             v[i] = mean_satisfaction
     return v
 
-#simple greedy algoritm
-#goes through the customers one by one and assigns them to
-# 1. best time for that customer
-# 2. to a time starting as early as possible
-# 3. to the first free resource#
+# simple greedy algoritm
+# goes through the customers one by one and assigns them to
+#  1. best time for that customer
+#  2. to a time starting as early as possible
+#  3. to the first free resource# 
 
-#the algorithm can be run multiple times with different resource/customer
-#permutations
+# the algorithm can be run multiple times with different resource/customer
+# permutations
 def greedy_1(resources, customers):
     def find_assignment(customer_sum, resource_sums):
-        #-satisfaction, starting time, resource_index
+        # -satisfaction, starting time, resource_index
         best_assignment = (0, 0, 0)
         for i in range(len(customer_sum)):
             if customer_sum[i] < best_assignment[0]:
@@ -152,21 +152,21 @@ def greedy_1(resources, customers):
         return best_assignment
 
 
-    #print('resources \n', resources)
-    #print('\n')
+    # print('resources \n', resources)
+    # print('\n')
     resources = copy.deepcopy(resources)
     customers = copy.deepcopy(customers)
 
     resource_m_ids, resource_times = zip(*resources)
     customer_m_ids, reservation_lengths, customer_times = zip(*customers)
-    #print(resource_m_ids, resource_times)
-    #print(customer_m_ids, reservation_lengths, customer_times)
+    # print(resource_m_ids, resource_times)
+    # print(customer_m_ids, reservation_lengths, customer_times)
 
 
     customer_sums = [calculate_satisfaction_sum(x, y)
                     for x, y in zip(customer_times, reservation_lengths)]
 
-    #print(customer_sums)
+    # print(customer_sums)
 
     assignments = []
 
@@ -177,9 +177,9 @@ def greedy_1(resources, customers):
         resource_sums = [calculate_satisfaction_sum(x, length)
                          for x in resource_times]
 
-        #print('resource_sums, ', resource_sums)
+        # print('resource_sums, ', resource_sums)
         best = find_assignment(customer_sums[i], resource_sums)
-        #print('best ', best)
+        # print('best ', best)
         if best == (0, 0, 0):
             continue
 
@@ -187,11 +187,11 @@ def greedy_1(resources, customers):
             resource_times[best[2]][j] = 0
 
         total_satisfaction += best[0]
-        #print('best ', best)
-        #print(customer_m_ids,i)
-        #print(customer_m_ids[i])
-        #print(resource_m_ids[best[2]])
-        #print(best[1])
+        # print('best ', best)
+        # print(customer_m_ids,i)
+        # print(customer_m_ids[i])
+        # print(resource_m_ids[best[2]])
+        # print(best[1])
         assignments.append(Assignment(customer_m_ids[i],
                                        resource_m_ids[best[2]],
                                        best[1]))

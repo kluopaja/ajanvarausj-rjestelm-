@@ -32,7 +32,7 @@ def process_new_new_customer_link(poll_id):
 def process_new_member_access_link(member_id):
     if member_id is None:
         return 'No member id was provided'
-    #check user is the owner of the resource parent poll
+    # check user is the owner of the resource parent poll
     if not member.user_owns_parent_poll(member_id):
         return 'User does not own the parent poll'
 
@@ -65,16 +65,16 @@ def get_new_customer_link_poll_id(url_id):
         return None
     return poll_id[0]
 
-#TODO return named tuple after we know what field are necessary for it
-#we need poll name, poll description, reservation length, poll_id
+# TODO return named tuple after we know what field are necessary for it
+# we need poll name, poll description, reservation length, poll_id
 def customer_type_details_by_url_id(url_id):
     sql = 'SELECT P.poll_name, poll_description, P.id \
            FROM Polls P, NewCustomerLinks L \
            WHERE P.id=L.poll_id AND L.url_id=:url_id'
     return db.session.execute(sql, {'url_id': url_id}).fetchone()
 
-#we need poll name, poll description, name, member_id, poll_id, member type
-#TODO it's horrible, change after modifying the database more
+# we need poll name, poll description, name, member_id, poll_id, member type
+# TODO it's horrible, change after modifying the database more
 def member_details_by_url_id(url_id):
     sql = 'SELECT P.poll_name, P.poll_description, \
            M.name, M.id, P.id, \

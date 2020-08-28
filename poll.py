@@ -34,7 +34,7 @@ def process_new_poll(user_id, name, description, first_date, last_date,
         return 'Poll end should not be in the past'
     if last_date - first_date > datetime.timedelta(days=30):
         return 'Poll date range cannot be longer than 31 days'
-    #TODO be more descriptivie
+    # TODO be more descriptivie
     if name is None or len(name) < 1 or len(name) > 30:
         return 'Not valid poll name'
     if description is None or len(description) == 0 or len(description) > 10000:
@@ -58,26 +58,26 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     db.session.commit()
     return None
 
-#returns list of member_ids
+# returns list of member_ids
 def get_poll_resource_members(poll_id):
     sql = 'SELECT M.id FROM PollMembers M, Resources R \
            WHERE M.id=R.member_id AND M.poll_id=:poll_id'
     member_ids = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     return [x[0] for x in member_ids]
 
-#returns list of member_ids
+# returns list of member_ids
 def get_poll_customer_members(poll_id):
     sql = 'SELECT M.id FROM PollMembers M, Customers C \
            WHERE M.id=C.member_id AND M.poll_id=:poll_id'
     member_ids = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     return [x[0] for x in member_ids]
 
-#returns ids of all polls that user somehow part of
-#(either owner, participant or owner of a resource)
-#TODO think about which of these following 4 should take user id as a parameter
-#should this take some parameter?
+# returns ids of all polls that user somehow part of
+# (either owner, participant or owner of a resource)
+# TODO think about which of these following 4 should take user id as a parameter
+# should this take some parameter?
 
-#assumes that poll_id is an integer
+# assumes that poll_id is an integer
 def process_get_poll(poll_id):
     user_id = session.get('user_id', 0)
     sql = 'SELECT P.* FROM Polls P \
@@ -156,9 +156,9 @@ def get_user_poll_customer_member_ids(user_id, poll_id):
                                           'poll_id': poll_id}).fetchall()
     return [x[0] for x in member_ids]
 
-#what should these return?
-#Now they just return some random things... Maybe only member_ids?
-#TODO look at user.get_user_poll_member_ids and similar to these
+# what should these return?
+# Now they just return some random things... Maybe only member_ids?
+# TODO look at user.get_user_poll_member_ids and similar to these
 def get_user_poll_resources(user_id, poll_id):
     sql = 'SELECT M.name, M.id FROM \
            PollMembers M, UsersPollMembers U, Resources R WHERE \
@@ -175,7 +175,7 @@ def get_poll_resources(poll_id):
     resources = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     return resources
 
-#need member_id, reservation_length, member_name
+# need member_id, reservation_length, member_name
 def get_user_poll_customers(user_id, poll_id):
     sql = 'SELECT P.id, C.reservation_length, P.name FROM PollMembers P, UsersPollMembers U, \
            Customers C \
@@ -209,7 +209,7 @@ def customer_name_in_poll(poll_id, name):
                              {'poll_id': poll_id, 'name': name}).fetchone()
     return count[0] > 0
 
-#TODO should this return a list of string, not a list of tuples?
+# TODO should this return a list of string, not a list of tuples?
 def get_new_customer_links(poll_id):
     sql = 'SELECT url_id FROM NewCustomerLinks\
            WHERE poll_id=:poll_id'
@@ -316,9 +316,9 @@ def process_new_resource(poll_id, resource_name):
     db.session.commit()
     return None
 
-#returns member_id
-#assumes that parameters are correct
-#reservation_length is in minutes
+# returns member_id
+# assumes that parameters are correct
+# reservation_length is in minutes
 def add_new_customer(poll_id, reservation_length, name):
     sql = 'INSERT INTO PollMembers (poll_id, name) \
            VALUES (:poll_id, :name) RETURNING id'

@@ -16,7 +16,7 @@ def index():
     return render_template('index.html', polls=polls)
 
 @app.route('/poll/<int:poll_id>')
-#naming this to "poll" would clash with the poll module
+# naming this to "poll" would clash with the poll module
 def route_poll(poll_id):
     if 'user_id' not in session:
         flash("Virhe! Kirjaudu ensin sisään")
@@ -34,7 +34,7 @@ def route_poll(poll_id):
     user_id = session.get('user_id')
     user_customers = poll.get_user_poll_customers(user_id, poll_id)
     user_resources = poll.get_user_poll_resources(user_id, poll_id)
-    #do we need this here?
+    # do we need this here?
     grade_descriptions = ['ei sovi', 'sopii', 'sopii hyvin']
 
     return render_template('poll.html', is_owner=is_owner,
@@ -49,11 +49,11 @@ def poll_owner(poll_id):
         flash("Virhe! Kirjaudu ensin sisään")
         return redirect(url_for('login'))
 
-    #list of (url_id, reservation_length)
+    # list of (url_id, reservation_length)
     customer_invitations = None
-    #list of (url_id, resource_description)
+    # list of (url_id, resource_description)
     resource_invitations = None
-    #list of (resource_description, resource_id)
+    # list of (resource_description, resource_id)
     resources = None
 
     is_owner = poll.user_owns_poll(poll_id)
@@ -63,7 +63,7 @@ def poll_owner(poll_id):
 
     current_poll = poll.get_polls_by_ids([poll_id])[0]
 
-    #note that we already know that poll_id is an integer
+    # note that we already know that poll_id is an integer
     new_customer_links = poll.get_new_customer_links(poll_id)
     customer_access_links = poll.get_customer_access_links(poll_id)
     resource_access_links = poll.get_resource_access_links(poll_id)
@@ -160,12 +160,12 @@ def new_poll():
             return render_template('error.html', message=error)
         flash('Kyselyn luonti onnistui')
         return redirect(url_for('index'))
-#TODO
-#storing the 'login_redirect' in the session was a very bad idea
-#what if the user visits the link, then does something else,
-#comes back to the site and logs in
-#then they will be redirected to the link site
-#how to login and then return to the same page?
+# TODO
+# storing the 'login_redirect' in the session was a very bad idea
+# what if the user visits the link, then does something else,
+# comes back to the site and logs in
+# then they will be redirected to the link site
+# how to login and then return to the same page?
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -173,7 +173,7 @@ def login():
         if 'login_redirect' not in session:
             return redirect(default)
 
-        #if the redirect target is not a valid relative url
+        # if the redirect target is not a valid relative url
         url = session['login_redirect']
         del session['login_redirect']
 
@@ -215,8 +215,8 @@ def register():
         auth.check_csrf_token(request.form.get('csrf_token'))
         error = auth.process_registration(request.form.get('username'),
                                           request.form.get('password'))
-        #after successful registration, automatically log the user in
-        #and redirect to login
+        # after successful registration, automatically log the user in
+        # and redirect to login
         if error is None:
             auth.process_login(request.form.get('username'),
                                request.form.get('password'))
@@ -227,7 +227,7 @@ def register():
     flash('Käyttäjätunnuksen luonti epäonnistui: ' + error)
     return redirect(url_for('register'))
 
-#create a new customer with a link
+# create a new customer with a link
 @app.route('/new_customer/<url_id>', methods=['POST', 'GET'])
 def new_customer(url_id):
     if 'user_id' not in session:
@@ -236,13 +236,13 @@ def new_customer(url_id):
         return redirect(url_for('login'))
 
     if request.method == 'GET':
-        #TODO think if the url_id should be in 'details'
+        # TODO think if the url_id should be in 'details'
         return render_template('confirm_poll_invitation.html',
                                details=link.customer_type_details_by_url_id(url_id),
                                url_id=url_id)
     if request.method == 'POST':
         auth.check_csrf_token(request.form.get('csrf_token'))
-        #TODO this should return the member id of the new customer
+        # TODO this should return the member id of the new customer
         error = link.process_new_customer_url(url_id,
                                               request.form.get('reservation_length'),
                                               request.form.get('customer_name'))
@@ -253,7 +253,7 @@ def new_customer(url_id):
 
         return render_template('error.html', message=error)
 
-#cannot use /new_customer for this
+# cannot use /new_customer for this
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     if 'user_id' not in session:
@@ -308,7 +308,7 @@ def new_new_customer_link():
         return redirect(url_for('poll_owner',
                         poll_id=request.form.get('poll_id', 0)))
     else:
-        #TODO REPLACE
+        # TODO REPLACE
         return render_template('new_invitation_failed.html',
                                error_message=error,
                                poll_id=request.form.get('poll_id'))
@@ -418,11 +418,11 @@ def new_time_preference():
 
     auth.check_csrf_token(request.form.get('csrf_token'))
 
-    #request was generated by javascript
+    # request was generated by javascript
     if request.form.get('data') is not None:
         error = times.process_grading_list(request.form.get('member_id'),
                                            request.form.get('data'));
-    #if no js was available
+    # if no js was available
     else:
         error = times.process_grading_fallback(request.form.get('member_id'),
                                                request.form.get('start'),
