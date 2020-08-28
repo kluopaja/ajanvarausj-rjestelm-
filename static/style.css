@@ -3,12 +3,12 @@ body {
     font-family: "Courier New";
     color: black;
     margin: auto;
-    max-width: 60em;
+    max-width: 1000px;
 }
 button {
     font-family: "Courier New";
 }
-input, textarea, button {
+input, textarea, button, .button {
     font-family: "Courier New";
     background: whitesmoke;
     color: black;
@@ -16,16 +16,18 @@ input, textarea, button {
     border-color: silver;
     border-width: 2px;
     font-size: 1em;
-
     outline: none;
 }
-input[type=submit], button {
+input[type=submit], button, .button {
     background: whitesmoke;
     border-width: 3px;
     color: black;
     font-size: 1em;
 }
-input:focus, textarea:focus {
+.button {
+    padding: 0 8px 0 8px;
+}
+input:focus, textarea:focus, .button:focus {
     background: gainsboro;
     border-color: black;
 }
@@ -35,7 +37,7 @@ textarea::selection, input::selection  {
     color: whitesmoke;
 }
 */
-input[type=submit]:hover, input[type=button]:hover, button:hover {
+input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
     background: gainsboro;
     border-color: black;
 }
@@ -65,7 +67,7 @@ input[type=submit]:hover, input[type=button]:hover, button:hover {
     content: "";
     padding: 0 0 0 0;
 }
-.menu li a {
+.menu li a, .button {
     text-decoration: none;
     color: black;
 }
@@ -142,7 +144,7 @@ input[type=submit]:hover, input[type=button]:hover, button:hover {
     display: block;
 }
 .poll_owner .section {
-    padding: 0 0 3em 1em;
+    margin: 0 0 3em 1em;
 }
 .poll_owner .section ul {
     display: block;
@@ -151,6 +153,75 @@ input[type=submit]:hover, input[type=button]:hover, button:hover {
 .poll_owner .section li {
     display: block;
     padding: 0 0 0.2em 0;
+}
+.poll_owner form {
+    display: inline-block;
+}
+.poll_owner #new_customer {
+    margin: 0em 1em 1em 0;
+}
+.poll_owner table {
+    padding: 0;
+    border-spacing: 1em;
+    margin: -1em;
+}
+.poll_owner .control_buttons .button {
+    margin: 0em 1em 0 0;
+}
+@media screen and (max-width: 1000px) {
+    .poll_owner .url {
+        width: 70%;
+    }
+    .poll_owner tr {
+        width: 100%;
+    }
+    .poll_owner .section {
+        padding: 0 0 3em 1em;
+    }
+    .poll_owner thead {
+        display: none;
+    }
+    .poll_owner tr {
+        display: block;
+        margin: 0 0 3em 0;
+    }
+    .poll_owner tr:last-child {
+        margin: 0 0 0 0;
+    }
+    .poll_owner thead tr {
+        display: none;
+    }
+    .poll_owner thead td {
+        margin: 0;
+        size: 0;
+    }
+    .poll_owner td {
+        display: block;
+    }
+    .poll_owner table {
+        padding: 0;
+        border-spacing: 0;
+        margin: 0;
+        width: 100%;
+    }
+    .poll_owner td.control_buttons {
+        padding: 0;
+    }
+    .poll_owner td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        width: 20%;
+        display: inline-block;
+    }
+    .poll_owner td.control_buttons:before {
+        float: left;
+    }
+    .poll_owner td.control_buttons .button {
+        margin: 1em;
+    }
+    .poll_owner td.control_buttons .button:first-child {
+        margin: 1em 1em 1em 0;
+    }
 }
 form {
     padding: 0 0 0 0;

@@ -20,32 +20,27 @@
 <h1>Asiakkaat</h1>
 <div class="section">
 <table>
-    <tr><th>Asiakkaan nimi</th><th>id</th><th>Varauksen kesto</th>
+<thead>
+    <tr><th>Asiakkaan nimi</th><th>id</th><th>Varauksen kesto</th><th></th><th></th></tr>
+</thead>
 {% for customer in customers %}
 <tr>
-    <td>{{ customer[2] }}</td>
-    <td>{{ customer[0] }}</td>
-    <td>{{ customer[1] }}</td>
-    <td>
-    <a href="/poll/{{ poll.id }}/{{ customer[0] }}/times">
-    Muokkaa
-    </a>
-    </td>
-    <td>
-    <form action="/delete_member" method="POST">
-        <input type="submit" value="Poista">
+    <td data-label="Asiakkaan nimi">{{ customer[2] }}</td>
+    <td data-label="Id">{{ customer[0] }}</td>
+    <td data-label="Varauksen kesto">{{ customer[1] }}</td>
+    <td class="control_buttons" data-label="">
+    <a class="button" href="/poll/{{ poll.id }}/{{ customer[0] }}/times">
+    Muokkaa</a><form action="/new_member_access_link" method="post">
+        <input class="button" type="submit" value="Luo muokkauslinkki">
+        <input type="hidden" name="member_id" id={{ customer[0] }}
+               value={{ customer[0] }}>
+        <input type="hidden" name="poll_id" value={{ poll.id }}>
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+    </form><form action="/delete_member" method="POST">
+        <input class="button" type="submit" value="Poista">
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="member_id" value={{ customer[0] }}>
         <input type="hidden" name="csrf_token" value= {{ session.get('csrf_token') }}>
-    </form>
-    </td>
-    <td>
-    <form action="/new_member_access_link" method="post">
-    <input type="submit" value="Luo muokkauslinkki">
-    <input type="hidden" name="member_id" id={{ customer[0] }}
-           value={{ customer[0] }}>
-    <input type="hidden" name="poll_id" value={{ poll.id }}>
-    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 </tr>
@@ -72,7 +67,7 @@
     </li>
     <br>
     <li>
-    <input type="submit" value="Luo asiakas">
+    <input class="button" type="submit" value="Luo asiakas">
     </li>
     <input type="hidden" name="poll_id" value={{ poll.id}}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -85,20 +80,21 @@
 <div class="section">
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn asiakkaan aikatoiveita</p>
 <table>
-<tr><th>Asiakkaan nimi</th><th>id</th><th>Url</th></tr>
+    <thead>
+    <tr><th>Asiakkaan nimi</th><th>id</th><th>Url</th></tr>
+    </thead>
 {% for link in customer_access_links %}
 <tr>
-    <td>{{ link[1] }}</td>
-    <td>{{ link[2] }}</td>
-    <td>
-    <input type='text' size=30 id={{ link[0] }}
+    <td data-label="Asiakkaan nimi">{{ link[1] }}</td>
+    <td data-label="Id">{{ link[2] }}</td>
+    <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
            value={{ url_for('access', url_id=link[0], _external=True) }}
            readonly>
     </td>
-    <td><button class="copy_button" id={{ link[0] }}>Kopioi linkki</button></td>
-    <td>
-    <form action="/delete_member_access_link" method="POST">
-        <input type="submit" value="Poista">
+    <td class="control_buttons">
+    <button class="button copy_button" id={{ link[0] }}>Kopioi linkki
+    </button><form action="/delete_member_access_link" method="POST">
+        <input class="button" type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -106,7 +102,6 @@
     </td>
 </tr>
 {% endfor %}
-<br>
 </table>
 </div>
 
@@ -116,23 +111,22 @@
 <p>Nämä antavat käyttäjälle oikeuden luoda kyselyyn uusia asiakkaita
 haluamallaan varauksen kestolla</p>
 <form action="/new_new_customer_link" method="post">
-    <input type="submit" value="Luo uusi linkki">
+    <input id="new_customer" type="submit" value="Luo uusi linkki">
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 <table>
-<tr><th>Url</th></tr>
+    <thead>
+    <tr><th>Url</th></tr>
+    </thead>
 {% for link in new_customer_links %}
 <tr>
-    <td>
-    <input type='text' size=30 id={{ link[0] }} 
+    <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
            value={{ url_for('new_customer', url_id=link[0], _external=True) }}
            readonly>
-    </td>
-    <td><button class="copy_button" id={{ link[0] }}>Kopioi linkki</button></td>
-    <td>
-    <form action="/delete_new_customer_link" method="POST">
-        <input type="submit" value="Poista">
+    </td><td class="control_buttons" data-label=""><button class="button copy_button" id={{ link[0] }}>Kopioi linkki
+        </button><form action="/delete_new_customer_link" method="POST">
+        <input class="button" type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -147,32 +141,28 @@ haluamallaan varauksen kestolla</p>
 <h1>Resurssit</h1>
 <div class="section">
 <table>
-<tr>
-    <th>Resurssin id</th><th>Resurssin nimi</th>
-<tr>
+<thead>
+    <tr>
+    <th>Resurssin nimi</th>
+    <th>Resurssin id</th>
+    <tr>
+</thead>
 {% for resource in resources %}
 <tr>
-    <td>{{ resource[1] }}</td>
-    <td>{{ resource[0] }}</td>
-    <td>
-    <a href="/poll/{{ poll.id }}/{{ resource[1] }}/times">
-    Muokkaa
-    </a>
-    <td>
-    <form action="/delete_member" method="POST">
-        <input type="submit" value="Poista">
-        <input type="hidden" name="poll_id" value={{ poll.id }}>
-        <input type="hidden" name="member_id" value={{ resource[1] }}>
-        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
-    </form>
-    </td>
-    <td>
-    <form action="/new_member_access_link" method="post">
-    <input type="submit" value="Luo muokkauslinkki">
-    <input type="hidden" name="member_id" id={{ resource[1] }}
+    <td data-label="Resurssin nimi">{{ resource[0] }}</td>
+    <td data-label="Resurssin id">{{ resource[1] }}</td>
+    <td data-label="Resurssin nimi">
+    <td class="control_buttons" data-label="">
+    <a class="button" href="/poll/{{ poll.id }}/{{ resource[1] }}/times">
+    Muokkaa</a><form action="/new_member_access_link" method="post"><input class="button" type="submit" value="Luo muokkauslinkki"><input type="hidden" name="member_id" id={{ resource[1] }}
            value={{ resource[1] }}>
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+    </form><form action="/delete_member" method="POST">
+        <input class="button" type="submit" value="Poista">
+        <input type="hidden" name="poll_id" value={{ poll.id }}>
+        <input type="hidden" name="member_id" value={{ resource[1] }}>
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
     </td>
 
@@ -191,7 +181,7 @@ haluamallaan varauksen kestolla</p>
     <input type="text" name="resource_name" id="resource_name">
     </li>
     <li>
-    <input type="submit" value="Luo resurssi">
+    <input class="button" type="submit" value="Luo resurssi">
     </li>
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -204,20 +194,21 @@ haluamallaan varauksen kestolla</p>
 <div class="section">
 <p>Nämä linkit antavat käyttäjälle oikeuden muokata tietyn resurssin aikoja</p>
 <table>
-    <tr><th>Resurssin nimi</th><th>id</th><th>Url</th></tr>
+    <thead>
+    <tr><th>Asiakkaan nimi</th><th>id</th><th>Url</th></tr>
+    </thead>
 {% for link in resource_access_links %}
 <tr>
-    <td>{{ link[1] }}</td>
-    <td>{{ link[2] }}</td>
-    <td>
-    <input type='text' size=30 id={{ link[0] }} 
+    <td data-label="Resurssin nimi" >{{ link[1] }}</td>
+    <td data-label="Id">{{ link[2] }}</td>
+    <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
            value={{ url_for('new_customer', url_id=link[0], _external=True) }}
            readonly>
     </td>
-    <td><button class="copy_button" id={{ link[0] }}>Kopioi linkki</button></td>
-    <td>
-    <form action="/delete_member_access_link" method="POST">
-        <input type="submit" value="Poista">
+    <td class="control_buttons" data-label="">
+    <button class="button copy_button" id={{ link[0] }}>Kopioi linkki
+    </button><form action="/delete_member_access_link" method="POST">
+        <input class="button" type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -228,13 +219,11 @@ haluamallaan varauksen kestolla</p>
 </table>
 </div>
 
-
-
 <hr>
 <h1>Optimointi</h1>
 <div class="section">
 <form action="/optimize_poll" method="post">
-    <input type="submit" value="Optimoi ajanvaraukset">
+    <input class="button" type="submit" value="Optimoi ajanvaraukset">
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
@@ -243,19 +232,21 @@ haluamallaan varauksen kestolla</p>
 <div class="section">
 {% if optimization_results|length > 0 %}
 <table>
+    <thead>
     <tr><th>Asiakkaan nimi</th>
         <th>Asiakkaan id</th>
         <th>Resurssin nimi</th>
         <th>Resurssin id</th>
         <th>Varauksen alkuaika</th>
     </tr>
+    </thead>
 {% for result in optimization_results %}
     <tr>
-        <td>{{ result.customer_member_name }}</td>
-        <td>{{ result.customer_member_id }}</td>
-        <td>{{ result.resource_member_name }}</td>
-        <td>{{ result.resource_member_id }}</td>
-        <td>{{ result.time }}</td>
+        <td data-label="Asiakkaan nimi">{{ result.customer_member_name }}</td>
+        <td data-label="Asiakkaan id">{{ result.customer_member_id }}</td>
+        <td data-label="Resurssin nimi">{{ result.resource_member_name }}</td>
+        <td data-label="Resurssin id">{{ result.resource_member_id }}</td>
+        <td data-label="Varauksen alkuaika">{{ result.time }}</td>
     </tr>
 {% endfor %}
 </table>
