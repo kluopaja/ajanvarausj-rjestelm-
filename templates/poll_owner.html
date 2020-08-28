@@ -5,17 +5,8 @@
 <script type="text/javascript" src={{ url_for('static', filename='poll_owner.js') }}></script>
 
 
-<h1>Kyselyn tiedot</h1>
-<div class="section">
-<ul>
-    <li>Kuvaus: {{ poll.description }}</li>
-    <li>Ensimmäinen varauspäivä: {{ poll.first_appointment_date }}</li>
-    <li>Viimeinen varauspäivä: {{ poll.last_appointment_date }}</li>
-    <li>Kysely päättyy: {{ poll.end_time }}</li>
-</ul>
-</div>
 
-<div class="poll_owner">
+<div class="poll">
 {% if customers|length > 0 %}
 <h1>Asiakkaat</h1>
 <div class="section">
@@ -55,7 +46,7 @@
     <ul>
     <li>
     <label for="customer_name">
-        Asiakkan nimi
+        Asiakkaan nimi:
     </label>
     <input type="text" id="customer_name" name="customer_name">
     </li>
@@ -63,6 +54,7 @@
     <label for="reservation_length">Varauksen kesto:</label>
     <input type="number" id="reservation_length"
            name="reservation_length" min=5 value=60 step=5>
+    minuuttia
     </li>
     <br>
     <li>

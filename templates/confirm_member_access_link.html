@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Sinut on kutsuttu hallinnoimaan roolia kyselyssä:</h2>
-<p>Kyselyn nimi: {{ details[0] }}</p>
-<p>Kyselyn kuvaus: {{ details[1] }}</p>
-<p>Roolin tyyppi:
+<h2>Sinut on kutsuttu hallinnoimaan jäsentä kyselyssä</h2>
+<p><b>Kyselyn nimi:</b> {{ details[0] }}</p>
+<p><b>Kyselyn kuvaus:</b> {{ details[1] }}</p>
+<p><b>Jäsenen tyyppi:</b>
 {% if details[5] == 'customer' %}
 asiakas
 {% else %}
 resurssi
 {% endif %}
 </p>
-<p>Roolin nimi: {{ details[2] }}</p>
+<p><b>Jäsenen nimi:</b> {{ details[2] }}</p>
 <form action={{ url_for('access', url_id=url_id) }} method="POST">
     <input type="submit" value="Hyväksy kutsu">
     <input type="hidden" name="poll_id" value={{ details[4] }}>

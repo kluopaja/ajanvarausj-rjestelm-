@@ -1,11 +1,15 @@
+html {
+    overflow-y: scroll;
+}
 figure.logo {
-    margin: 1em;
+    margin: 0.5em;
 }
 body {
     background: whitesmoke;
     font-family: "Courier New";
     color: black;
     margin: auto;
+    font-size: 1rem;
     max-width: 1000px;
 }
 button {
@@ -18,7 +22,7 @@ input, textarea, button, .button {
     border-style: solid;
     border-color: silver;
     border-width: 2px;
-    font-size: 1em;
+    font-size: 1rem;
     outline: none;
 }
 input[type=submit], button, .button {
@@ -26,6 +30,14 @@ input[type=submit], button, .button {
     border-width: 3px;
     color: black;
     font-size: 1em;
+}
+ul {
+    padding: 0 0 0 1em;
+    margin 0;
+}
+li {
+    list-style: none;
+    padding: 0 0 1em 0;
 }
 .button {
     padding: 0 8px 0 8px;
@@ -59,6 +71,7 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
 }
 .menu li {
     display: inline;
+    padding: 0;
     float: left;
 }
 .menu li:after {
@@ -146,83 +159,83 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
 .register label {
     display: block;
 }
-.poll_owner .section {
+.poll .section {
     margin: 0 0 3em 1em;
 }
-.poll_owner .section ul {
+.poll .section ul {
     display: block;
     padding: 0 0 0 0;
 }
-.poll_owner .section li {
+.poll .section li {
     display: block;
     padding: 0 0 0.2em 0;
 }
-.poll_owner form {
+.poll form {
     display: inline-block;
 }
-.poll_owner #new_customer {
+.poll #new_customer {
     margin: 0em 1em 1em 0;
 }
-.poll_owner table {
+.poll table {
     padding: 0;
     border-spacing: 1em;
     margin: -1em;
 }
-.poll_owner .control_buttons .button {
+.poll .control_buttons .button {
     margin: 0em 1em 0 0;
 }
 @media screen and (max-width: 1000px) {
-    .poll_owner .url {
+    .poll .url {
         width: 70%;
     }
-    .poll_owner tr {
+    .poll tr {
         width: 100%;
     }
-    .poll_owner .section {
+    .poll .section {
         padding: 0 0 3em 1em;
     }
-    .poll_owner thead {
+    .poll thead {
         display: none;
     }
-    .poll_owner tr {
+    .poll tr {
         display: block;
         margin: 0 0 3em 0;
     }
-    .poll_owner tr:last-child {
+    .poll tr:last-child {
         margin: 0 0 0 0;
     }
-    .poll_owner thead tr {
+    .poll thead tr {
         display: none;
     }
-    .poll_owner thead td {
+    .poll thead td {
         margin: 0;
         size: 0;
     }
-    .poll_owner td {
+    .poll td {
         display: block;
     }
-    .poll_owner table {
+    .poll table {
         padding: 0;
         border-spacing: 0;
         margin: 0;
         width: 100%;
     }
-    .poll_owner td.control_buttons {
+    .poll td.control_buttons {
         padding: 0;
     }
-    .poll_owner td:before {
+    .poll td:before {
         content: attr(data-label);
         font-weight: bold;
         width: 20%;
         display: inline-block;
     }
-    .poll_owner td.control_buttons:before {
+    .poll td.control_buttons:before {
         float: left;
     }
-    .poll_owner td.control_buttons .button {
+    .poll td.control_buttons .button {
         margin: 1em;
     }
-    .poll_owner td.control_buttons .button:first-child {
+    .poll td.control_buttons .button:first-child {
         margin: 1em 1em 1em 0;
     }
 }

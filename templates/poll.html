@@ -1,23 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 {% include "poll_navi.html" %}
-<h2>Kyselyn tiedot</h2>
-<ul>
-    <li>Kuvaus: {{ poll.description }}</li>
-    <li>Ensimmäinen varauspäivä: {{ poll.first_appointment_date }}</li>
-    <li>Viimeinen varauspäivä: {{ poll.last_appointment_date }}</li>
-    <li>Kysely päättyy: {{ poll.end_time }}</li>
-</ul>
+<div class="poll">
+
 <h2>Hallinnoitavat asiakkaat</h2>
+<div class="section">
 <table>
-    <tr><th>Asiakkaan nimi</th><th>id</th><th>Varauksen kesto</th>
+<thead>
+    <tr><th>Asiakas</th><th>Varauksen kesto</th>
+</thead>
 {% for customer in user_customers %}
 <tr>
-    <td>{{ customer[2] }}</td>
-    <td>{{ customer[0] }}</td>
-    <td>{{ customer[1] }}</td>
-    <td>
-        <a href={{ url_for('poll_times', poll_id=poll.id,
+    <td data-label="Asiakas">{{ customer[2] }}</td>
+    <td data-label="Varauksen kesto">{{ customer[1] }}</td>
+    <td class="control_buttons" data-label="">
+        <a class="button" href={{ url_for('poll_times', poll_id=poll.id,
                            member_id=customer[0]) }}>
     Siirry varaukseen
     </a>
@@ -25,13 +22,18 @@
 </tr>
 {% endfor %}
 </table>
+</div>
+
 <h2>Hallinnoitavat resurssit</h2>
+<div class="section">
 <table>
-    <tr><th>Resurssin nimi</th>
+<thead>
+    <tr><th>Resurssi</th>
+</thead>
 {% for resource in user_resources %}
 <tr>
-    <td>{{ resource[0] }}</td>
-    <td>
+    <td data-label="Resurssi">{{ resource[0] }}</td>
+    <td class="control_buttons" data-label="">
         <a href={{ url_for('poll_times', poll_id=poll.id,
                            member_id=resource[1]) }}>
     Siirry resurssiin
@@ -40,4 +42,6 @@
 </tr>
 {% endfor %}
 </table>
+</div>
+</div>
 {% endblock %}

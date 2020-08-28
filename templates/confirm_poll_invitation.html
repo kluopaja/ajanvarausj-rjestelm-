@@ -1,23 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Sinut on kutsuttu osallistumaan kyselyyn:</h2>
-<p>Kyselyn nimi: {{ details[0] }}</p>
-<p>Kyselyn kuvaus: {{ details[1] }}</p>
-<p>Voit tässä hyväksyä kutsun ja luoda itsellesi varaajaroolin
+<p><b>Kyselyn nimi:</b> {{ details[0] }}</p>
+<p><b>Kyselyn kuvaus:</b> {{ details[1] }}</p>
+<p>Voit tässä hyväksyä kutsun ja luoda itsellesi hallittavia asiakkaita
 kyselyyn</p>
 <p>Voit käyttää tätä linkkiä uudelleen luodaksesi itsellesi
-muita varaajarooleja.</p>
+muita hallittavia asiakkaita.</p>
+<p>Jos asiakkaan nimi on jo käytössä kyselyssä, lisätään nimen perään 
+automaattisesti uniikki tunniste</p>
 <form action={{ url_for('new_customer', url_id=url_id) }} method="POST">
+<ul>
+    <li>
     <label for="reservation_length">Varattavan ajan pituus:</label>
     <input type="number" id="reservation_length"
-           name="reservation_length" min=5 value=60 step=5>
+           name="reservation_length" min=5 value=60 size=5 step=5> minuuttia
+    </li>
+    <li>
     <label for="customer_name">
-        Varaajaroolin nimi
+        Asiakkaan nimi:
     </label>
     <input type="text" id="customer_name" name="customer_name">
-    <br>
+    </li>
+    <li>
     <input type="submit" value="Luo varaajarooli">
+    </li>
     <input type="hidden" name="poll_id" value={{ details[2] }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+</ul>
 </form>
 {% endblock %}
