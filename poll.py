@@ -145,6 +145,7 @@ def get_polls_by_ids(poll_ids):
     polls = db.session.execute(sql, {'poll_ids':tuple(poll_ids)}).fetchall()
     return [Poll(*x) for x in polls]
 
+# check if this fails with poll_id=None
 def user_owns_poll(poll_id):
     user_id = session.get('user_id', 0)
     sql = 'SELECT COUNT(*) FROM Polls WHERE id=:poll_id \
@@ -254,8 +255,7 @@ def get_resource_access_links(poll_id):
            AND P.id=L.member_id'
     access_links = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     return access_links
-
-def process_add_customer(poll_id, reservation_length, customer_name):
+def check_new_customer_attributes(reservation_length, customer_name):
     try:
         reservation_length = int(reservation_length)
     except ValueError:
@@ -270,6 +270,10 @@ def process_add_customer(poll_id, reservation_length, customer_name):
         return 'Customer name missing'
     if len(customer_name) > 30:
         return 'Customer name too long (over 30 characters)'
+    return None
+
+def process_add_customer(poll_id, reservation_length, customer_name,
+                         from_url=False):
     if not user_owns_poll(poll_id):
         return 'No rights to add a new customer to the poll'
     # now we know that poll_id is valid
@@ -277,13 +281,14 @@ def process_add_customer(poll_id, reservation_length, customer_name):
     if get_poll_phase(poll_id) == 2:
         return 'Poll in the final results phase'
 
-    user_id = session.get('user_id')
-    unique_name = create_unique_customer_name(poll_id, customer_name)
-    if unique_name is None:
-        return "Failed to create a unique customer name"
+    error = check_new_customer_attributes(reservation_length, customer_name)
+    if error is not None:
+        return error
 
-    member_id = add_new_customer(poll_id, reservation_length, unique_name)
-    member.give_user_access_to_member(user_id, member_id)
+    error = add_new_customer(poll_id, reservation_length, customer_name)
+    if error is not None:
+        return error
+
     db.session.commit()
     return None
 
@@ -346,16 +351,21 @@ def process_new_resource(poll_id, resource_name):
     db.session.commit()
     return None
 
-# returns member_id
-# assumes that parameters are correct
-# reservation_length is in minutes
+# assumes that parameters are in correct format
+# reservation_length is in minutes (str)
 def add_new_customer(poll_id, reservation_length, name):
+    user_id = session.get('user_id')
+    name = create_unique_customer_name(poll_id, name)
+    if name is None:
+        return "Failed to create a unique customer name"
+
     sql = 'INSERT INTO PollMembers (poll_id, name) \
            VALUES (:poll_id, :name) RETURNING id'
+
     member_id = db.session.execute(sql, {'poll_id': poll_id,
                                          'name': name}).fetchone()
 
-    reservation_length = str(reservation_length*60)
+    reservation_length = str(int(reservation_length)*60)
     sql = 'INSERT INTO Customers \
            (member_id, reservation_length) VALUES \
            (:member_id, :reservation_length)'
@@ -363,7 +373,8 @@ def add_new_customer(poll_id, reservation_length, name):
                              'reservation_length': reservation_length})
 
     member.initialize_poll_member_times(member_id[0], poll_id, 0)
-    return member_id[0]
+    member.give_user_access_to_member(user_id, member_id[0])
+    return None
 
 def member_in_poll(member_id, poll_id):
     sql = 'SELECT COUNT(*) FROM PollMembers WHERE id=:member_id \

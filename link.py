@@ -98,8 +98,19 @@ def process_new_customer_url(url_id, reservation_length, customer_name):
     if poll_id is None:
         return "No poll corresponding to the link found"
     if poll.get_poll_phase(poll_id) >= 1:
-        return 'Poll has ended'
-    return poll.process_add_customer(poll_id, reservation_length, customer_name)
+        return 'Poll has ended.'
+
+    error = poll.check_new_customer_attributes(reservation_length,
+                                               customer_name)
+    if error is not None:
+        return error;
+
+    error = poll.add_new_customer(poll_id, reservation_length, customer_name)
+    if error is not None:
+        return error
+
+    db.session.commit()
+    return None
 
 def process_access(url_id):
     member_id = get_member_id(url_id)
