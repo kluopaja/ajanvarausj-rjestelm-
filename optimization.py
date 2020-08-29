@@ -26,6 +26,8 @@ def process_optimize_poll(poll_id):
         return 'No poll_id was given'
     if not poll.user_owns_poll(poll_id):
         return 'Current user does not own the poll'
+    if poll.get_poll_phase(poll_id) == 2:
+        return 'Poll in the final results phase'
     optimize_poll(poll_id)
     '''
     def handler(signum, frame):
@@ -74,6 +76,7 @@ def optimize_poll(poll_id):
     assignments = [assignment_to_datetime(x, start) for x in assignments]
 
     save_optimization(assignments, poll_id)
+
 def discrete_to_datetime(x, start):
     return start + datetime.timedelta(minutes=5*x)
 

@@ -58,6 +58,28 @@ def process_new_poll(user_id, name, description, first_date, last_date,
     db.session.commit()
     return None
 
+# 0 = running
+# 1 = ended
+# 2 = final results
+def get_poll_phase(poll_id):
+    sql = "SELECT poll_end_time, has_final_results FROM Polls \
+           WHERE id=:poll_id"
+    result = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
+    if result[1]:
+        return 2
+    current_time = datetime.datetime.today()
+    if current_time > result[0]:
+        return 1
+    return 0
+
+def poll_details_to_phase(poll_end_time, has_final_results):
+    if has_final_results:
+        return 2
+    current_time = datetime.datetime.today()
+    if current_time > poll_end_time:
+        return 1
+    return 0
+
 # returns list of member_ids
 def get_poll_resource_members(poll_id):
     sql = 'SELECT M.id FROM PollMembers M, Resources R \
@@ -250,6 +272,10 @@ def process_add_customer(poll_id, reservation_length, customer_name):
         return 'Customer name too long (over 30 characters)'
     if not user_owns_poll(poll_id):
         return 'No rights to add a new customer to the poll'
+    # now we know that poll_id is valid
+
+    if get_poll_phase(poll_id) == 2:
+        return 'Poll in the final results phase'
 
     user_id = session.get('user_id')
     unique_name = create_unique_customer_name(poll_id, customer_name)
@@ -300,6 +326,8 @@ def process_new_resource(poll_id, resource_name):
         return 'Resource name too long (> 30 characters)'
     if not user_owns_poll(poll_id):
         return 'User does not own the poll'
+    if get_poll_phase(poll_id) == 2:
+        return 'Poll in the final results phase'
 
     unique_name = create_unique_resource_name(poll_id, resource_name)
     if unique_name is None:

@@ -42,6 +42,12 @@ def get_member_type(member_id):
         return None
     return member_type[0]
 
+def get_parent_poll_phase(member_id):
+    sql = 'SELECT P.poll_end_time, P.has_final_results FROM Polls P, \
+           PollMembers M WHERE P.id=M.poll_id AND M.id=:member_id'
+    result = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    return poll.poll_details_to_phase(result[0], result[1])
+
 def user_owns_parent_poll(member_id):
     sql = 'SELECT COUNT(*) FROM Polls P, PollMembers M \
            WHERE P.id=M.poll_id AND M.id=:member_id \
@@ -95,6 +101,10 @@ def process_modify_customer(member_id, reservation_length):
     # also other users than the admin to modify the customer
     if not user_owns_parent_poll(member_id):
         return 'User has no rights to modify the customer'
+    #from now on, assume that member_id is valid
+
+    if member.get_parent_poll_phase(member_id) == 2:
+        return 'Poll in the final result phase'
 
     error = update_reservation_length(member_id, reservation_length)
     if error is None:
@@ -117,7 +127,9 @@ def process_delete_member(member_id):
         return "Member id not an interger"
     if not user_owns_parent_poll(member_id):
         return "User has no rights to delete the member"
-    # TODO check if the poll has final results. In that case, don't proceed
+    if get_parent_poll_phase(member_id) == 2:
+        return 'Poll in the final results phase'
+
     delete_member(member_id)
     db.session.commit()
 

@@ -195,8 +195,13 @@ def process_new_grading(member_id, start, end, date, time_grade):
 
     user_id = session.get('user_id')
     # check user rights
-    if not member.user_owns_parent_poll(member_id) and \
-       not member.user_has_access(user_id, member_id):
+    if member.user_owns_parent_poll(member_id):
+        if member.get_parent_poll_phase(member_id) == 2:
+            return 'Poll in final results phase'
+    elif member.user_has_access(user_id, member_id):
+        if member.get_parent_poll_phase(member_id) >= 1:
+            return 'Poll has ended'
+    else:
         return 'User has no rights to add new time grades'
 
     member_type = member.get_member_type(member_id)
