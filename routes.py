@@ -113,7 +113,7 @@ def poll_optimization(poll_id):
 
     current_poll = poll.get_polls_by_ids([poll_id])[0]
 
-    optimization_results = optimization.get_optimization_results(poll_id)
+    optimization_results = optimization.get_owner_optimization_results(poll_id)
 
     return render_template('poll_optimization.html',
                            is_owner=True,
@@ -132,8 +132,15 @@ def poll_results(poll_id):
         return redirect(url_for('index'))
 
     is_owner = poll.user_owns_poll(poll_id)
+    results = []
+    if current_poll.phase == 2:
+        if is_owner:
+            results = optimization.get_owner_optimization_results(poll_id)
+        else:
+            results = optimization.get_normal_user_optimization_results(poll_id)
     return render_template('poll_results.html',
                            is_owner=is_owner,
+                           optimization_results=results,
                            poll=current_poll);
 
 @app.route('/poll/<int:poll_id>/<int:member_id>/times')
@@ -511,6 +518,21 @@ def optimize_poll():
         flash('Ajanvarauksien optimoiminen onnistui');
     else:
         flash('Virhe! Ajanvarauksien optimoiminen epäonnistui: ' + error)
+
+    return redirect(url_for('poll_optimization',
+                            poll_id=request.form.get('poll_id', 0)))
+@app.route('/set_results_final', methods=['POST'])
+def set_results_final():
+    if 'user_id' not in session:
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect(url_for('login'))
+
+    auth.check_csrf_token(request.form.get('csrf_token'))
+    error = poll.process_set_results_final(request.form.get('poll_id'))
+    if error is None:
+        flash('Kyselyn tulokset julkaistu')
+    else:
+        flash('Virhe! Kyselyn tulosten julkaiseminen epäonnistui: ' + error)
 
     return redirect(url_for('poll_optimization',
                             poll_id=request.form.get('poll_id', 0)))

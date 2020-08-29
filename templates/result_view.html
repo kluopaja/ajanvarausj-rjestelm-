@@ -1,0 +1,15 @@
+<table>
+    <thead>
+    <tr><th>Asiakas</th>
+        <th>Resurssi</th>
+        <th>Varauksen alkuaika</th>
+    </tr>
+    </thead>
+{% for result in optimization_results %}
+    <tr>
+        <td data-label="Asiakas">{{ result.customer_member_name }}</td>
+        <td data-label="Resurssi">{{ result.resource_member_name }}</td>
+        <td data-label="Varauksen alkuaika">{{ result.time }}</td>
+    </tr>
+{% endfor %}
+</table>

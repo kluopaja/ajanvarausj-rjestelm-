@@ -6,6 +6,7 @@ import numpy as np
 import signal
 import times
 from db import db
+from flask import session
 ### Optimization related functions ###
 # everything is handled as 5 minute intervals
 
@@ -236,11 +237,34 @@ OptimizationResult = namedtuple('OptimizationResult',
                                  'resource_member_name',
                                  'time'])
 
-def get_optimization_results(poll_id):
+def get_owner_optimization_results(poll_id):
+    try:
+        int(poll_id)
+    except ValueError:
+        return "Poll id not an integer"
     sql = 'SELECT P1.id, P1.name, P2.id, P2.name, O.time_start \
            FROM PollMembers P1, PollMembers P2, OptimizationResults O \
            WHERE P1.id=O.customer_member_id AND P2.id=O.resource_member_id \
            AND P1.poll_id=:poll_id'
 
     results = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
+    return [OptimizationResult(*x) for x in results]
+
+# assumes poll_id is an integer or None
+# retrieves results from poll poll_id
+# only members to which user has access through the UsersPollmembers
+def get_normal_user_optimization_results(poll_id):
+    try:
+        int(poll_id)
+    except ValueError:
+        return "Poll id not an integer"
+    user_id = session.get('user_id')
+    sql = 'SELECT P1.id, P1.name, P2.id, P2.name, O.time_start \
+           FROM PollMembers P1, PollMembers P2, OptimizationResults O, \
+           UsersPollMembers M \
+           WHERE P1.id=O.customer_member_id AND P2.id=O.resource_member_id \
+           AND (P1.id=M.member_id OR P2.id=M.member_id) \
+           AND P1.poll_id=:poll_id AND M.user_id=:user_id'
+    results = db.session.execute(sql, {'poll_id': poll_id,
+                                       'user_id': user_id}).fetchall()
     return [OptimizationResult(*x) for x in results]

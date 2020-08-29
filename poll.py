@@ -387,3 +387,23 @@ def member_in_poll(member_id, poll_id):
     count = db.session.execute(sql, {'member_id': member_id,
                                      'poll_id': poll_id}).fetchone()
     return count[0] > 0
+
+def process_set_results_final(poll_id):
+    try:
+        poll_id = int(poll_id)
+    except ValueError:
+        return 'Poll id should be an integer'
+    if not user_owns_poll(poll_id):
+        return 'Current user does not own the poll'
+    phase = get_poll_phase(poll_id)
+    if phase == 0:
+        return 'Cannot publish results. Poll has not ended yet.'
+    if phase == 2:
+        return 'Results have already been published'
+
+    set_results_final(poll_id)
+    db.session.commit()
+
+def set_results_final(poll_id):
+    sql = 'UPDATE Polls SET has_final_results=TRUE WHERE id=:poll_id'
+    db.session.execute(sql, {'poll_id': poll_id})

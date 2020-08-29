@@ -2,5 +2,14 @@
 {% block content %}
 {% set active_page = "results" %}
 {% include "poll_navi.html" %}
+{% if poll.phase < 2 %}
 <h3>Kyselyn tulokset tulevat näkyviin tälle sivulle kyselyn päätyttyä<h3>
+{% else %}
+    {% if optimization_results|length > 0 %}
+    {% include "result_view.html" %}
+    {% else %}
+    <p>Mikään hallitsemastasi jäsenestä ei ollut osallisena onnistuneessa
+aikavarauksessa</p>
+    {% endif %}
+{% endif %}
 {% endblock %}
