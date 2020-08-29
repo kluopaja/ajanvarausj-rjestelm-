@@ -25,13 +25,15 @@ def route_poll(poll_id):
     current_poll = poll.process_get_poll(poll_id)
     if current_poll is None:
         message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
-        return render_template('error.html', message=message)
+        flash("Virhe! " + message)
+        return redirect(url_for('index'))
 
     is_owner = poll.user_owns_poll(poll_id)
 
     user_id = session.get('user_id')
     user_customers = poll.get_user_poll_customers(user_id, poll_id)
     user_resources = poll.get_user_poll_resources(user_id, poll_id)
+
     # do we need this here?
     grade_descriptions = ['ei sovi', 'sopii', 'sopii hyvin']
 
@@ -53,8 +55,8 @@ def poll_customers(poll_id):
 
     is_owner = poll.user_owns_poll(poll_id)
     if not is_owner:
-        error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
-        return render_template('error.html', message=error)
+        flash('Virhe! Ei oikeuksia katsoa kyselyn omistajan näkymää')
+        return redirect(url_for('route_poll', poll_id=poll_id))
 
     current_poll = poll.get_polls_by_ids([poll_id])[0]
 
@@ -82,8 +84,8 @@ def poll_resources(poll_id):
 
     is_owner = poll.user_owns_poll(poll_id)
     if not is_owner:
-        error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
-        return render_template('error.html', message=error)
+        flash('Virhe! Ei oikeuksia katsoa kyselyn omistajan näkymää')
+        return redirect(url_for('route_poll', poll_id=poll_id))
 
     current_poll = poll.get_polls_by_ids([poll_id])[0]
 
@@ -106,8 +108,8 @@ def poll_optimization(poll_id):
 
     is_owner = poll.user_owns_poll(poll_id)
     if not is_owner:
-        error = 'Ei oikeuksia katsoa kyselyn omistajan näkymää'
-        return render_template('error.html', message=error)
+        flash('Virhe! Ei oikeuksia katsoa kyselyn omistajan näkymää')
+        return redirect(url_for('route_poll', poll_id=poll_id))
 
     current_poll = poll.get_polls_by_ids([poll_id])[0]
 
@@ -126,8 +128,8 @@ def poll_results(poll_id):
 
     current_poll = poll.process_get_poll(poll_id)
     if current_poll is None:
-        message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
-        return render_template('error.html', message=message)
+        flash("Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn")
+        return redirect(url_for('index'))
 
     is_owner = poll.user_owns_poll(poll_id)
     return render_template('poll_results.html',
@@ -140,22 +142,22 @@ def poll_times(poll_id, member_id):
         flash("Virhe! Kirjaudu ensin sisään")
         return redirect(url_for('login'))
 
+    current_poll = poll.process_get_poll(poll_id)
+    if current_poll is None:
+        flash("Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn")
+        return redirect(url_for('index'))
+
     user_id = session.get('user_id')
     is_owner = member.user_owns_parent_poll(member_id)
 
     if not is_owner and not member.user_has_access(user_id, member_id):
-        error = 'Ei oikeuksia muokata aikoja'
-        return render_template('error.html', message=error)
+        flash('Virhe! Ei oikeuksia muokata aikoja')
+        return redirect(url_for('route_poll', poll_id=poll_id))
 
-    current_poll = poll.process_get_poll(poll_id)
-    if current_poll is None:
-        message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
-        return render_template('error.html', message=message)
 
     if not poll.member_in_poll(member_id, poll_id):
-        error = 'Tarkista url. Jäsen ei kuulu kyselyyn'
-        return render_template('error.html', message=error)
-
+        flash('Virhe! Jäsen ei kuulu kyselyyn. Tarkista url.')
+        return redirect(url_for('route_poll', poll_id=poll_id))
 
     member_type = member.get_member_type(member_id)
     member_times = times.get_minute_grades(member_id, poll_id)
@@ -197,8 +199,10 @@ def new_poll():
                                       request.form.get('poll_end_date'),
                                       request.form.get('poll_end_time'))
         if error is not None:
-            return render_template('error.html', message=error)
-        flash('Kyselyn luonti onnistui')
+            flash("Virhe! Uuden kyselyn luominen epäonnistui: " + error)
+            return redirect(url_for('new_poll'))
+
+        flash('Kyselyn luominen onnistui')
         return redirect(url_for('index'))
 # TODO
 # storing the 'login_redirect' in the session was a very bad idea
@@ -238,7 +242,7 @@ def login():
             flash('Kirjautuminen onnistui')
             return redirect_to_next(default='/')
 
-    flash("Kirjautuminen epäonnistui")
+    flash("Virhe! Kirjautuminen epäonnistui")
     return redirect(url_for('login'));
 
 @app.route('/logout')
@@ -264,7 +268,7 @@ def register():
             flash('Rekisteröityminen onnistui')
             return redirect(url_for('login'))
 
-    flash('Käyttäjätunnuksen luonti epäonnistui: ' + error)
+    flash('Virhe! Käyttäjätunnuksen luominen epäonnistui: ' + error)
     return redirect(url_for('register'))
 
 # create a new customer with a link
@@ -291,7 +295,8 @@ def new_customer(url_id):
             poll_id = request.form.get('poll_id')
             return redirect(url_for('route_poll', poll_id=poll_id))
 
-        return render_template('error.html', message=error)
+        flash('Virhe! Uuden asiakkaan luominen epäonnistui: ' + error)
+        return redirect(url_for('index'))
 
 # cannot use /new_customer for this
 @app.route('/add_customer', methods=['POST'])
@@ -306,10 +311,11 @@ def add_customer():
                                       request.form.get('customer_name'))
     if error is None:
         flash('Uusi asiakas luotu onnistuneesti')
-        poll_id = request.form.get('poll_id')
-        return redirect(url_for('poll_customers', poll_id=poll_id))
+    else:
+        flash('Virhe! Uuden asiakkaan luominen epäonnistui: '+ error)
 
-    return render_template('error.html', message=error)
+    return redirect(url_for('poll_customers',
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/access/<url_id>', methods=['POST', 'GET'])
 def access(url_id):
@@ -326,14 +332,13 @@ def access(url_id):
         auth.check_csrf_token(request.form.get('csrf_token'))
         error = link.process_access(url_id)
         if error is not None:
-            message = 'Kutsumisen hyväksyminen epäonnistui: ' + error
-            return render_template('error.html', message=message)
+            flash('Virhe! Kutsumisen hyväksyminen epäonnistui: ' + error)
+            return redirect(url_for('index'))
 
         flash('Muokkausoikeus hyväksytty')
-        poll_id = request.form.get('poll_id', 0)
-        member_id = request.form.get('member_id', 0)
-        return redirect(url_for('poll_times', poll_id=poll_id,
-                                member_id=member_id))
+        return redirect(url_for('poll_times',
+                                poll_id=request.form.get('poll_id', 0),
+                                member_id=request.form.get('member_id', 0)))
 
 @app.route('/new_new_customer_link', methods=['POST'])
 def new_new_customer_link():
@@ -344,14 +349,12 @@ def new_new_customer_link():
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = link.process_new_new_customer_link(request.form.get('poll_id'))
     if error is None:
-        flash('Uuden kutsun luonti onnistui')
-        return redirect(url_for('poll_customers',
-                        poll_id=request.form.get('poll_id', 0)))
+        flash('Uuden kutsun luominen onnistui')
     else:
-        # TODO REPLACE
-        return render_template('new_invitation_failed.html',
-                               error_message=error,
-                               poll_id=request.form.get('poll_id'))
+        flash('Virhe! Kutsun luominen epäonnistui: ' + error)
+
+    return redirect(url_for('poll_customers',
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/new_member_access_link', methods=['POST'])
 def new_member_access_link():
@@ -362,9 +365,9 @@ def new_member_access_link():
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = link.process_new_member_access_link(request.form.get('member_id'))
     if error is None:
-        flash('Uuden oikeuslinkin luonti onnistui')
+        flash('Uuden oikeuslinkin luominen onnistui')
     else:
-        flash('Uuden oikeuslinkin luonti epäonnistui:\n' + error)
+        flash('Virhe! Uuden oikeuslinkin luominen epäonnistui: ' + error)
 
     if request.form.get('member_type') == 'customer':
         redirect_route = 'poll_customers'
@@ -372,7 +375,7 @@ def new_member_access_link():
         redirect_route = 'poll_resources'
 
     return redirect(url_for(redirect_route,
-                    poll_id=request.form.get('poll_id', 0)))
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/modify_customer', methods=['POST'])
 def modify_customer():
@@ -384,13 +387,13 @@ def modify_customer():
     error = member.process_modify_customer(request.form.get('member_id'),
                                            request.form.get('reservation_length'));
     if error is None:
-        flash('Varaustoiveen pituuden muutos onnistui')
-        poll_id = request.form.get('poll_id', 0)
-        member_id = request.form.get('member_id', 0)
-        return redirect(url_for('poll_times', poll_id=poll_id,
-                        member_id=member_id))
+        flash('Varaustoiveen pituuden muuttaminen onnistui')
     else:
-        return render_template('error.html', message=error)
+        flash('Virhe! Varaustoiveen pituuden muuttaminen epäonnistui' + error)
+
+    return redirect(url_for('poll_times',
+                            poll_id=request.form.get('poll_id', 0),
+                            member_id=request.form.get('member_id', 0)))
 
 @app.route('/new_resource', methods=['POST'])
 def new_resource():
@@ -402,13 +405,12 @@ def new_resource():
     error = poll.process_new_resource(request.form.get('poll_id'),
                                       request.form.get('resource_name'))
     if error is None:
-        flash('Uuden resurssin luonti onnistui')
-        return redirect(url_for('poll_resources',
-                        poll_id=request.form.get('poll_id', 0)))
+        flash('Uuden resurssin luominen onnistui')
     else:
-        return render_template('new_resource_failed.html',
-                               error_message=error,
-                               poll_id=request.form.get('poll_id'))
+        flash('Virhe! Uuden resurssin luominen epäonnistui' + error)
+
+    return redirect(url_for('poll_resources',
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/delete_member', methods=['POST'])
 def delete_member():
@@ -419,16 +421,17 @@ def delete_member():
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = member.process_delete_member(request.form.get('member_id'))
     if error is None:
-        flash('Jäsenen poisto onnistui')
-        if request.form.get('member_type') == 'customer':
-            redirect_route = 'poll_customers'
-        else:
-            redirect_route = 'poll_resources'
-
-        return redirect(url_for(redirect_route,
-                                poll_id=request.form.get('poll_id', 0)))
+        flash('Jäsenen poistaminen onnistui')
     else:
-        return render_template('error.html', message=error)
+        flash('Virhe! Jäsenen poistaminen epäonnistui: ' + error)
+
+    if request.form.get('member_type') == 'customer':
+        redirect_route = 'poll_customers'
+    else:
+        redirect_route = 'poll_resources'
+
+    return redirect(url_for(redirect_route,
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/delete_new_customer_link', methods=['POST'])
 def delete_new_customer_link():
@@ -439,11 +442,12 @@ def delete_new_customer_link():
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = link.process_delete_new_customer_link(request.form.get('url_id'))
     if error is None:
-        flash('Linkin poisto onnistui')
-        return redirect(url_for('poll_customers',
-                        poll_id=request.form.get('poll_id', 0)))
+        flash('Linkin poistaminen onnistui')
     else:
-        return render_template('error.html', message=error)
+        flash('Virhe! Linkin poistaminen epäonnistui: ' + error)
+
+    return redirect(url_for('poll_customers',
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/delete_member_access_link', methods=['POST'])
 def delete_member_access_link():
@@ -454,16 +458,17 @@ def delete_member_access_link():
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = link.process_delete_member_access_link(request.form.get('url_id'))
     if error is None:
-        flash('Linkin poisto onnistui')
-        if request.form.get('member_type') == 'customer':
-            redirect_route = 'poll_customers'
-        else:
-            redirect_route = 'poll_resources'
-
-        return redirect(url_for(redirect_route,
-                                poll_id=request.form.get('poll_id', 0)))
+        flash('Linkin poistaminen onnistui')
     else:
-        return render_template('error.html', message=error)
+        flash('Virhe! Linkin poistaminen epäonnistui: ' + error)
+
+    if request.form.get('member_type') == 'customer':
+        redirect_route = 'poll_customers'
+    else:
+        redirect_route = 'poll_resources'
+
+    return redirect(url_for(redirect_route,
+                            poll_id=request.form.get('poll_id', 0)))
 
 @app.route('/new_time_preference', methods=['POST'])
 def new_time_preference():
@@ -485,18 +490,14 @@ def new_time_preference():
                                                request.form.get('date'),
                                                request.form.get('satisfaction'))
     if error is None:
-        poll_id = request.form.get('poll_id')
-        member_id = request.form.get('member_id')
-        flash('Aikavalintojen tallennus onnistui');
-        if poll_id is None or member_id is None:
-            message = 'Uudelleenohjaus epäonnistui'
-            return render_template('error.html', message=message)
-
-        return redirect(url_for('poll_times', poll_id=poll_id,
-                                member_id=member_id,
-                                selected_day=request.form.get('selected_day', 0)))
+        flash('Aikavalintojen tallentaminen onnistui');
     else:
-        return render_template('error.html', message=error)
+        flash('Virhe! Aikavalintojen tallentaminen epäonnistui: ' + error)
+
+    return redirect(url_for('poll_times',
+                            poll_id=request.form.get('poll_id', 0),
+                            member_id=request.form.get('member_id', 0),
+                            selected_day=request.form.get('selected_day', 0)))
 
 @app.route('/optimize_poll', methods=['POST'])
 def optimize_poll():
@@ -507,8 +508,9 @@ def optimize_poll():
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
-        flash('Ajanvarauksien optimointi onnistui');
-        return redirect(url_for('poll_optimization',
-                                poll_id=request.form.get('poll_id', 0)))
+        flash('Ajanvarauksien optimoiminen onnistui');
+    else:
+        flash('Virhe! Ajanvarauksien optimoiminen epäonnistui: ' + error)
 
-    return render_template('error.html', message=error)
+    return redirect(url_for('poll_optimization',
+                            poll_id=request.form.get('poll_id', 0)))
