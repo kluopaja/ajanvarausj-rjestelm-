@@ -3,6 +3,8 @@
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
 <script type="text/javascript" src={{ url_for('static', filename='clipboard.js') }}></script>
+<script type="text/javascript"
+        src={{ url_for('static', filename='confirmations.js') }}></script>
 
 
 
@@ -27,7 +29,7 @@
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="member_type" value="customer">
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
-    </form><form action={{ url_for('delete_member') }} method="POST">
+    </form><form class="delete_customer" action={{ url_for('delete_member') }} method="POST">
         <input class="button" type="submit" value="Poista">
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="member_id" value={{ customer[0] }}>
@@ -85,7 +87,7 @@
     </td>
     <td class="control_buttons">
     <button class="button copy_button" id={{ link[0] }}>Kopioi linkki
-    </button><form action={{ url_for('delete_member_access_link') }} method="POST">
+    </button><form class="delete_member_access_link" action={{ url_for('delete_member_access_link') }} method="POST">
         <input class="button" type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
@@ -118,8 +120,8 @@ haluamallaan varauksen kestolla</p>
            value={{ url_for('new_customer', url_id=link[0], _external=True) }}
            readonly>
     </td><td class="control_buttons" data-label=""><button class="button copy_button" id={{ link[0] }}>Kopioi linkki
-        </button><form action={{ url_for('delete_new_customer_link') }} method="POST">
-        <input class="button" type="submit" value="Poista">
+        </button><form class="delete_new_customer_link" action={{ url_for('delete_new_customer_link') }} method="POST">
+        <input type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>

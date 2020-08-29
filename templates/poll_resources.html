@@ -3,7 +3,8 @@
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
 <script type="text/javascript" src={{ url_for('static', filename='clipboard.js') }}></script>
-
+<script type="text/javascript"
+        src={{ url_for('static', filename='confirmations.js') }}></script>
 
 
 <div class="poll">
@@ -26,7 +27,7 @@
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="member_type" value="resource">
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
-    </form><form action={{ url_for('delete_member') }} method="POST">
+    </form><form class="delete_resource" action={{ url_for('delete_member') }} method="POST">
         <input class="button" type="submit" value="Poista">
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="member_id" value={{ resource[1] }}>
@@ -75,7 +76,7 @@
     </td>
     <td class="control_buttons" data-label="">
     <button class="button copy_button" id={{ link[0] }}>Kopioi linkki
-    </button><form action={{ url_for('delete_member_access_link') }} method="POST">
+    </button><form class="delete_resource_access_link" action={{ url_for('delete_member_access_link') }} method="POST">
         <input class="button" type="submit" value="Poista">
         <input type="hidden" name="url_id" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>

@@ -2,9 +2,11 @@
 {% block content %}
 {% set active_page = "owner" %}
 {% include "poll_navi.html" %}
+<script type="text/javascript"
+        src={{ url_for('static', filename='confirmations.js') }}></script>
 <h1>Optimointi</h1>
 <div class="section">
-<form action={{ url_for('optimize_poll') }} method="post">
+<form class="optimize_poll" action={{ url_for('optimize_poll') }} method="post">
     <input class="button" type="submit" value="Optimoi ajanvaraukset">
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -25,7 +27,7 @@
 Julkaisemalla tulokset tulevat kyselyn osanottajien näkyville.
 Julkaisemisen jälkeen kukaan, omistaja mukaan lukien, ei voi enää 
 muokata kyselyn tuloksia.</p>
-<form action={{ url_for('set_results_final') }} method="post">
+<form class="set_results_final" action={{ url_for('set_results_final') }} method="post">
     <input class="button" type="submit" value="Julkaise optimoinnin tulokset">
     <input type="hidden" name="poll_id" value={{ poll.id }}>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
