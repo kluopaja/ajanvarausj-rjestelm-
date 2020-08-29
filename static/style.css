@@ -122,6 +122,10 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
     font-weight: bold;
 }
 
+.poll_title span {
+    color: #707070;
+    font-size: 0.8em;
+}
 .new_poll ul {
     padding: 0 0 0 1em;
     margin: 0;
