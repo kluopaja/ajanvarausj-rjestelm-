@@ -3,7 +3,6 @@
 {% include "poll_navi.html" %}
 <div class="poll">
 
-<h2>Kyselyn tiedot</h2>
 <div class="poll">
 <div class="section">
 <ul>
@@ -13,8 +12,37 @@
     <li><b>Kysely päättyy:</b> {{ poll.end_time }}</li>
 </ul>
 </div>
+{% if is_owner %}
+<h3>Hallinnoi kyselyä</h3>
+<div class="section">
+<form action={{ url_for('modify_poll') }} method="post">
+    <input type="submit" value="Lopeta kysely">
+    <input type="hidden" name="poll_id" value={{ poll.id }}>
+    <input type="hidden" name="end_now" value=1>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+</form>
+<br>
+<form action={{ url_for('modify_poll') }} method="post">
+<ul>
+    <li>
+        <label for="poll_end_date">Kyselyn päättymispäivämäärä ja -aika</label>
+        <input type="date" name="poll_end_date" id="poll_end_date">
+        <input type="text" name="poll_end_time" id="poll_end_time" value="23:55" size=5>
+        <ul>
+        <li id="end_date_error" aria-live="polite"></li>
+        <li id="end_time_error" aria-live="polite"></li>
+        </ul>
+    </li>
+    <li>
+        <input type="submit" value="Uusi loppumisaika">
+    </li>
+    <input type="hidden" name="poll_id" value={{ poll.id }}>
+    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+</ul>
+</form>
+</div>
 
-{% if not is_owner %}
+{% else %}
 <h2>Hallinnoitavat asiakkaat</h2>
 <div class="section">
 <table>

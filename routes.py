@@ -211,13 +211,32 @@ def new_poll():
 
         flash('Kyselyn luominen onnistui')
         return redirect(url_for('index'))
+
+@app.route('/modify_poll', methods=['POST'])
+def modify_poll():
+    if 'user_id' not in session:
+        flash("Virhe! Kirjaudu ensin sisään")
+        return redirect(url_for('login'))
+
+    auth.check_csrf_token(request.form.get('csrf_token'))
+    error = poll.process_modify_poll(request.form.get('poll_id'),
+                                     request.form.get('poll_end_date'),
+                                     request.form.get('poll_end_time'),
+                                     request.form.get('end_now'))
+    if error is None:
+        flash('Kyselyn tiedot päivitetty onnistuneesti')
+    else:
+        flash('Virhe! Kyselyn tietojen päivittäminen epäonnistui: ' + error)
+
+    return redirect(url_for('route_poll',
+                            poll_id=request.form.get('poll_id', 0)))
+
 # TODO
 # storing the 'login_redirect' in the session was a very bad idea
 # what if the user visits the link, then does something else,
 # comes back to the site and logs in
 # then they will be redirected to the link site
 # how to login and then return to the same page?
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     def redirect_to_next(default='/'):

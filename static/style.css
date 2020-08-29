@@ -182,6 +182,9 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
     display: block;
     padding: 0 0 0.2em 0;
 }
+.poll li:empty {
+    display: none;
+}
 .poll form {
     display: inline-block;
 }

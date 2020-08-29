@@ -17,21 +17,19 @@ Poll = namedtuple('Poll', ['id', 'owner_user_id', 'name', 'description',
 
 def process_new_poll(user_id, name, description, first_date, last_date,
                      end_date, end_time):
+    error = check_poll_end(end_date, end_time)
+    if error is not None:
+        return error
+    end = datetime.datetime.combine(datetime.date.fromisoformat(end_date),
+                                    datetime.time.fromisoformat(end_time))
     try:
         first_date = datetime.date.fromisoformat(first_date)
         last_date = datetime.date.fromisoformat(last_date)
-        end_date = datetime.date.fromisoformat(end_date)
-        end_time = datetime.time.fromisoformat(end_time)
-        end = datetime.datetime.combine(end_date, end_time)
-    except ValueError:
+    except:
         return 'Incorrect time/date formats!'
 
-    if end.minute%5 != 0:
-        return 'End time should be divisible by 5 minutes'
     if first_date > last_date:
         return 'The last available date cannot be before the first one!'
-    if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
-        return 'Poll end should not be in the past'
     if last_date - first_date > datetime.timedelta(days=30):
         return 'Poll date range cannot be longer than 31 days'
     # TODO be more descriptivie
@@ -56,6 +54,47 @@ def process_new_poll(user_id, name, description, first_date, last_date,
                       'has_final_results': False}
     db.session.execute(sql, parameter_dict)
     db.session.commit()
+    return None
+
+def process_modify_poll(poll_id, end_date, end_time, end_now):
+    if end_now == '1':
+        end = datetime.datetime.today()
+        end -= datetime.timedelta(microseconds=end.microsecond)
+
+    else:
+        error = check_poll_end(end_date, end_time)
+        if error is not None:
+            return error
+        end = datetime.datetime.combine(datetime.date.fromisoformat(end_date),
+                                        datetime.time.fromisoformat(end_time))
+    try:
+        poll_id = int(poll_id)
+    except:
+        return 'Poll should be an interger'
+
+    if not user_owns_poll(poll_id):
+        return 'User does not own the poll'
+
+    if get_poll_phase(poll_id) == 2:
+        return 'Poll in the final results phase'
+
+    sql = 'UPDATE Polls SET poll_end_time=:poll_end_time WHERE id=:poll_id'
+    db.session.execute(sql, {'poll_id': poll_id, 'poll_end_time': end})
+
+    db.session.commit()
+    return None
+
+def check_poll_end(end_date, end_time):
+    try:
+        end_date = datetime.date.fromisoformat(end_date)
+        end_time = datetime.time.fromisoformat(end_time)
+        end = datetime.datetime.combine(end_date, end_time)
+    except ValueError:
+        return 'Incorrect time/date formats'
+    if end.minute%5 != 0:
+        return 'End time should be divisible by 5 minutes'
+    if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
+        return 'Poll end should not be in the past'
     return None
 
 # 0 = running
