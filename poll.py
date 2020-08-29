@@ -248,6 +248,8 @@ def process_add_customer(poll_id, reservation_length, customer_name):
         return 'Customer name missing'
     if len(customer_name) > 30:
         return 'Customer name too long (over 30 characters)'
+    if not user_owns_poll(poll_id):
+        return 'No rights to add a new customer to the poll'
 
     user_id = session.get('user_id')
     unique_name = create_unique_customer_name(poll_id, customer_name)
