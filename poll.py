@@ -13,7 +13,7 @@ import member
 ### Poll related functions ###
 Poll = namedtuple('Poll', ['id', 'owner_user_id', 'name', 'description',
                            'first_appointment_date', 'last_appointment_date',
-                           'end_time', 'has_final_results'])
+                           'end_time', 'has_final_results', 'phase'])
 
 def process_new_poll(user_id, name, description, first_date, last_date,
                      end_date, end_time):
@@ -112,7 +112,8 @@ def process_get_poll(poll_id):
     if poll_data is None:
         return None
 
-    return Poll(*poll_data)
+    phase = poll_details_to_phase(poll_data[6], poll_data[7])
+    return Poll(*poll_data, phase)
 
 def get_user_polls():
     tmp = get_user_poll_ids()
@@ -143,7 +144,11 @@ def get_polls_by_ids(poll_ids):
 
     sql = 'SELECT * FROM Polls WHERE id in :poll_ids'
     polls = db.session.execute(sql, {'poll_ids':tuple(poll_ids)}).fetchall()
-    return [Poll(*x) for x in polls]
+    result = []
+    for x in polls:
+        phase = poll_details_to_phase(x[6], x[7])
+        result.append(Poll(*x, phase))
+    return result;
 
 # check if this fails with poll_id=None
 def user_owns_poll(poll_id):
