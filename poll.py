@@ -278,7 +278,7 @@ def customer_name_in_poll(poll_id, name):
 
 # TODO should this return a list of string, not a list of tuples?
 def get_new_customer_links(poll_id):
-    sql = 'SELECT url_id FROM NewCustomerLinks\
+    sql = 'SELECT url_id, times_used FROM NewCustomerLinks\
            WHERE poll_id=:poll_id'
 
     links = db.session.execute(sql, {'poll_id': poll_id}).fetchall()

@@ -47,6 +47,7 @@ CREATE TABLE UsersPollMembers
 CREATE TABLE NewCustomerLinks
 (
     poll_id INTEGER REFERENCES Polls (id) ON DELETE CASCADE,
+    times_used INTEGER DEFAULT 0,
     url_id TEXT
 );
 CREATE TABLE MemberAccessLinks

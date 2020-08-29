@@ -109,8 +109,14 @@ def process_new_customer_url(url_id, reservation_length, customer_name):
     if error is not None:
         return error
 
+    update_new_customer_link_usage(url_id)
     db.session.commit()
     return None
+
+def update_new_customer_link_usage(url_id):
+    sql = 'UPDATE NewCustomerLinks SET times_used=times_used+1 WHERE url_id=:url_id'
+
+    db.session.execute(sql, {'url_id': url_id})
 
 def process_access(url_id):
     member_id = get_member_id(url_id)

@@ -104,7 +104,8 @@
 <h2>Asiakkaanluontilinkit:</h2>
 <div class="section">
 <p>Nämä antavat käyttäjälle oikeuden luoda kyselyyn uusia asiakkaita
-haluamallaan varauksen kestolla</p>
+haluamallaan varauksen kestolla. "Asiakkaita luotu"-kohta kertoo, montako
+uutta asiakasta linkillä on luotu.</p>
 <form action={{ url_for('new_new_customer_link') }} method="post">
     <input id="new_customer" type="submit" value="Luo uusi linkki">
     <input type="hidden" name="poll_id" value={{ poll.id }}>
@@ -112,10 +113,11 @@ haluamallaan varauksen kestolla</p>
 </form>
 <table>
     <thead>
-    <tr><th>Url</th></tr>
+    <tr><th>Asiakkaita luotu</th><th>Url</th></tr>
     </thead>
 {% for link in new_customer_links %}
 <tr>
+    <td data-label="Asiakkaita luotu">{{ link[1] }}</td>
     <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
            value={{ url_for('new_customer', url_id=link[0], _external=True) }}
            readonly>
