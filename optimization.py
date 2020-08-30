@@ -88,8 +88,8 @@ def intervals_to_array(time_intervals, start, end):
     for x in time_intervals:
         a = to_index(x.start, start)
         b = to_index(x.end, start)
-        i = a
-        while i < b:
+        i = max(0, a)
+        while i < min(len(arr), b):
             arr[i] = x.grade
             i += 1
     return arr
