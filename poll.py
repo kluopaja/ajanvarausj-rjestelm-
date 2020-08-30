@@ -91,8 +91,6 @@ def check_poll_end(end_date, end_time):
         end = datetime.datetime.combine(end_date, end_time)
     except ValueError:
         return 'Incorrect time/date formats'
-    if end.minute%5 != 0:
-        return 'End time should be divisible by 5 minutes'
     if end <= datetime.datetime.today() + datetime.timedelta(seconds=2):
         return 'Poll end should not be in the past'
     return None

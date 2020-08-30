@@ -110,11 +110,6 @@ function checkEndTime() {
         return false;
     }
     let mins = time.substring(4, 5);
-    if(parseInt(mins)%5 != 0) {
-        tmp = "Minuuttien tulee olla viidellä jaollisia"
-        endTimeError.textContent = tmp;
-        return false;
-    }
     return true;
 }
 //NOTE that this also accepts dates with time which should not be the case
