@@ -409,7 +409,7 @@ def modify_customer():
     if error is None:
         flash('Varaustoiveen pituuden muuttaminen onnistui')
     else:
-        flash('Virhe! Varaustoiveen pituuden muuttaminen epäonnistui' + error)
+        flash('Virhe! Varaustoiveen pituuden muuttaminen epäonnistui: ' + error)
 
     return redirect(url_for('poll_times',
                             poll_id=request.form.get('poll_id', 0),

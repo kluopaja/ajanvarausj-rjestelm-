@@ -103,7 +103,7 @@ def process_modify_customer(member_id, reservation_length):
         return 'User has no rights to modify the customer'
     #from now on, assume that member_id is valid
 
-    if member.get_parent_poll_phase(member_id) == 2:
+    if get_parent_poll_phase(member_id) == 2:
         return 'Poll in the final result phase'
 
     error = update_reservation_length(member_id, reservation_length)
