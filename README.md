@@ -112,29 +112,11 @@ itse luomiensa asiakkaiden varausaikojen pituudet.
 
 ## Tunnettuja ongelmia ja vielä työn alla olevia asioita
 
-* Tällä hetkellä vain kyselyn omistaja voi katsoa kyselyn aikojen optimoinnin
-tuloksia.
-  * Tarkoitus olisi, että jokainen käyttäjä voisi tarkastella omille
-    kyselyjäsenillensä optimoituja aikoja.
-* Edelliseen liittyen kyselyn loppumisajankohta ei tee tällä hetkellä mitään.
-  * Tarkoitus olisi, että loppumisajankohdan jälkeen ajanvarauksia voisi
-    muokata pelkästään kyselyn omistaja
-* Optimoinnin tulosten formaattia tulisi vielä parantaa helppolukuisemmaksi.
-* Kapealla näytöllä (esim. mobiililaitteet) osa sivuston sisällöstä jää näytön 
-  ulkopuolelle
+
 * Aikatoiveiden ja resurssien saatavuuden valiseminen toimii huonosti
   kosketusnäytöllä.
 * Käyttäjän aikavyöhykettä ei oteta sovelluksessa mitenkään huomioon
-* Tietokannan rakenne vaatii vielä miettimistä
-  * Resources-taulussa oli aiemmin sarake "resource_name", joka siirrettiin
-    PollMembers-tauluun. Tällä hetkellä olisi varmaankin järkevämpää poistaa
-    Resources-taulu (ja mahdollisesti Customers) taulu kokonaan ja siirtää
-    tieto PollMembers-tauluun. Toisaalta tulevaisuudessa resursseille ja
-    asiakkaille olisi mukava pystyä asettamaan ominaisuuksia, kuten
-    "sallittujen yhtäaikaisten asiakkaiden määrä" (resurssille) ja
-    "haluttujen varausaikojen määrä" (asiakkaalle). Mielestäni tämä puoltaa 
-    nykyisen tietokantarakenteen säilyttämistä.
-* Omistajalta ei kysytä vahvistusta ennen asioiden poistamista.
+* Kyselyn päättymisajan muokkausta ei tarkisteta javascriptillä
 
 ## Sovelluksen testaaminen
 Sovellusta voi testata osoitteessa https://csos.herokuapp.com/
