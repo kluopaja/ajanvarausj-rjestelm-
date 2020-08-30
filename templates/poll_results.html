@@ -3,7 +3,7 @@
 {% set active_page = "results" %}
 {% include "poll_navi.html" %}
 {% if poll.phase < 2 %}
-<h3>Kyselyn tulokset tulevat näkyviin tälle sivulle kyselyn päätyttyä<h3>
+<p>Kyselyn tulokset tulevat näkyviin tälle sivulle, kun omistaja päättää julkaista ne.</p>
 {% else %}
     {% if optimization_results|length > 0 %}
     {% include "result_view.html" %}
