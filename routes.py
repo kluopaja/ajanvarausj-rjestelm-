@@ -229,34 +229,23 @@ def modify_poll():
     return redirect(url_for('route_poll',
                             poll_id=request.form.get('poll_id', 0)))
 
-# TODO
-# storing the 'login_redirect' in the session was a very bad idea
-# what if the user visits the link, then does something else,
-# comes back to the site and logs in
-# then they will be redirected to the link site
-# how to login and then return to the same page?
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    def redirect_to_next(default='/'):
-        if 'login_redirect' not in session:
-            return redirect(default)
-
-        # if the redirect target is not a valid relative url
-        url = session['login_redirect']
-        del session['login_redirect']
-
-        if not url or url_parse(url).netloc != '':
-            return redirect(default)
-
-        return redirect(url)
+    def redirect_to_next():
+        next_url = request.args.get('next_url', 0)
+        if next_url:
+            return redirect(next_url)
+        return redirect(url_for('index'))
 
     error = 'Unknown error'
     if session.get('user_id', 0):
-        return redirect_to_next(default='/')
+        flash('Olet jo kirjautunut sisään')
+        return redirect_to_next()
 
     if request.method == 'GET':
         auth.set_csrf_token()
-        return render_template('login.html')
+        return render_template('login.html',
+                               next_url=request.args.get('next_url'))
 
     elif request.method == 'POST':
         auth.check_csrf_token(request.form.get('csrf_token'))
@@ -264,7 +253,7 @@ def login():
                                    request.form.get('password'))
         if error is None:
             flash('Kirjautuminen onnistui')
-            return redirect_to_next(default='/')
+            return redirect_to_next()
 
     flash('Virhe! Kirjautuminen epäonnistui')
     return redirect(url_for('login'))
@@ -300,8 +289,8 @@ def register():
 def new_customer(url_id):
     if 'user_id' not in session:
         flash('Virhe! Kirjaudu ensin sisään')
-        session['login_redirect'] = '/new_customer/' + url_id
-        return redirect(url_for('login'))
+        redirect_url = url_for('new_customer', url_id=url_id)
+        return redirect(url_for('login', next_url=redirect_url))
 
     if request.method == 'GET':
         # TODO think if the url_id should be in 'details'
@@ -345,8 +334,8 @@ def add_customer():
 def access(url_id):
     if 'user_id' not in session:
         flash('Virhe! Kirjaudu ensin sisään')
-        session['login_redirect'] = '/access/' + url_id
-        return redirect(url_for('login'))
+        redirect_url = url_for('access', url_id=url_id)
+        return redirect(url_for('login', next_url=redirect_url))
 
     if request.method == 'GET':
         return render_template('confirm_member_access_link.html',
