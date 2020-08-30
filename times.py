@@ -215,10 +215,11 @@ def process_new_grading(member_id, start, end, date, time_grade):
     if member_type is None:
         return 'Invalid member_id'
 
-    print('start_datetime, end_datetime: ', start_datetime, end_datetime)
-    # TODO check that user has rights to member_id
-    # TODO.fcheck that the start_datetime and end_datetime are within the
-    # allowed poll range!
+
+    poll_start, poll_end = member.get_parent_poll_datetime_range(member_id)
+    if start_datetime < poll_start or end_datetime > poll_end:
+        return 'Time segment was outside the poll range'
+
     add_member_time_grading(member_id, start_datetime, end_datetime,
                          time_grade)
     db.session.commit()

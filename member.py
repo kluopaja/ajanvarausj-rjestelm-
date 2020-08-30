@@ -138,3 +138,12 @@ def process_delete_member(member_id):
 def delete_member(member_id):
     sql = 'DELETE FROM PollMembers WHERE id=:member_id'
     db.session.execute(sql, {'member_id': member_id})
+
+def get_parent_poll_datetime_range(member_id):
+    sql = 'SELECT P.first_appointment_date, P.last_appointment_date FROM \
+            Polls P, PollMembers M WHERE P.id=M.poll_id AND M.id=:member_id'
+    start, end = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    start = datetime.datetime.combine(start, datetime.time(0, 0, 0))
+    end += datetime.timedelta(days=1)
+    end = datetime.datetime.combine(end, datetime.time(0, 0, 0))
+    return (start, end)
