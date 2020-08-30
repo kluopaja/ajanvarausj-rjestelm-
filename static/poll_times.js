@@ -47,7 +47,11 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
 
         //we need to attach the form somewhere to submit it
         self.dom.appendChild(form);
+        //remove leave confirmation
+        window.onbeforeunload = null;
+
         form.submit();
+
     }
     this.handleReset = function() {
         let message = "Haluatko varmasti peruuttaa tallentamattomat muutokset?"
@@ -55,6 +59,8 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
             self.initNewGrades();
             self.interface.reset();
             self.draw();
+            //remove leave confirmation
+            window.onbeforeunload = null;
         }
     }
     this.handleDaySelection = function(e) {
@@ -89,6 +95,9 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         let grade = self.selectedGrade;
         self.newGrades[self.selectedDay][1].push([start, end, grade]);
         self.draw();
+
+        //add "are you sure you want to leave?"
+        window.onbeforeunload = function() { return true; }
     }
     this.draw = function() {
         let grades1 = self.timeGrades[self.selectedDay][1];
