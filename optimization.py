@@ -41,11 +41,8 @@ def optimize_poll(poll_id):
 
 
 
-    # TODO use get poll range
-    print(customer_times)
-    print('customer times', customer_times[0])
-    start = customer_times[0][0].start
-    end = customer_times[0][-1].end
+    start, end = poll.get_poll_datetime_range(poll_id)
+
     # convert time to discrete 5 min intervals
     resource_times = [intervals_to_array(x, start, end) for x in resource_times]
     customer_times = [intervals_to_array(x, start, end) for x in customer_times]
