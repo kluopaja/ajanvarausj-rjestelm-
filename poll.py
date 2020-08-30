@@ -398,7 +398,7 @@ def process_new_resource(poll_id, resource_name):
     sql = 'INSERT INTO Resources (member_id) VALUES (:member_id)'
     db.session.execute(sql, {'member_id': member_id[0]})
 
-    member.initialize_poll_member_times(member_id[0], poll_id, 0)
+    member.initialize_poll_member_times(member_id[0], 0)
     db.session.commit()
     return None
 
@@ -423,7 +423,7 @@ def add_new_customer(poll_id, reservation_length, name):
     db.session.execute(sql, {'member_id': member_id[0],
                              'reservation_length': reservation_length})
 
-    member.initialize_poll_member_times(member_id[0], poll_id, 0)
+    member.initialize_poll_member_times(member_id[0], 0)
     member.give_user_access_to_member(user_id, member_id[0])
     return None
 

@@ -18,15 +18,8 @@ def get_customer_reservation_length(member_id):
         return None
     return length[0]
 
-# TODO remove poll_id from the parameters!
-def initialize_poll_member_times(member_id, poll_id, grade):
-    start, end = poll.get_poll_date_range(poll_id)
-    end += datetime.timedelta(days=1)
-
-    # convert to datetime.datetime
-    start = datetime.datetime(start.year, start.month, start.day)
-    end = datetime.datetime(end.year, end.month, end.day)
-
+def initialize_poll_member_times(member_id, grade):
+    start, end = get_parent_poll_datetime_range(member_id)
     times.add_member_time_grading(member_id, start, end, grade)
 
 def get_member_type(member_id):
