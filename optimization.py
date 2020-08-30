@@ -18,8 +18,10 @@ Assignment = namedtuple('Assignment', ['customer_member_id',
                                        'time'])
 
 def process_optimize_poll(poll_id):
-    if poll_id is None:
-        return 'No poll_id was given'
+    try:
+        poll_id = int(poll_id)
+    except:
+        return 'Poll id should be an integer'
     if not poll.user_owns_poll(poll_id):
         return 'Current user does not own the poll'
     if poll.get_poll_phase(poll_id) == 2:

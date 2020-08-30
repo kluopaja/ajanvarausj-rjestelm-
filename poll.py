@@ -70,7 +70,7 @@ def process_modify_poll(poll_id, end_date, end_time, end_now):
     try:
         poll_id = int(poll_id)
     except:
-        return 'Poll should be an interger'
+        return 'Poll id should be an interger'
 
     if not user_owns_poll(poll_id):
         return 'User does not own the poll'
@@ -325,6 +325,10 @@ def check_new_customer_attributes(reservation_length, customer_name):
 
 def process_add_customer(poll_id, reservation_length, customer_name,
                          from_url=False):
+    try:
+        poll_id = int(poll_id)
+    except:
+        return 'Poll id should be an integer'
     if not user_owns_poll(poll_id):
         return 'No rights to add a new customer to the poll'
     # now we know that poll_id is valid
@@ -374,8 +378,10 @@ def name_is_unique(poll_id, name):
     return count[0] == 0
 
 def process_new_resource(poll_id, resource_name):
-    if poll_id is None:
-        return 'No poll id was provided'
+    try:
+        poll_id = int(poll_id)
+    except:
+        return 'Poll id should be an integer'
     if resource_name is None or len(resource_name) == 0:
         return 'No resource name was provided'
     if len(resource_name) > 30:

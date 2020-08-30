@@ -16,8 +16,10 @@ def create_new_url_key():
     return base64.urlsafe_b64encode(urandom(15)).decode('ascii')
 
 def process_new_new_customer_link(poll_id):
-    if poll_id is None:
-        return 'No poll id was provided'
+    try:
+        poll_id = int(poll_id)
+    except:
+        return 'Poll id should be an integer'
     if not poll.user_owns_poll(poll_id):
         return 'User does not own the poll'
 
@@ -30,8 +32,10 @@ def process_new_new_customer_link(poll_id):
     return None
 
 def process_new_member_access_link(member_id):
-    if member_id is None:
-        return 'No member id was provided'
+    try:
+        member_id = int(member_id)
+    except:
+        return 'Member id should be an integer'
     # check user is the owner of the resource parent poll
     if not member.user_owns_parent_poll(member_id):
         return 'User does not own the parent poll'
