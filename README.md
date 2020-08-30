@@ -49,6 +49,40 @@ Tämän lisäksi omistaja voi luoda uuden asiakkaan luomieen oikeuttavia linkkej
 Näitä linkkejä painamalla käyttäjä voi luoda uusia asiakkaita ja määrittää
 samalla asiakkaan varausajan pituuden.
 
+## Ajanvarauskyselyn kulku
+
+Ajanvarauskysely voi olla kolmessa eri tilassa
+* Käynnissä (0, running)
+* Odottaa tuloksia (1, ended)
+* Tulokset julkaistu (2, results)
+
+Kysely on oletuksena tilassa 0. Kun kyselyn loppumisaika siirtyy menneisyyteen, 
+siirtyy kysely tilaan 1. Kyselyn omistaja voi halutessaan siirtää kyselyn 
+loppumisajan nykyseen hetkeen (== lopettaa kyselyn). Omistaja voi myös
+siirtää kyselyn loppumishetken tulevaisuuteen. Tällöin kysely siirtyy
+automaattisesti tilaan 1 (ellei jo ollut siinä). 
+
+Tilassa 1 kysely toimii omistajan näkökulmasta täysin normaalisti (eli 
+omistaja voi luoda uusia asiakkaita/resursseja ja muokata niiden aikoja
+yms). Muuttamalla kyselyn loppuhetken takaisin tulevaisuuteen
+voi omistaja siirtää kyselyn takaisin tilaan 0. 
+Kuitenkin linkit lakkaavat toimimasta. (Tällä hetkellä hieman
+epäloogisesti uuden käyttäjän luomiseen oikeuttavat linkit lakkaavat
+toimimasta myös kyselyn omistajan käyttäessä niitä. Omistaja voi 
+kuitenkin aina luoda uusia asiakkaita "Asiakkaat"-viulla.)
+
+Tavalliset käyttäjät voivat tilassa 1 ainoastaan tarkastella
+heidän jo tekemiänsä aikatoiveita.
+
+Tilassa 1 omistaja voi lisäksi julkaista kyselyn tulokset. Tulosten 
+julkaiseminen on peruuttamaton toiminto ja siirtää kyselyn tilaan 2. 
+Tilassa 2 kukaan ei voi enää muokata kyselyn tuloksia. Tilassa 2
+"Tulokset" sivulle tulee näkyviin kyselyn lopulliset tulokset.
+Tavalliset käyttäjät näkevät ainoastaan ne tulokset, joihin heillä
+on oikeudet, mutta omistaja näkee kaikki tulokset.
+
+
+
 ## Lisää muokkauslinkeistä ja käyttäjäluontilinkeistä:
 
 Tällä hetkellä kyselyn oikeuksien hallinta perustuu kahdenlaiseen
@@ -103,4 +137,5 @@ tuloksia.
 * Omistajalta ei kysytä vahvistusta ennen asioiden poistamista.
 
 ## Sovelluksen testaaminen
-Sovellusta voi testata osoitteessa https://boiling-falls-99919.herokuapp.com/
+Sovellusta voi testata osoitteessa https://csos.herokuapp.com/
+Testikäyttäjiä ovat esim: (maija, kissa2) (tiina, kissa2)
