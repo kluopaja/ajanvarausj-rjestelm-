@@ -96,14 +96,14 @@ def member_details_by_url_id(url_id):
 def process_new_customer_url(url_id, reservation_length, customer_name):
     poll_id = get_new_customer_link_poll_id(url_id)
     if poll_id is None:
-        return "No poll corresponding to the link found"
+        return 'No poll corresponding to the link found'
     if poll.get_poll_phase(poll_id) >= 1:
         return 'Poll has ended.'
 
     error = poll.check_new_customer_attributes(reservation_length,
                                                customer_name)
     if error is not None:
-        return error;
+        return error
 
     error = poll.add_new_customer(poll_id, reservation_length, customer_name)
     if error is not None:
@@ -121,7 +121,7 @@ def update_new_customer_link_usage(url_id):
 def process_access(url_id):
     member_id = get_member_id(url_id)
     if member_id is None:
-        return "No member id corresponding to url was found"
+        return 'No member id corresponding to url was found'
     if member.get_parent_poll_phase(member_id) >= 1:
         return 'Poll has ended'
     user_id = session['user_id']
@@ -156,7 +156,7 @@ def delete_new_customer_link(url_id, owner_user_id):
     deleted = db.session.execute(sql, {'url_id': url_id,
                                      'owner_user_id': owner_user_id}).fetchone()
     if deleted is None:
-        return "User does not own the link or the link doesn't exist"
+        return 'User does not own the link or the link does not exist'
 
     return None
 
@@ -179,5 +179,5 @@ def delete_member_access_link(url_id, owner_user_id):
                                      'owner_user_id': owner_user_id}).fetchone()
 
     if deleted is None:
-        return "User does not own the link or the link doesn't exist"
+        return 'User does not own the link or the link does not exist'
     return None

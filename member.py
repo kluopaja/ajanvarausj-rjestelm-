@@ -124,9 +124,9 @@ def process_delete_member(member_id):
     try:
         member_id = int(member_id)
     except:
-        return "Member id not an interger"
+        return 'Member id not an interger'
     if not user_owns_parent_poll(member_id):
-        return "User has no rights to delete the member"
+        return 'User has no rights to delete the member'
     if get_parent_poll_phase(member_id) == 2:
         return 'Poll in the final results phase'
 

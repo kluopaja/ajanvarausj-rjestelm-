@@ -16,16 +16,16 @@ def index():
     return render_template('index.html', polls=polls)
 
 @app.route('/poll/<int:poll_id>')
-# naming this to "poll" would clash with the poll module
+# naming this to 'poll' would clash with the poll module
 def route_poll(poll_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     current_poll = poll.process_get_poll(poll_id)
     if current_poll is None:
-        message = "Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn"
-        flash("Virhe! " + message)
+        message = 'Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn'
+        flash('Virhe! ' + message)
         return redirect(url_for('index'))
 
     is_owner = poll.user_owns_poll(poll_id)
@@ -47,7 +47,7 @@ def route_poll(poll_id):
 @app.route('/poll/<int:poll_id>/customers')
 def poll_customers(poll_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     # list of (url_id, reservation_length)
@@ -74,7 +74,7 @@ def poll_customers(poll_id):
 @app.route('/poll/<int:poll_id>/resources')
 def poll_resources(poll_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     # list of (url_id, resource_description)
@@ -98,12 +98,12 @@ def poll_resources(poll_id):
                            is_owner=True,
                            poll=current_poll,
                            resource_access_links=resource_access_links,
-                           resources=resources);
+                           resources=resources)
 
 @app.route('/poll/<int:poll_id>/optimization')
 def poll_optimization(poll_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     is_owner = poll.user_owns_poll(poll_id)
@@ -123,12 +123,12 @@ def poll_optimization(poll_id):
 @app.route('/poll/<int:poll_id>/results')
 def poll_results(poll_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     current_poll = poll.process_get_poll(poll_id)
     if current_poll is None:
-        flash("Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn")
+        flash('Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn')
         return redirect(url_for('index'))
 
     is_owner = poll.user_owns_poll(poll_id)
@@ -141,17 +141,17 @@ def poll_results(poll_id):
     return render_template('poll_results.html',
                            is_owner=is_owner,
                            optimization_results=results,
-                           poll=current_poll);
+                           poll=current_poll)
 
 @app.route('/poll/<int:poll_id>/<int:member_id>/times')
 def poll_times(poll_id, member_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     current_poll = poll.process_get_poll(poll_id)
     if current_poll is None:
-        flash("Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn")
+        flash('Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn')
         return redirect(url_for('index'))
 
     user_id = session.get('user_id')
@@ -160,7 +160,6 @@ def poll_times(poll_id, member_id):
     if not is_owner and not member.user_has_access(user_id, member_id):
         flash('Virhe! Ei oikeuksia muokata aikoja')
         return redirect(url_for('route_poll', poll_id=poll_id))
-
 
     if not poll.member_in_poll(member_id, poll_id):
         flash('Virhe! Jäsen ei kuulu kyselyyn. Tarkista url.')
@@ -186,12 +185,12 @@ def poll_times(poll_id, member_id):
                             member_type=member_type,
                             member_name=member_name,
                             reservation_length=reservation_length,
-                            selected_day=request.args.get('selected_day', 0));
+                            selected_day=request.args.get('selected_day', 0))
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     if request.method == 'GET':
@@ -206,7 +205,7 @@ def new_poll():
                                       request.form.get('poll_end_date'),
                                       request.form.get('poll_end_time'))
         if error is not None:
-            flash("Virhe! Uuden kyselyn luominen epäonnistui: " + error)
+            flash('Virhe! Uuden kyselyn luominen epäonnistui: ' + error)
             return redirect(url_for('new_poll'))
 
         flash('Kyselyn luominen onnistui')
@@ -215,7 +214,7 @@ def new_poll():
 @app.route('/modify_poll', methods=['POST'])
 def modify_poll():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -254,7 +253,7 @@ def login():
 
     error = 'Unknown error'
     if session.get('user_id', 0):
-        return redirect_to_next(default='/');
+        return redirect_to_next(default='/')
 
     if request.method == 'GET':
         auth.set_csrf_token()
@@ -268,8 +267,8 @@ def login():
             flash('Kirjautuminen onnistui')
             return redirect_to_next(default='/')
 
-    flash("Virhe! Kirjautuminen epäonnistui")
-    return redirect(url_for('login'));
+    flash('Virhe! Kirjautuminen epäonnistui')
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():
@@ -301,7 +300,7 @@ def register():
 @app.route('/new_customer/<url_id>', methods=['POST', 'GET'])
 def new_customer(url_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         session['login_redirect'] = '/new_customer/' + url_id
         return redirect(url_for('login'))
 
@@ -328,7 +327,7 @@ def new_customer(url_id):
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -346,7 +345,7 @@ def add_customer():
 @app.route('/access/<url_id>', methods=['POST', 'GET'])
 def access(url_id):
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         session['login_redirect'] = '/access/' + url_id
         return redirect(url_for('login'))
 
@@ -369,7 +368,7 @@ def access(url_id):
 @app.route('/new_new_customer_link', methods=['POST'])
 def new_new_customer_link():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -385,7 +384,7 @@ def new_new_customer_link():
 @app.route('/new_member_access_link', methods=['POST'])
 def new_member_access_link():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -406,12 +405,12 @@ def new_member_access_link():
 @app.route('/modify_customer', methods=['POST'])
 def modify_customer():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = member.process_modify_customer(request.form.get('member_id'),
-                                           request.form.get('reservation_length'));
+                                           request.form.get('reservation_length'))
     if error is None:
         flash('Varaustoiveen pituuden muuttaminen onnistui')
     else:
@@ -424,7 +423,7 @@ def modify_customer():
 @app.route('/new_resource', methods=['POST'])
 def new_resource():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -441,7 +440,7 @@ def new_resource():
 @app.route('/delete_member', methods=['POST'])
 def delete_member():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -462,7 +461,7 @@ def delete_member():
 @app.route('/delete_new_customer_link', methods=['POST'])
 def delete_new_customer_link():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -478,7 +477,7 @@ def delete_new_customer_link():
 @app.route('/delete_member_access_link', methods=['POST'])
 def delete_member_access_link():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -499,7 +498,7 @@ def delete_member_access_link():
 @app.route('/new_time_preference', methods=['POST'])
 def new_time_preference():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
@@ -507,7 +506,7 @@ def new_time_preference():
     # request was generated by javascript
     if request.form.get('data') is not None:
         error = times.process_grading_list(request.form.get('member_id'),
-                                           request.form.get('data'));
+                                           request.form.get('data'))
     # if no js was available
     else:
         error = times.process_grading_fallback(request.form.get('member_id'),
@@ -516,7 +515,7 @@ def new_time_preference():
                                                request.form.get('date'),
                                                request.form.get('satisfaction'))
     if error is None:
-        flash('Aikavalintojen tallentaminen onnistui');
+        flash('Aikavalintojen tallentaminen onnistui')
     else:
         flash('Virhe! Aikavalintojen tallentaminen epäonnistui: ' + error)
 
@@ -528,22 +527,23 @@ def new_time_preference():
 @app.route('/optimize_poll', methods=['POST'])
 def optimize_poll():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
     error = optimization.process_optimize_poll(request.form.get('poll_id'))
     if error is None:
-        flash('Ajanvarauksien optimoiminen onnistui');
+        flash('Ajanvarauksien optimoiminen onnistui')
     else:
         flash('Virhe! Ajanvarauksien optimoiminen epäonnistui: ' + error)
 
     return redirect(url_for('poll_optimization',
                             poll_id=request.form.get('poll_id', 0)))
+
 @app.route('/set_results_final', methods=['POST'])
 def set_results_final():
     if 'user_id' not in session:
-        flash("Virhe! Kirjaudu ensin sisään")
+        flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))

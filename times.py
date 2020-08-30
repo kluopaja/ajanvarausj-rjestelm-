@@ -22,7 +22,7 @@ GradesInDate = namedtuple('GradesInDate', ['date', 'intervals'])
 # get an ordered list of time intervals that overlap with 'day'
 def get_minute_grades_for_day(member_id, day):
     def to_minutes(t):
-        return t.hour*60 + t.minute;
+        return t.hour*60 + t.minute
 
     sql = 'SELECT CAST(GREATEST(time_beginning, :day) as time),\
            CAST(LEAST(time_end, :day + \'1 day\'::interval) \
@@ -40,7 +40,7 @@ def get_minute_grades_for_day(member_id, day):
         # note that time period can never end at the beginning of the
         # current day
         if mins_1 == 0:
-            mins_1 = 24*60;
+            mins_1 = 24*60
         out.append(TimeInterval(mins_0, mins_1, x[2]))
     return out
 
@@ -234,12 +234,12 @@ def process_grading_list(member_id, data):
         for day in data:
             for interval in day[1]:
                 error = process_new_grading(member_id, interval[0], interval[1],
-                                            day[0], interval[2]);
+                                            day[0], interval[2])
         if error is not None:
             return error
         db.session.commit()
     except Exception as e:
-        return 'Error when parsing the the grading json' + str(data);
+        return 'Error when parsing the the grading json' + str(data)
 
 def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
     try:
@@ -250,8 +250,8 @@ def process_grading_fallback(member_id, start_time, end_time, date, time_grade):
     except:
         return 'Incorrect time format'
 
-    error = process_new_grading(member_id, start, end, date, time_grade);
+    error = process_new_grading(member_id, start, end, date, time_grade)
     if error is None:
-        db.session.commit();
+        db.session.commit()
 
-    return error;
+    return error

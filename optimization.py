@@ -33,7 +33,7 @@ def process_optimize_poll(poll_id):
     '''
     def handler(signum, frame):
         print('optimization timeout!')
-        raise TimelimitError();
+        raise TimelimitError()
     signal.signal(signal.SIGALRM, handler)
     try:
         signal.alarm(5)
@@ -241,7 +241,7 @@ def get_owner_optimization_results(poll_id):
     try:
         int(poll_id)
     except ValueError:
-        return "Poll id not an integer"
+        return 'Poll id not an integer'
     sql = 'SELECT P1.id, P1.name, P2.id, P2.name, O.time_start \
            FROM PollMembers P1, PollMembers P2, OptimizationResults O \
            WHERE P1.id=O.customer_member_id AND P2.id=O.resource_member_id \
@@ -257,7 +257,7 @@ def get_normal_user_optimization_results(poll_id):
     try:
         int(poll_id)
     except ValueError:
-        return "Poll id not an integer"
+        return 'Poll id not an integer'
     user_id = session.get('user_id')
     sql = 'SELECT P1.id, P1.name, P2.id, P2.name, O.time_start \
            FROM PollMembers P1, PollMembers P2, OptimizationResults O, \

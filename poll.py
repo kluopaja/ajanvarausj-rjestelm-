@@ -101,8 +101,8 @@ def check_poll_end(end_date, end_time):
 # 1 = ended
 # 2 = final results
 def get_poll_phase(poll_id):
-    sql = "SELECT poll_end_time, has_final_results FROM Polls \
-           WHERE id=:poll_id"
+    sql = 'SELECT poll_end_time, has_final_results FROM Polls \
+           WHERE id=:poll_id'
     result = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
     if result[1]:
         return 2
@@ -187,9 +187,9 @@ def get_polls_by_ids(poll_ids):
     for x in polls:
         phase = poll_details_to_phase(x[6], x[7])
         result.append(Poll(*x, phase))
-    return result;
+    return result
 
-# check if this fails with poll_id=None
+# poll_id has to be None or integer
 def user_owns_poll(poll_id):
     user_id = session.get('user_id', 0)
     sql = 'SELECT COUNT(*) FROM Polls WHERE id=:poll_id \
@@ -342,7 +342,7 @@ def create_unique_customer_name(poll_id, name):
         print(name_candidate)
         if not customer_name_in_poll(poll_id, name_candidate):
             return name_candidate
-        name_candidate = name + "-" + create_random_name_suffix()
+        name_candidate = name + '-' + create_random_name_suffix()
 
     return None
 
@@ -352,7 +352,7 @@ def create_unique_resource_name(poll_id, name):
         print(name_candidate)
         if not resource_name_in_poll(poll_id, name_candidate):
             return name_candidate
-        name_candidate = name + "-" + create_random_name_suffix()
+        name_candidate = name + '-' + create_random_name_suffix()
 
     return None
 
@@ -360,8 +360,8 @@ def create_random_name_suffix():
     return base64.urlsafe_b64encode(urandom(3)).decode('ascii')
 
 def name_is_unique(poll_id, name):
-    sql = "SELECT COUNT(*) FROM PollMembers WHERE poll_id=:poll_id \
-           AND name=:name"
+    sql = 'SELECT COUNT(*) FROM PollMembers WHERE poll_id=:poll_id \
+           AND name=:name'
     count = db.session.execute(sql, {'poll_id': poll_id,
                                      'name': name}).fetchone()
     return count[0] == 0
@@ -380,7 +380,7 @@ def process_new_resource(poll_id, resource_name):
 
     unique_name = create_unique_resource_name(poll_id, resource_name)
     if unique_name is None:
-        return "Failed to create a unique resource name"
+        return 'Failed to create a unique resource name'
 
     sql = 'INSERT INTO PollMembers (poll_id, name) VALUES \
            (:poll_id, :resource_name) RETURNING id'
@@ -401,7 +401,7 @@ def add_new_customer(poll_id, reservation_length, name):
     user_id = session.get('user_id')
     name = create_unique_customer_name(poll_id, name)
     if name is None:
-        return "Failed to create a unique customer name"
+        return 'Failed to create a unique customer name'
 
     sql = 'INSERT INTO PollMembers (poll_id, name) \
            VALUES (:poll_id, :name) RETURNING id'
