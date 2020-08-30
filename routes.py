@@ -22,15 +22,15 @@ def route_poll(poll_id):
         flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
+    # note that we already know that poll_id is an integer
     current_poll = poll.process_get_poll(poll_id)
     if current_poll is None:
         message = 'Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn'
         flash('Virhe! ' + message)
         return redirect(url_for('index'))
 
-    is_owner = poll.user_owns_poll(poll_id)
-
     user_id = session.get('user_id')
+    is_owner = (current_poll.owner_user_id == user_id)
     user_customers = poll.get_user_poll_customers(user_id, poll_id)
     user_resources = poll.get_user_poll_resources(user_id, poll_id)
 
@@ -40,8 +40,7 @@ def route_poll(poll_id):
     return render_template('poll.html', is_owner=is_owner,
                            poll=current_poll,
                            user_customers=user_customers,
-                           user_resources=user_resources,
-                           grade_descriptions=grade_descriptions)
+                           user_resources=user_resources)
 
 
 @app.route('/poll/<int:poll_id>/customers')
@@ -53,14 +52,14 @@ def poll_customers(poll_id):
     # list of (url_key, reservation_length)
     customer_invitations = None
 
-    is_owner = poll.user_owns_poll(poll_id)
-    if not is_owner:
+    # note that we already know that poll_id is an integer
+    current_poll = poll.process_get_poll(poll_id)
+    user_id = session.get('user_id')
+    if (current_poll is None) or (current_poll.owner_user_id != user_id):
         flash('Virhe! Ei oikeuksia katsoa kyselyn omistajan näkymää')
         return redirect(url_for('route_poll', poll_id=poll_id))
 
-    current_poll = poll.get_polls_by_ids([poll_id])[0]
 
-    # note that we already know that poll_id is an integer
     new_customer_links = poll.get_new_customer_links(poll_id)
     customer_access_links = poll.get_customer_access_links(poll_id)
     customers = poll.get_poll_customers(poll_id)
@@ -82,14 +81,13 @@ def poll_resources(poll_id):
     # list of (resource_description, resource_id)
     resources = None
 
-    is_owner = poll.user_owns_poll(poll_id)
-    if not is_owner:
+    # note that we already know that poll_id is an integer
+    current_poll = poll.process_get_poll(poll_id)
+    user_id = session.get('user_id')
+    if (current_poll is None) or (current_poll.owner_user_id != user_id):
         flash('Virhe! Ei oikeuksia katsoa kyselyn omistajan näkymää')
         return redirect(url_for('route_poll', poll_id=poll_id))
 
-    current_poll = poll.get_polls_by_ids([poll_id])[0]
-
-    # note that we already know that poll_id is an integer
     resource_access_links = poll.get_resource_access_links(poll_id)
     resources = poll.get_poll_resources(poll_id)
 
@@ -105,12 +103,12 @@ def poll_optimization(poll_id):
         flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
-    is_owner = poll.user_owns_poll(poll_id)
-    if not is_owner:
+    # note that we already know that poll_id is an integer
+    current_poll = poll.process_get_poll(poll_id)
+    user_id = session.get('user_id')
+    if (current_poll is None) or (current_poll.owner_user_id != user_id):
         flash('Virhe! Ei oikeuksia katsoa kyselyn omistajan näkymää')
         return redirect(url_for('route_poll', poll_id=poll_id))
-
-    current_poll = poll.get_polls_by_ids([poll_id])[0]
 
     optimization_results = optimization.get_owner_optimization_results(poll_id)
 
@@ -130,13 +128,15 @@ def poll_results(poll_id):
         flash('Virhe! Kyselyä ei löytynyt tai käyttäjällä ei ole oikeuksia kyselyyn')
         return redirect(url_for('index'))
 
-    is_owner = poll.user_owns_poll(poll_id)
+    user_id = session.get('user_id')
+    is_owner = (current_poll.owner_user_id == user_id)
     results = []
     if current_poll.phase == 2:
         if is_owner:
             results = optimization.get_owner_optimization_results(poll_id)
         else:
             results = optimization.get_normal_user_optimization_results(poll_id)
+
     return render_template('poll_results.html',
                            is_owner=is_owner,
                            optimization_results=results,
@@ -154,25 +154,21 @@ def poll_times(poll_id, member_id):
         return redirect(url_for('index'))
 
     user_id = session.get('user_id')
-    is_owner = member.user_owns_parent_poll(member_id)
+    is_owner = (current_poll.owner_user_id == user_id)
 
-    if not is_owner and not member.user_has_access(user_id, member_id):
+    if not (is_owner or member.user_has_access(user_id, member_id)):
         flash('Virhe! Ei oikeuksia muokata aikoja')
         return redirect(url_for('route_poll', poll_id=poll_id))
 
-    if not poll.member_in_poll(member_id, poll_id):
+    member_details = member.get_member_details(member_id)
+    if member_details.poll_id != current_poll.id:
         flash('Virhe! Jäsen ei kuulu kyselyyn. Tarkista url.')
         return redirect(url_for('route_poll', poll_id=poll_id))
 
-    member_type = member.get_member_type(member_id)
     member_times = times.get_minute_grades(member_id, poll_id)
-    member_name = member.get_member_name(member_id)
-    reservation_length = 0
-    if member_type == 'resource':
+    if member_details.type == 'resource':
         grade_descriptions = ['Ei käytettävissä', 'Käytettävissä']
-
-    if member_type == 'customer':
-        reservation_length = member.get_customer_reservation_length(member_id)
+    else:
         grade_descriptions = ['Ei sovi', 'Sopii tarvittaessa', 'Sopii hyvin']
 
     view_only = 0
@@ -187,9 +183,9 @@ def poll_times(poll_id, member_id):
                             member_id=member_id,
                             time_grades=member_times,
                             grade_descriptions=grade_descriptions,
-                            member_type=member_type,
-                            member_name=member_name,
-                            reservation_length=reservation_length,
+                            member_type=member_details.type,
+                            member_name=member_details.name,
+                            reservation_length=member_details.reservation_length,
                             selected_day=request.args.get('selected_day', 0),
                             view_only=view_only)
 

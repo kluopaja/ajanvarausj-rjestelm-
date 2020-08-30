@@ -70,15 +70,21 @@ def give_user_access_to_member(user_id, member_id):
     db.session.execute(sql, {'user_id': user_id, 'member_id': member_id})
     return None
 
-# TODO should this return '' or None?
-def get_member_name(member_id):
-    sql = 'SELECT name FROM PollMembers WHERE id=:member_id'
+MemberDetails = namedtuple('MemberDetails', ['name', 'poll_id', 'reservation_length', 'type'])
+#assumes that member_id exists
+def get_member_details(member_id):
+    sql = 'SELECT P.name, P.poll_id, C.reservation_length \
+           FROM PollMembers P LEFT JOIN Customers C \
+           ON P.id=C.member_id WHERE P.id=:member_id'
 
-    name = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    details = db.session.execute(sql, {'member_id': member_id}).fetchone()
 
-    if name is None:
-        return ''
-    return name[0]
+    if details[2] is None:
+        member_type = 'resource'
+    else:
+        member_type = 'customer'
+    return MemberDetails(*details, member_type)
+
 
 def process_modify_customer(member_id, reservation_length):
     try:
