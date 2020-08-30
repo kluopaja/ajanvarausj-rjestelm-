@@ -5,6 +5,11 @@
 <script type="text/javascript"
         src={{ url_for('static', filename='confirmations.js') }}></script>
 <h1>Optimointi</h1>
+{% if poll.phase == 2 %}
+<p>
+Lopulliset tulokset on julkaistu. Optimointi ei ole enää mahdollista..
+</p>
+{% else %}
 <div class="section">
 <form class="optimize_poll" action={{ url_for('optimize_poll') }} method="post">
     <input class="button" type="submit" value="Optimoi ajanvaraukset">
@@ -33,5 +38,6 @@ muokata kyselyn tuloksia.</p>
     <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
 </form>
 </div>
+{% endif %}
 </div>
 {% endblock %}

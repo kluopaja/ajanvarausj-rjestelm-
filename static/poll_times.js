@@ -1,12 +1,14 @@
 //TODO functions to arrow functions
 function makeDayEditorDom(timeGrades, gradeDescriptions, blockSize,
-                          memberId, pollId, csrfToken, selectedDay) {
+                          memberId, pollId, csrfToken, selectedDay,
+                          viewOnly) {
     let editor = new DayEditor(timeGrades, gradeDescriptions, blockSize,
-                               memberId, pollId, csrfToken, selectedDay);
+                               memberId, pollId, csrfToken, selectedDay,
+                               viewOnly);
     return editor.dom;
 }
 function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
-                  pollId, csrfToken, selectedDay) {
+                  pollId, csrfToken, selectedDay, viewOnly) {
     let self = this;
     this.handleSave = function() {
         let form = document.createElement('form');
@@ -113,14 +115,17 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
     self.selectedGrade = gradeDescriptions.length-1;
 
     self.interface = new Interface(400, 1200, self.blockSize,
-                                   self.addSelection, self.draw);
+                                   self.addSelection, self.draw,
+                                   viewOnly);
     //initialize radio buttons
     let daySelection = makeDaySelectionDom(self.timeGrades,
                                            self.handleDaySelection,
-                                           self.selectedDay);
+                                           self.selectedDay,
+                                           viewOnly);
     let gradeSelection = makeGradeSelectionDom(self.gradeDescriptions,
                                                self.interface.gradeColors,
-                                               self.handleGradeSelection);
+                                               self.handleGradeSelection,
+                                               viewOnly);
 
     let saveReset = makeSaveReset(self.handleSave, self.handleReset);
 
@@ -129,17 +134,22 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
     self.dom.appendChild(daySelection);
     self.dom.appendChild(document.createElement('br'));
     self.dom.appendChild(gradeSelection);
-    self.dom.appendChild(saveReset);
+    if(viewOnly == 0) {
+        self.dom.appendChild(saveReset);
+    }
     self.dom.appendChild(self.interface.canvas);
 
     self.draw();
 }
-function makeDaySelectionDom(timeGrades, change, selectedDay) {
+function makeDaySelectionDom(timeGrades, change, selectedDay, viewOnly) {
     let dayRadios = document.createElement('div');
     dayRadios.id = 'day_radios';
 
     let header = document.createElement('h3');
     header.innerHTML = "Valitse muokattava päivä";
+    if(viewOnly == 1) {
+        header.innerHTML = "Valitse katseltava päivä";
+    }
     dayRadios.appendChild(header)
     for (let i = 0; i < timeGrades.length; i++) {
         let id = "day_radio_" + i.toString();
@@ -162,11 +172,15 @@ function makeDaySelectionDom(timeGrades, change, selectedDay) {
     }
     return dayRadios;
 }
-function makeGradeSelectionDom(gradeDescriptions, gradeColors, change) {
+function makeGradeSelectionDom(gradeDescriptions, gradeColors,
+                               change, viewOnly) {
     let gradeRadios = document.createElement('div')
     gradeRadios.id = 'grade_radios'
     let header = document.createElement('h3');
     header.innerHTML = "Valitse lisättävän toiveen tyyppi";
+    if(viewOnly == 1) {
+        header.innerHTML = "Aikatoiveen tyyppi";
+    }
     gradeRadios.appendChild(header)
     for(let i = 0; i < gradeDescriptions.length; i++) {
         let id = "grade_radio_" + i.toString();
@@ -185,6 +199,9 @@ function makeGradeSelectionDom(gradeDescriptions, gradeColors, change) {
         radio.name = 'grade';
         radio.id = id;
         radio.value = i;
+        if(viewOnly == 1) {
+            radio.hidden = true;
+        }
         if(i+1 == gradeDescriptions.length) {
             radio.checked = true;
         }
@@ -287,7 +304,8 @@ function Time24(hour, min) {
 //takes in data to draw
 //maintains selections
 //and then the selectiosn can be processed in DayEditor
-function Interface(width, height, blockSize, addSelection, drawEditor) {
+function Interface(width, height, blockSize, addSelection, drawEditor,
+                   viewOnly) {
     let self = this;
     this.handleMousemove = function(e) {
         self.mouse.updatePos(e);
@@ -450,13 +468,15 @@ function Interface(width, height, blockSize, addSelection, drawEditor) {
     }
     this.draw = function(oldGrades, newGrades, selectedGrade) {
         self.drawIntervals(oldGrades, self.gradeColors);
-        self.drawIntervals(newGrades, self.gradeColors);
+        if(viewOnly == 0) {
+            self.drawIntervals(newGrades, self.gradeColors);
 
-        if(self.selection.isActive) {
-            self.drawActiveSelection(self.selection.minY(),
-                                     self.selection.maxY(),
-                                     selectedGrade,
-                                     self.activeColors);
+            if(self.selection.isActive) {
+                self.drawActiveSelection(self.selection.minY(),
+                    self.selection.maxY(),
+                    selectedGrade,
+                    self.activeColors);
+            }
         }
         self.drawTimeGrid();
         self.drawMouse();

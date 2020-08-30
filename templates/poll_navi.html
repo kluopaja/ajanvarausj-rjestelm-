@@ -16,7 +16,9 @@
 {% if is_owner %}
     <li><a class="button" href={{ url_for('poll_customers', poll_id=poll.id) }}>Asiakkaat</a></li>
     <li><a class="button" href={{ url_for('poll_resources', poll_id=poll.id) }}>Resurssit</a></li>
+    {% if poll.phase < 2 %}
     <li><a class="button" href={{ url_for('poll_optimization', poll_id=poll.id) }}>Optimointi</a></li>
+    {% endif %}
 {% endif %}
     <li><a class="button" href={{ url_for('poll_results', poll_id=poll.id) }}>Tulokset</a></li>
 </ul>

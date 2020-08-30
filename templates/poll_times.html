@@ -5,7 +5,7 @@
 <h2>Asiakkaan varaustoiveet</h2>
 <p>Asiakkaan nimi: {{ member_name }}</p>
 <p>Varauksen pituus: {{ reservation_length }}</p>
-{% if is_owner %}
+{% if is_owner and poll.phase < 2 %}
 <form action={{ url_for('modify_customer') }} method="POST">
     <label for="reservation_length">Varauksen pituus minuutteina (5 min tarkkuus)
     </label>
@@ -36,9 +36,10 @@
     let memberId = {{ member_id }};
     let pollId = {{ poll.id }};
     let csrfToken = '{{ session.get('csrf_token') }}';
-    let selectedDay = '{{ selected_day }}'
+    let selectedDay = '{{ selected_day }}';
+    let viewOnly = {{ view_only }};
 dom = makeDayEditorDom(timeGrades, gradeDescriptions, 15, memberId,
-                          pollId, csrfToken, selectedDay);
+                          pollId, csrfToken, selectedDay, viewOnly);
     document.querySelector("div[id=day_editors").appendChild(dom);
 </script>
 <noscript>

@@ -175,6 +175,12 @@ def poll_times(poll_id, member_id):
         reservation_length = member.get_customer_reservation_length(member_id)
         grade_descriptions = ['Ei sovi', 'Sopii tarvittaessa', 'Sopii hyvin']
 
+    view_only = 0
+    if current_poll.phase >= 1 and not is_owner:
+        view_only = 1;
+    if current_poll.phase == 2:
+        view_only = 1;
+
     return render_template('poll_times.html',
                             is_owner=is_owner,
                             poll=current_poll,
@@ -184,7 +190,8 @@ def poll_times(poll_id, member_id):
                             member_type=member_type,
                             member_name=member_name,
                             reservation_length=reservation_length,
-                            selected_day=request.args.get('selected_day', 0))
+                            selected_day=request.args.get('selected_day', 0),
+                            view_only=view_only)
 
 @app.route('/new_poll', methods=['GET', 'POST'])
 def new_poll():

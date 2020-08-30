@@ -21,12 +21,14 @@
     <td data-label="Resurssi">{{ resource[0] }}</td>
     <td class="control_buttons" data-label="">
     <a class="button" href={{ url_for('poll_times', poll_id=poll.id, member_id=resource[1]) }}>
-    Muokkaa</a><form action={{ url_for('new_member_access_link') }} method="post">
-    <input class="button" type="submit" value="Luo muokkauslinkki"><input type="hidden" name="member_id" id={{ resource[1] }}
-           value={{ resource[1] }}>
-    <input type="hidden" name="poll_id" value={{ poll.id }}>
-    <input type="hidden" name="member_type" value="resource">
-    <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
+    Ajat</a
+    >{% if poll.phase < 2 %}<form
+    action={{ url_for('new_member_access_link') }} method="post">
+        <input class="button" type="submit" value="Luo muokkauslinkki"><input type="hidden" name="member_id" id={{ resource[1] }}
+               value={{ resource[1] }}>
+        <input type="hidden" name="poll_id" value={{ poll.id }}>
+        <input type="hidden" name="member_type" value="resource">
+        <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form><form class="delete_resource" action={{ url_for('delete_member') }} method="POST">
         <input class="button" type="submit" value="Poista">
         <input type="hidden" name="poll_id" value={{ poll.id }}>
@@ -34,6 +36,7 @@
         <input type="hidden" name="member_type" value="resource">
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
+    {% endif %}
     </td>
 
 </tr>
@@ -42,6 +45,7 @@
 </div>
 
 
+{% if poll.phase < 2 %}
 <h2>Luo uusi resurssi:</h2>
 <div class="section">
 <form action={{ url_for('new_resource') }} method="post">
@@ -88,5 +92,6 @@
 {% endfor %}
 </table>
 </div>
+{% endif %}
 </div>
 {% endblock %}

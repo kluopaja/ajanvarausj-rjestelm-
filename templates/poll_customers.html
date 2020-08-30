@@ -22,7 +22,9 @@
     <td data-label="Varauksen kesto">{{ customer[1] }}</td>
     <td class="control_buttons" data-label="">
     <a class="button" href={{ url_for('poll_times', poll_id=poll.id, member_id=customer[0]) }}>
-        Muokkaa</a><form action={{ url_for('new_member_access_link') }} method="post">
+        Ajat</a
+    >{% if poll.phase < 2 %}<form
+    action={{ url_for('new_member_access_link') }} method="post">
         <input class="button" type="submit" value="Luo muokkauslinkki">
         <input type="hidden" name="member_id" id={{ customer[0] }}
                value={{ customer[0] }}>
@@ -36,6 +38,7 @@
         <input type="hidden" name="member_type" value="customer">
         <input type="hidden" name="csrf_token" value= {{ session.get('csrf_token') }}>
     </form>
+    {% endif %}
     </td>
 </tr>
 {% endfor %}
@@ -43,7 +46,7 @@
 </div>
 {% endif %}
 
-
+{% if poll.phase < 2 %}
 <h2>Luo uusi asiakas</h2>
 <div class="section">
 <form class="add_customer_form" action={{ url_for('add_customer') }} method="POST">
@@ -133,4 +136,7 @@ uutta asiakasta linkillä on luotu.</p>
 {% endfor %}
 </table>
 </div>
+{% endif %}
+</div>
+
 {% endblock %}

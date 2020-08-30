@@ -13,6 +13,7 @@
 </ul>
 </div>
 {% if is_owner %}
+{% if poll.phase < 2 %}
 <h3>Hallinnoi kyselyä</h3>
 <p>Voit muokata kyselyn loppumisaikaa. Jos kyselyn tuloksia ei ole vielä
 julkaistu, voit palauttaa kyselyn tilaan "Käynnissä" asettamalla
@@ -44,6 +45,7 @@ kyselyn päättymishetken tulevaisuuteen</p>
 </ul>
 </form>
 </div>
+{% endif %}
 
 {% else %}
 <h2>Hallinnoitavat asiakkaat</h2>
