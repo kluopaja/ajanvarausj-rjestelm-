@@ -34,9 +34,6 @@ def route_poll(poll_id):
     user_customers = poll.get_user_poll_customers(user_id, poll_id)
     user_resources = poll.get_user_poll_resources(user_id, poll_id)
 
-    # do we need this here?
-    grade_descriptions = ['ei sovi', 'sopii', 'sopii hyvin']
-
     return render_template('poll.html', is_owner=is_owner,
                            poll=current_poll,
                            user_customers=user_customers,
@@ -48,9 +45,6 @@ def poll_customers(poll_id):
     if 'user_id' not in session:
         flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
-
-    # list of (url_key, reservation_length)
-    customer_invitations = None
 
     # note that we already know that poll_id is an integer
     current_poll = poll.process_get_poll(poll_id)
@@ -75,11 +69,6 @@ def poll_resources(poll_id):
     if 'user_id' not in session:
         flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
-
-    # list of (url_key, resource_description)
-    resource_invitations = None
-    # list of (resource_description, resource_id)
-    resources = None
 
     # note that we already know that poll_id is an integer
     current_poll = poll.process_get_poll(poll_id)
@@ -240,7 +229,6 @@ def login():
             return redirect(next_url)
         return redirect(url_for('index'))
 
-    error = 'Unknown error'
     if session.get('user_id', 0):
         flash('Olet jo kirjautunut sisään')
         return redirect_to_next()
@@ -296,7 +284,6 @@ def new_customer(url_key):
         return redirect(url_for('login', next_url=redirect_url))
 
     if request.method == 'GET':
-        # TODO think if the url_key should be in 'details'
         return render_template('confirm_poll_invitation.html',
                                details=link.customer_type_details_by_url_key(url_key),
                                url_key=url_key)
@@ -308,7 +295,7 @@ def new_customer(url_key):
                                               request.form.get('customer_name'))
         if error is None:
             flash('Uusi asiakas luotu onnistuneesti')
-            poll_id = request.form.get('poll_id')
+            poll_id = request.form.get('poll_id', 0)
             return redirect(url_for('route_poll', poll_id=poll_id))
 
         flash('Virhe! Uuden asiakkaan luominen epäonnistui: ' + error)

@@ -350,7 +350,6 @@ def process_add_customer(poll_id, reservation_length, customer_name,
 def create_unique_customer_name(poll_id, name):
     name_candidate = name
     for i in range(5):
-        print(name_candidate)
         if not customer_name_in_poll(poll_id, name_candidate):
             return name_candidate
         name_candidate = name + '-' + create_random_name_suffix()
@@ -360,7 +359,6 @@ def create_unique_customer_name(poll_id, name):
 def create_unique_resource_name(poll_id, name):
     name_candidate = name
     for i in range(5):
-        print(name_candidate)
         if not resource_name_in_poll(poll_id, name_candidate):
             return name_candidate
         name_candidate = name + '-' + create_random_name_suffix()

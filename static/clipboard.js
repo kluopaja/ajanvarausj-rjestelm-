@@ -9,7 +9,6 @@ window.addEventListener('load', (e) => {
     for(let i = 0; i < buttons.length; i++) {
         buttons[i].addEventListener('click', copyToClipboard);
     }
-    console.log(buttons);
 });
 
 
