@@ -92,7 +92,6 @@ def poll_resources(poll_id):
     # note that we already know that poll_id is an integer
     resource_access_links = poll.get_resource_access_links(poll_id)
     resources = poll.get_poll_resources(poll_id)
-    optimization_results = optimization.get_optimization_results(poll_id)
 
     return render_template('poll_resources.html',
                            is_owner=True,
