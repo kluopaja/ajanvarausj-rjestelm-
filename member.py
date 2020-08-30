@@ -23,23 +23,39 @@ def initialize_poll_member_times(member_id, grade):
     times.add_member_time_grading(member_id, start, end, grade)
 
 def get_member_type(member_id):
-    sql = 'SELECT CASE \
-           WHEN COUNT(C.member_id) > 0 THEN \'customer\' \
-           WHEN COUNT(R.member_id) > 0 THEN \'resource\' \
-           END \
-           FROM Customers C FULL JOIN Resources R ON FALSE WHERE \
-           C.member_id=:member_id OR R.member_id=:member_id'
-    member_type = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    sql = 'SELECT C.reservation_length \
+           FROM PollMembers P LEFT JOIN Customers C \
+           ON P.id=C.member_id WHERE P.id=:member_id'
 
-    if member_type is None:
+    details = db.session.execute(sql, {'member_id': member_id}).fetchone()
+
+    if details is None:
         return None
-    return member_type[0]
+
+    if details[0] is None:
+        member_type = 'resource'
+    else:
+        member_type = 'customer'
+
+    return member_type
 
 def get_parent_poll_phase(member_id):
     sql = 'SELECT P.end_time, P.has_final_results FROM Polls P, \
            PollMembers M WHERE P.id=M.poll_id AND M.id=:member_id'
     result = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    if result is None:
+        return None
     return poll.poll_details_to_phase(result[0], result[1])
+
+def get_parent_poll_details(member_id):
+    sql = 'SELECT P.* FROM Polls P, PollMembers M WHERE P.id=M.poll_id \
+           AND M.id=:member_id'
+    poll_data = db.session.execute(sql, {'member_id': member_id}).fetchone()
+    if poll_data is None:
+        return None
+
+    phase = poll.poll_details_to_phase(poll_data[6], poll_data[7])
+    return poll.Poll(*poll_data, phase)
 
 def user_owns_parent_poll(member_id):
     sql = 'SELECT COUNT(*) FROM Polls P, PollMembers M \

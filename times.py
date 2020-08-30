@@ -193,13 +193,17 @@ def process_new_grading(member_id, start, end, date, time_grade):
     if start_datetime.minute%5 != 0 or end_datetime.minute%5 != 0:
         return 'All times should be divisible by 5 minutes'
 
-    user_id = session.get('user_id')
     # check user rights
-    if member.user_owns_parent_poll(member_id):
-        if member.get_parent_poll_phase(member_id) == 2:
+    user_id = session.get('user_id')
+    poll = member.get_parent_poll_details(member_id)
+    if poll is None:
+        return 'Invalid member id'
+
+    if user_id == poll.owner_user_id:
+        if poll.phase == 2:
             return 'Poll in final results phase'
     elif member.user_has_access(user_id, member_id):
-        if member.get_parent_poll_phase(member_id) >= 1:
+        if poll.phase >= 1:
             return 'Poll has ended'
     else:
         return 'User has no rights to add new time grades'
@@ -212,11 +216,9 @@ def process_new_grading(member_id, start, end, date, time_grade):
         if time_grade not in [0, 1]:
             return 'Invalid time grade value'
 
-    if member_type is None:
-        return 'Invalid member_id'
+    poll_start, poll_end = date_range_to_datetime(poll.first_appointment_date,
+                                                  poll.last_appointment_date)
 
-
-    poll_start, poll_end = member.get_parent_poll_datetime_range(member_id)
     if start_datetime < poll_start or end_datetime > poll_end:
         return 'Time segment was outside the poll range'
 
@@ -224,6 +226,12 @@ def process_new_grading(member_id, start, end, date, time_grade):
                          time_grade)
     db.session.commit()
     return None
+
+def date_range_to_datetime(start, end):
+    start = datetime.datetime.combine(start, datetime.time(0, 0, 0))
+    end += datetime.timedelta(days=1)
+    end = datetime.datetime.combine(end, datetime.time(0, 0, 0))
+    return (start, end)
 
 def process_grading_list(member_id, data):
     try:

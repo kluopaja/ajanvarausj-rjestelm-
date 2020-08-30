@@ -216,10 +216,7 @@ def get_poll_datetime_range(poll_id):
     sql = 'SELECT first_appointment_date, last_appointment_date FROM \
            Polls WHERE id=:poll_id'
     start, end = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
-    start = datetime.datetime.combine(start, datetime.time(0, 0, 0))
-    end += datetime.timedelta(days=1)
-    end = datetime.datetime.combine(end, datetime.time(0, 0, 0))
-    return start, end
+    return times.date_range_to_datetime(start, end)
 
 def get_user_poll_customer_member_ids(user_id, poll_id):
     sql = 'SELECT P.id FROM PollMembers P, UsersPollMembers U, \
