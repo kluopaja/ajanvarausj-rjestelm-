@@ -3,8 +3,8 @@ import poll
 import datetime
 import copy
 import numpy as np
-import signal
 import times
+import time
 from db import db
 from flask import session
 ### Optimization related functions ###
@@ -17,11 +17,6 @@ Assignment = namedtuple('Assignment', ['customer_member_id',
                                        'resource_member_id',
                                        'time'])
 
-class TimelimitError(Exception):
-    def __init__(self, expression, message):
-        self.expression = expression
-        self.message = message
-
 def process_optimize_poll(poll_id):
     if poll_id is None:
         return 'No poll_id was given'
@@ -29,21 +24,8 @@ def process_optimize_poll(poll_id):
         return 'Current user does not own the poll'
     if poll.get_poll_phase(poll_id) == 2:
         return 'Poll in the final results phase'
+
     optimize_poll(poll_id)
-    '''
-    def handler(signum, frame):
-        print('optimization timeout!')
-        raise TimelimitError()
-    signal.signal(signal.SIGALRM, handler)
-    try:
-        signal.alarm(5)
-        optimize_poll_2(poll_id)
-        signal.alarm(0)
-    except TimelimitError:
-        return 'Timelimit exceeded in optimization'
-    except:
-        return 'Unkown error in optimization'
-    '''
 
     return None
 
@@ -71,8 +53,20 @@ def optimize_poll(poll_id):
     resources = list(zip(resource_ids, resource_times))
     customers = list(zip(customer_ids, reservation_lengths, customer_times))
 
-    assignments, satisfaction = random_restarts(greedy_1, 100, resources,
-                                                customers)
+    #optimize for ~2 seconds
+    best_optimization = ([], 0)
+    start_time = time.perf_counter()
+    best_optimization = random_restart(greedy_1, resources, customers,
+                                       best_optimization)
+    one_round_length = time.perf_counter()-start_time
+    cnt = 1;
+    while (time.perf_counter() - start_time + one_round_length < 2):
+        best_optimization = random_restart(greedy_1, resources, customers,
+                                           best_optimization)
+        cnt += 1
+
+    assignments, satisfaction = best_optimization
+
     # 5min blocks --> datetime
     assignments = [assignment_to_datetime(x, start) for x in assignments]
 
@@ -91,18 +85,14 @@ def to_index(time, start):
     return timedelta_to_index(time-start)
 
 def intervals_to_array(time_intervals, start, end):
-    # print(start, end, end-start, (end-start).seconds)
 
     length_minutes = (end-start).days*24*60 + (end-start).seconds//60
-    # print('length_minutes', length_minutes)
     arr = [0 for x in range(length_minutes//5)]
     for x in time_intervals:
         a = to_index(x.start, start)
         b = to_index(x.end, start)
-       #  print('a, b', a, b)
         i = a
         while i < b:
-            #      print(i)
             arr[i] = x.grade
             i += 1
     return arr
@@ -114,18 +104,26 @@ def intervals_to_array(time_intervals, start, end):
 
 # v[i] is always 0 if there is zero in v[i...i+res_length-1]
 def calculate_satisfaction_sum(arr, res_length):
+    zero_cnt = 0
+    array_sum = 0
+    for i in range(res_length-1):
+        if arr[i] == 0:
+            zero_cnt += 1
+        array_sum += arr[i]
+
     v = [0 for i in range(len(arr))]
-    for i in range(len(arr)-res_length+1):
-        ok_start = True
-        mean_satisfaction = 0
-        for j in range(i, i+res_length):
-            if arr[j] == 0:
-                ok_start = 0
-            mean_satisfaction += arr[j]/res_length
-        if ok_start == 0:
-            v[i] = 0
+    for i in range(res_length-1, len(arr)):
+        array_sum += arr[i]
+        if arr[i] == 0:
+            zero_cnt += 1
+        if zero_cnt > 0:
+            v[i-res_length+1] = 0
         else:
-            v[i] = mean_satisfaction
+            v[i-res_length+1] = array_sum/res_length
+        array_sum -= arr[i-res_length+1]
+        if arr[i-res_length+1] == 0:
+            zero_cnt -= 1
+
     return v
 
 # simple greedy algoritm
@@ -156,21 +154,15 @@ def greedy_1(resources, customers):
         return best_assignment
 
 
-    # print('resources \n', resources)
-    # print('\n')
     resources = copy.deepcopy(resources)
     customers = copy.deepcopy(customers)
 
     resource_m_ids, resource_times = zip(*resources)
     customer_m_ids, reservation_lengths, customer_times = zip(*customers)
-    # print(resource_m_ids, resource_times)
-    # print(customer_m_ids, reservation_lengths, customer_times)
 
 
     customer_sums = [calculate_satisfaction_sum(x, y)
                     for x, y in zip(customer_times, reservation_lengths)]
-
-    # print(customer_sums)
 
     assignments = []
 
@@ -181,9 +173,7 @@ def greedy_1(resources, customers):
         resource_sums = [calculate_satisfaction_sum(x, length)
                          for x in resource_times]
 
-        # print('resource_sums, ', resource_sums)
         best = find_assignment(customer_sums[i], resource_sums)
-        # print('best ', best)
         if best == (0, 0, 0):
             continue
 
@@ -191,31 +181,23 @@ def greedy_1(resources, customers):
             resource_times[best[2]][j] = 0
 
         total_satisfaction += best[0]
-        # print('best ', best)
-        # print(customer_m_ids,i)
-        # print(customer_m_ids[i])
-        # print(resource_m_ids[best[2]])
-        # print(best[1])
         assignments.append(Assignment(customer_m_ids[i],
                                        resource_m_ids[best[2]],
                                        best[1]))
 
     return assignments, total_satisfaction
 
-def random_restarts(f, n, resources, customers):
-    best_assignment = ([], 0)
-    for i in range(n):
-        r_permutation = list(np.random.permutation(len(resources)))
-        c_permutation = list(np.random.permutation(len(customers)))
-        resources = [resources[x] for x in r_permutation]
-        customers = [customers[x] for x in c_permutation]
-        tmp = f(resources, customers)
-        if tmp[1] > best_assignment[1]:
-            best_assignment = tmp
-    return best_assignment
+def random_restart(f, resources, customers, best):
+    r_permutation = list(np.random.permutation(len(resources)))
+    c_permutation = list(np.random.permutation(len(customers)))
+    resources = [resources[x] for x in r_permutation]
+    customers = [customers[x] for x in c_permutation]
+    result = f(resources, customers)
+    if result[1] > best[1]:
+        return result
+    return best
 
 def save_optimization(assignments, poll_id):
-    print('saving: ', assignments)
     sql = 'DELETE FROM OptimizationResults O WHERE O.customer_member_id IN \
             (SELECT P.id FROM PollMembers P WHERE P.poll_id=:poll_id)'
 
