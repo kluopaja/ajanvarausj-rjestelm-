@@ -20,8 +20,6 @@ def process_new_new_customer_link(poll_id):
         return 'No poll id was provided'
     if not poll.user_owns_poll(poll_id):
         return 'User does not own the poll'
-    if poll.get_poll_phase(poll_id) >= 1:
-        return 'Poll has ended'
 
     url_id = create_new_url_key()
     sql = 'INSERT INTO NewCustomerLinks \
@@ -37,8 +35,6 @@ def process_new_member_access_link(member_id):
     # check user is the owner of the resource parent poll
     if not member.user_owns_parent_poll(member_id):
         return 'User does not own the parent poll'
-    if member.get_parent_poll_phase(member_id) >= 1:
-        return 'Poll has ended'
 
     url_id = create_new_url_key()
     sql = 'INSERT INTO MemberAccessLinks \
