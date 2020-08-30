@@ -92,12 +92,14 @@ function DayEditor(timeGrades, gradeDescriptions, blockSize, memberId,
         self.draw();
     }
     this.addSelection = function(start, end) {
-        let grade = self.selectedGrade;
-        self.newGrades[self.selectedDay][1].push([start, end, grade]);
-        self.draw();
+        if(!viewOnly) {
+            let grade = self.selectedGrade;
+            self.newGrades[self.selectedDay][1].push([start, end, grade]);
+            self.draw();
 
-        //add "are you sure you want to leave?"
-        window.onbeforeunload = function() { return true; }
+            //add "are you sure you want to leave?"
+            window.onbeforeunload = function() { return true; }
+        }
     }
     this.draw = function() {
         let grades1 = self.timeGrades[self.selectedDay][1];
