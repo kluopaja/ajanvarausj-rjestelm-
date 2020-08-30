@@ -39,18 +39,18 @@ def process_new_poll(user_id, name, description, first_date, last_date,
         return 'Not valid poll description'
 
     sql = 'INSERT INTO Polls \
-           (owner_user_id, poll_name, poll_description,  \
+           (owner_user_id, name, description,  \
            first_appointment_date, last_appointment_date, \
-           poll_end_time, has_final_results) VALUES \
-           (:owner_user_id, :poll_name, :poll_description, \
-           :first_appointment_date, :last_appointment_date, :poll_end_time, \
+           end_time, has_final_results) VALUES \
+           (:owner_user_id, :name, :description, \
+           :first_appointment_date, :last_appointment_date, :end_time, \
            :has_final_results)'
     parameter_dict = {'owner_user_id': user_id,
-                      'poll_end_time': end,
+                      'end_time': end,
                       'first_appointment_date': first_date,
                       'last_appointment_date': last_date,
-                      'poll_name': name,
-                      'poll_description': description,
+                      'name': name,
+                      'description': description,
                       'has_final_results': False}
     db.session.execute(sql, parameter_dict)
     db.session.commit()
@@ -78,8 +78,8 @@ def process_modify_poll(poll_id, end_date, end_time, end_now):
     if get_poll_phase(poll_id) == 2:
         return 'Poll in the final results phase'
 
-    sql = 'UPDATE Polls SET poll_end_time=:poll_end_time WHERE id=:poll_id'
-    db.session.execute(sql, {'poll_id': poll_id, 'poll_end_time': end})
+    sql = 'UPDATE Polls SET end_time=:end_time WHERE id=:poll_id'
+    db.session.execute(sql, {'poll_id': poll_id, 'end_time': end})
 
     db.session.commit()
     return None
@@ -101,7 +101,7 @@ def check_poll_end(end_date, end_time):
 # 1 = ended
 # 2 = final results
 def get_poll_phase(poll_id):
-    sql = 'SELECT poll_end_time, has_final_results FROM Polls \
+    sql = 'SELECT end_time, has_final_results FROM Polls \
            WHERE id=:poll_id'
     result = db.session.execute(sql, {'poll_id': poll_id}).fetchone()
     if result[1]:
@@ -278,14 +278,14 @@ def customer_name_in_poll(poll_id, name):
 
 # TODO should this return a list of string, not a list of tuples?
 def get_new_customer_links(poll_id):
-    sql = 'SELECT url_id, times_used FROM NewCustomerLinks\
+    sql = 'SELECT url_key, times_used FROM NewCustomerLinks\
            WHERE poll_id=:poll_id'
 
     links = db.session.execute(sql, {'poll_id': poll_id}).fetchall()
     return links
 
 def get_customer_access_links(poll_id):
-    sql = 'SELECT L.url_id, P.name, P.id, C.reservation_length \
+    sql = 'SELECT L.url_key, P.name, P.id, C.reservation_length \
            FROM PollMembers P, Customers C, MemberAccessLinks L \
            WHERE P.poll_id=:poll_id AND P.id=C.member_id \
            AND P.id=L.member_id'
@@ -293,7 +293,7 @@ def get_customer_access_links(poll_id):
     return access_links
 
 def get_resource_access_links(poll_id):
-    sql = 'SELECT L.url_id, P.name, P.id \
+    sql = 'SELECT L.url_key, P.name, P.id \
            FROM PollMembers P, Resources R, MemberAccessLinks L \
            WHERE P.poll_id=:poll_id AND P.id=R.member_id \
            AND P.id=L.member_id'

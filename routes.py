@@ -50,7 +50,7 @@ def poll_customers(poll_id):
         flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
-    # list of (url_id, reservation_length)
+    # list of (url_key, reservation_length)
     customer_invitations = None
 
     is_owner = poll.user_owns_poll(poll_id)
@@ -77,7 +77,7 @@ def poll_resources(poll_id):
         flash('Virhe! Kirjaudu ensin sisään')
         return redirect(url_for('login'))
 
-    # list of (url_id, resource_description)
+    # list of (url_key, resource_description)
     resource_invitations = None
     # list of (resource_description, resource_id)
     resources = None
@@ -286,28 +286,28 @@ def register():
                                request.form.get('password'))
 
             flash('Rekisteröityminen onnistui')
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
 
     flash('Virhe! Käyttäjätunnuksen luominen epäonnistui: ' + error)
     return redirect(url_for('register'))
 
 # create a new customer with a link
-@app.route('/new_customer/<url_id>', methods=['POST', 'GET'])
-def new_customer(url_id):
+@app.route('/new_customer/<url_key>', methods=['POST', 'GET'])
+def new_customer(url_key):
     if 'user_id' not in session:
         flash('Virhe! Kirjaudu ensin sisään')
-        redirect_url = url_for('new_customer', url_id=url_id)
+        redirect_url = url_for('new_customer', url_key=url_key)
         return redirect(url_for('login', next_url=redirect_url))
 
     if request.method == 'GET':
-        # TODO think if the url_id should be in 'details'
+        # TODO think if the url_key should be in 'details'
         return render_template('confirm_poll_invitation.html',
-                               details=link.customer_type_details_by_url_id(url_id),
-                               url_id=url_id)
+                               details=link.customer_type_details_by_url_key(url_key),
+                               url_key=url_key)
     if request.method == 'POST':
         auth.check_csrf_token(request.form.get('csrf_token'))
         # TODO this should return the member id of the new customer
-        error = link.process_new_customer_url(url_id,
+        error = link.process_new_customer_url(url_key,
                                               request.form.get('reservation_length'),
                                               request.form.get('customer_name'))
         if error is None:
@@ -337,20 +337,20 @@ def add_customer():
     return redirect(url_for('poll_customers',
                             poll_id=request.form.get('poll_id', 0)))
 
-@app.route('/access/<url_id>', methods=['POST', 'GET'])
-def access(url_id):
+@app.route('/access/<url_key>', methods=['POST', 'GET'])
+def access(url_key):
     if 'user_id' not in session:
         flash('Virhe! Kirjaudu ensin sisään')
-        redirect_url = url_for('access', url_id=url_id)
+        redirect_url = url_for('access', url_key=url_key)
         return redirect(url_for('login', next_url=redirect_url))
 
     if request.method == 'GET':
         return render_template('confirm_member_access_link.html',
-                               details=link.member_details_by_url_id(url_id),
-                               url_id=url_id)
+                               details=link.member_details_by_url_key(url_key),
+                               url_key=url_key)
     if request.method == 'POST':
         auth.check_csrf_token(request.form.get('csrf_token'))
-        error = link.process_access(url_id)
+        error = link.process_access(url_key)
         if error is not None:
             flash('Virhe! Kutsumisen hyväksyminen epäonnistui: ' + error)
             return redirect(url_for('index'))
@@ -460,7 +460,7 @@ def delete_new_customer_link():
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
-    error = link.process_delete_new_customer_link(request.form.get('url_id'))
+    error = link.process_delete_new_customer_link(request.form.get('url_key'))
     if error is None:
         flash('Linkin poistaminen onnistui')
     else:
@@ -476,7 +476,7 @@ def delete_member_access_link():
         return redirect(url_for('login'))
 
     auth.check_csrf_token(request.form.get('csrf_token'))
-    error = link.process_delete_member_access_link(request.form.get('url_id'))
+    error = link.process_delete_member_access_link(request.form.get('url_key'))
     if error is None:
         flash('Linkin poistaminen onnistui')
     else:

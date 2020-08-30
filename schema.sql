@@ -7,12 +7,12 @@ CREATE TABLE Users
 CREATE TABLE Polls
 (
     id SERIAL PRIMARY KEY,
-    owner_user_id INTEGER REFERENCES Users (id) ON DELETE CASCADE, --Also there was ON UPDATE CASCADE, check these!
-    poll_name TEXT,
-    poll_description TEXT,
+    owner_user_id INTEGER REFERENCES Users (id) ON DELETE CASCADE,
+    name TEXT,
+    description TEXT,
     first_appointment_date date,
     last_appointment_date date,
-    poll_end_time timestamp, --change name?
+    end_time timestamp, --change name?
     has_final_results boolean,
     CHECK(first_appointment_date <= last_appointment_date)
 );
@@ -37,7 +37,7 @@ CREATE TABLE Customers
 );
 CREATE TABLE Resources
 (
-    member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE 
+    member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE
 );
 CREATE TABLE UsersPollMembers
 (
@@ -48,12 +48,12 @@ CREATE TABLE NewCustomerLinks
 (
     poll_id INTEGER REFERENCES Polls (id) ON DELETE CASCADE,
     times_used INTEGER DEFAULT 0,
-    url_id TEXT
+    url_key TEXT
 );
 CREATE TABLE MemberAccessLinks
 (
     member_id INTEGER REFERENCES PollMembers (id) ON DELETE CASCADE,
-    url_id TEXT
+    url_key TEXT
 );
 CREATE TABLE OptimizationResults
 (

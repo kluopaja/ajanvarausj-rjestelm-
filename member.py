@@ -43,7 +43,7 @@ def get_member_type(member_id):
     return member_type[0]
 
 def get_parent_poll_phase(member_id):
-    sql = 'SELECT P.poll_end_time, P.has_final_results FROM Polls P, \
+    sql = 'SELECT P.end_time, P.has_final_results FROM Polls P, \
            PollMembers M WHERE P.id=M.poll_id AND M.id=:member_id'
     result = db.session.execute(sql, {'member_id': member_id}).fetchone()
     return poll.poll_details_to_phase(result[0], result[1])

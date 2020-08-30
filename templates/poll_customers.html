@@ -85,14 +85,14 @@
 <tr>
     <td data-label="Asiakas">{{ link[1] }}</td>
     <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
-           value={{ url_for('access', url_id=link[0], _external=True) }}
+           value={{ url_for('access', url_key=link[0], _external=True) }}
            readonly>
     </td>
     <td class="control_buttons">
     <button class="button copy_button" id={{ link[0] }}>Kopioi linkki
     </button><form class="delete_member_access_link" action={{ url_for('delete_member_access_link') }} method="POST">
         <input class="button" type="submit" value="Poista">
-        <input type="hidden" name="url_id" value={{ link[0] }}>
+        <input type="hidden" name="url_key" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="member_type" value="customer">
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
@@ -122,12 +122,12 @@ uutta asiakasta linkillä on luotu.</p>
 <tr>
     <td data-label="Asiakkaita luotu">{{ link[1] }}</td>
     <td data-label="Url"><input class="url" type='text' size=30 id={{ link[0] }}
-           value={{ url_for('new_customer', url_id=link[0], _external=True) }}
+           value={{ url_for('new_customer', url_key=link[0], _external=True) }}
            readonly>
     </td><td class="control_buttons" data-label=""><button class="button copy_button" id={{ link[0] }}>Kopioi linkki
         </button><form class="delete_new_customer_link" action={{ url_for('delete_new_customer_link') }} method="POST">
         <input type="submit" value="Poista">
-        <input type="hidden" name="url_id" value={{ link[0] }}>
+        <input type="hidden" name="url_key" value={{ link[0] }}>
         <input type="hidden" name="poll_id" value={{ poll.id }}>
         <input type="hidden" name="csrf_token" value={{ session.get('csrf_token') }}>
     </form>
