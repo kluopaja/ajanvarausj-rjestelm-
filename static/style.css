@@ -87,7 +87,7 @@ input[type=submit]:hover, input[type=button]:hover, button:hover, .button:hover{
     text-decoration: none;
     color: black;
 }
-.menu li a:hover {
+.menu li a:hover, .menu li a:focus {
     color: whitesmoke;
     background: black;
 }
